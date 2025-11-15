@@ -18,16 +18,19 @@ export const Route = createRootRoute({
   component: () => (
     <>
       <HeadContent />
-      <div className="flex gap-2 p-2">
-        <Link to="/" className="[&.active]:font-bold">
+
+      <main className="flex min-h-dvh flex-col items-center justify-center gap-y-4">
+        <Link to="/" className="[&.active]:font-semibold">
           Home
-        </Link>{" "}
-        <Link to="/about" className="[&.active]:font-bold">
+        </Link>
+
+        <Link to="/about" className="[&.active]:font-semibold">
           About
         </Link>
-      </div>
-      <hr />
-      <Outlet />
+
+        <Outlet />
+      </main>
+
       <Scripts />
       <TanStackRouterDevtools />
     </>
