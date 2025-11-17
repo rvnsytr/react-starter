@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/core/providers/theme";
 import {
   createRootRoute,
   HeadContent,
@@ -19,17 +20,19 @@ export const Route = createRootRoute({
     <>
       <HeadContent />
 
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-y-4">
-        <Link to="/" className="[&.active]:font-semibold">
-          Home
-        </Link>
+      <ThemeProvider defaultTheme="system" storageKey="ui-theme">
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-y-4">
+          <Link to="/" className="[&.active]:font-semibold">
+            Home
+          </Link>
 
-        <Link to="/about" className="[&.active]:font-semibold">
-          About
-        </Link>
+          <Link to="/about" className="[&.active]:font-semibold">
+            About
+          </Link>
 
-        <Outlet />
-      </main>
+          <Outlet />
+        </main>
+      </ThemeProvider>
 
       <Scripts />
       <TanStackRouterDevtools />
