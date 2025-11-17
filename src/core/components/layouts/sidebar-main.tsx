@@ -11,7 +11,7 @@
 //   useMemo,
 //   useState,
 // } from "react";
-// import { LinkSpinner, RefreshButton } from "../ui/buttons.client";
+// import { LinkSpinner, RefreshButton } from "../ui/buttons";
 // import {
 //   Collapsible,
 //   CollapsibleContent,

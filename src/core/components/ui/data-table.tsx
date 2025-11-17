@@ -32,7 +32,7 @@ import {
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Button, buttonVariants } from "./button";
 import { ButtonGroup } from "./button-group";
-import { RefreshButton } from "./buttons.client";
+import { RefreshButton } from "./buttons";
 import { Checkbox } from "./checkbox";
 import {
   ActiveFilters,

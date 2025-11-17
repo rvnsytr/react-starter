@@ -1,3 +1,5 @@
+import { ThemeButton } from "@/core/components/ui/buttons";
+import { appMeta } from "@/core/constants";
 import { ThemeProvider } from "@/core/providers/theme";
 import {
   createRootRoute,
@@ -11,17 +13,19 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      { name: "name", content: "React Starter" },
-      { name: "description", content: "App description..." },
-      { title: "React Starter" },
+      { name: "name", content: appMeta.name },
+      { name: "description", content: appMeta.description },
+      { title: appMeta.name },
     ],
   }),
   component: () => (
     <>
       <HeadContent />
 
-      <ThemeProvider defaultTheme="system" storageKey="ui-theme">
+      <ThemeProvider defaultTheme="system" storageKey="theme">
         <main className="flex min-h-dvh flex-col items-center justify-center gap-y-4">
+          <ThemeButton />
+
           <Link to="/" className="[&.active]:font-semibold">
             Home
           </Link>
