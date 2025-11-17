@@ -1,5 +1,9 @@
 import { Role } from "../auth";
-import { dashboardMenu, Menu, Route, routesMeta } from "../constants";
+import { appMeta, dashboardMenu, Menu, Route, routesMeta } from "../constants";
+
+export function getTitle(route: Route) {
+  return `${routesMeta[route].displayName} | ${appMeta.name}`;
+}
 
 export function getRandomString(length: number) {
   const characters =

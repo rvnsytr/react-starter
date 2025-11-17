@@ -1,5 +1,5 @@
 export const appMeta = {
-  name: "React Starter Starter",
+  name: "React Starter",
   description: "App description...",
 
   // logo: {
