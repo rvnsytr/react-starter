@@ -2,7 +2,7 @@ import { ThemeButton } from "@/core/components/ui/buttons";
 import { R } from "@/core/components/ui/motion";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/(home)/_home")({
+export const Route = createFileRoute("/(home)/_layout")({
   component: HomeLayout,
 });
 
