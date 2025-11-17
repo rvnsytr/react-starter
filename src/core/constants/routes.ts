@@ -9,6 +9,7 @@ export const routesMeta: Record<
   { displayName: string; role?: RouteRole }
 > = {
   "/": { displayName: "Beranda" },
+  "/dashboard": { displayName: "Dashboard" },
   "/about": { displayName: "Tentang" },
   // "/sign-in": { displayName: "Masuk" },
   // "/dashboard": { displayName: "Dashboard", role: "all" },

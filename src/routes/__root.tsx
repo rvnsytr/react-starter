@@ -1,4 +1,5 @@
 import NotFound from "@/core/components/layouts/not-found";
+import { GridPattern } from "@/core/components/ui/grid-pattern";
 import { appMeta } from "@/core/constants";
 import { ThemeProvider } from "@/core/providers/theme";
 import { getTitle } from "@/core/utils";
@@ -9,6 +10,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Toaster } from "sonner";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -26,10 +28,15 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
+
       <ThemeProvider defaultTheme="system" storageKey="theme">
+        <GridPattern className="stroke-muted dark:stroke-muted/60 -z-1 min-h-dvh" />
         <Outlet />
+        <Toaster position="top-center" closeButton richColors />
       </ThemeProvider>
+
       <Scripts />
+
       <TanStackRouterDevtools />
     </>
   );

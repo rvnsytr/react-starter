@@ -23,11 +23,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 type ButtonPropsWithoutChildren = Omit<ButtonProps, "children">;
 type ButtonIconSize = "icon-xs" | "icon-sm" | "icon" | "icon-lg";
 
-type PulsatingButtonProps = ButtonProps & {
-  pulseColor?: string;
-  duration?: string;
-};
-
 export function ResetButton({
   type = "reset",
   size = "default",
@@ -48,10 +43,14 @@ export function PulsatingButton({
   pulseColor = "var(--primary-pulse)",
   duration = "1.5s",
   ...props
-}: Omit<PulsatingButtonProps, "asChild"> & { href: string }) {
+}: Omit<ButtonProps, "asChild"> & {
+  href: string;
+  pulseColor?: string;
+  duration?: string;
+}) {
   return (
     <Button
-      className={cn("relative", className)}
+      className={cn("relative rounded-full", className)}
       style={
         {
           "--pulse-color": pulseColor,
