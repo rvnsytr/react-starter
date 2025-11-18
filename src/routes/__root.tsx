@@ -1,6 +1,7 @@
 import NotFound from "@/core/components/layouts/not-found";
 import { GridPattern } from "@/core/components/ui/grid-pattern";
 import { appMeta } from "@/core/constants";
+import { GlobalShortcuts } from "@/core/providers/global-shortcuts";
 import { ThemeProvider } from "@/core/providers/theme";
 import { getTitle } from "@/core/utils";
 import {
@@ -33,6 +34,7 @@ function RootComponent() {
         <GridPattern className="stroke-muted dark:stroke-muted/60 -z-1 min-h-dvh" />
         <Outlet />
         <Toaster position="top-center" closeButton richColors />
+        <GlobalShortcuts />
       </ThemeProvider>
 
       <Scripts />

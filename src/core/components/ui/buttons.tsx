@@ -79,25 +79,6 @@ export function ThemeButton({
 }: ButtonPropsWithoutChildren &
   Pick<ComponentProps<typeof TooltipContent>, "align">) {
   const { theme, setTheme } = useTheme();
-
-  const themeHandler = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-  };
-
-  const onTheme = useEffectEvent(themeHandler);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === "t") {
-        e.preventDefault();
-        onTheme();
-      }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
-
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -106,7 +87,8 @@ export function ThemeButton({
           variant={variant}
           onClick={(e) => {
             onClick?.(e);
-            themeHandler();
+            const newTheme = theme === "dark" ? "light" : "dark";
+            setTheme(newTheme);
           }}
           {...props}
         >
