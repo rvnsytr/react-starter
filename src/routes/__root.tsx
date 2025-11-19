@@ -1,9 +1,9 @@
-import NotFound from "@/core/components/layouts/not-found";
+import { NotFound } from "@/core/components/layouts";
 import { GridPattern } from "@/core/components/ui/grid-pattern";
 import { appMeta } from "@/core/constants";
 import { GlobalShortcuts } from "@/core/providers/global-shortcuts";
 import { ThemeProvider } from "@/core/providers/theme";
-import { getTitle } from "@/core/utils";
+import { getRouteTitle } from "@/core/utils";
 import {
   createRootRoute,
   HeadContent,
@@ -18,11 +18,11 @@ export const Route = createRootRoute({
     meta: [
       { name: "name", content: appMeta.name },
       { name: "description", content: appMeta.description },
-      { title: getTitle("/") },
+      { title: getRouteTitle("/") },
     ],
   }),
   component: RootComponent,
-  notFoundComponent: NotFound,
+  notFoundComponent: () => <NotFound className="min-h-dvh" />,
 });
 
 function RootComponent() {

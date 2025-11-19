@@ -1,8 +1,22 @@
 import { Role } from "@/modules/auth";
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { appMeta, dashboardMenu, Menu, Route, routesMeta } from "../constants";
 
-export function getTitle(route: Route) {
-  return `${routesMeta[route].displayName} | ${appMeta.name}`;
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function delay(seconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
+export function setRouteTitle(title: string) {
+  return `${title} | ${appMeta.name}`;
+}
+
+export function getRouteTitle(route: Route) {
+  return setRouteTitle(routesMeta[route].displayName);
 }
 
 export function getRandomString(length: number) {
