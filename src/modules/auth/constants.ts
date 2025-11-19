@@ -1,4 +1,9 @@
 import { LucideIcon, ShieldUser, UserRoundCheck } from "lucide-react";
+import z from "zod";
+import { sessionSchema } from "./schemas";
+
+export type Session = z.infer<typeof sessionSchema>;
+// export type UserWithProfile = z.infer<typeof zodUserWithProfile>;
 
 export type Role = (typeof allRoles)[number];
 export const allRoles = ["user", "admin"] as const;

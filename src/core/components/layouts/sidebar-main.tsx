@@ -1,7 +1,6 @@
-import { Role } from "@/core/auth";
 import { dashboardfooterMenu, routesMeta } from "@/core/constants";
 import { cn, getActiveRoute, getMenuByRole, toKebabCase } from "@/core/utils";
-// import { SignOutButton, UserAvatar, UserVerifiedBadge } from "@/modules/auth";
+import { Session, SignOutButton, UserAvatar } from "@/modules/auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { Collapsible as CollapsiblePrimitive } from "radix-ui";
@@ -38,15 +37,11 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 
-// TODO
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type User = any;
-
-export function SidebarMain({ data }: { data: User }) {
+export function SidebarMain({ data }: { data: Session["user"] }) {
   const { pathname } = useLocation();
   const { isMobile, toggleSidebar } = useSidebar();
 
-  const menu = useMemo(() => getMenuByRole(data.role as Role), [data.role]);
+  const menu = useMemo(() => getMenuByRole(data.role), [data.role]);
 
   return (
     <Sidebar collapsible="icon">
@@ -59,9 +54,9 @@ export function SidebarMain({ data }: { data: User }) {
               className="group/head-button h-13 group-data-[collapsible=icon]:my-2.5 group-data-[collapsible=icon]:p-0"
               asChild
             >
-              <Link to="/">
-                {/* // TODO <Link to="/dashboard/profile"> */}
-                {/* <UserAvatar
+              {/* <Link to="/dashboard/profile"> */}
+              <Link to="/dashboard">
+                <UserAvatar
                   name={data.name}
                   image={data.image}
                   className="rounded-md"
@@ -69,7 +64,7 @@ export function SidebarMain({ data }: { data: User }) {
                     image: "rounded-md group-hover/head-button:scale-125",
                     fallback: "rounded-md group-hover/head-button:scale-125",
                   }}
-                /> */}
+                />
 
                 <div className="grid break-all">
                   <div className="flex items-center gap-x-2">
@@ -206,11 +201,11 @@ export function SidebarMain({ data }: { data: User }) {
             },
           )}
 
-          {/* <SidebarSeparator />
+          <SidebarSeparator />
 
           <SidebarMenuItem>
             <SignOutButton />
-          </SidebarMenuItem> */}
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
 

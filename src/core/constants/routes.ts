@@ -1,7 +1,7 @@
+import { Role } from "@/modules/auth";
 import { FileRouteTypes } from "@/routeTree.gen";
-import { Role } from "../auth";
 
-export type Route = FileRouteTypes["fullPaths"];
+export type Route = FileRouteTypes["to"];
 export type RouteRole = "all" | Role[];
 
 export const routesMeta: Record<

@@ -6,6 +6,7 @@ import {
   EmptyTitle,
 } from "@/core/components/ui/empty";
 import { Link } from "@tanstack/react-router";
+import { LinkSpinner } from "../ui/spinner";
 
 export default function NotFound() {
   return (
@@ -18,7 +19,7 @@ export default function NotFound() {
       </EmptyHeader>
       <EmptyContent>
         <Link to="/" className="link">
-          Take me Home
+          <LinkSpinner /> Take me Home
         </Link>
       </EmptyContent>
     </Empty>

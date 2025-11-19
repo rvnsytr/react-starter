@@ -1,4 +1,4 @@
-import { Role } from "../auth";
+import { Role } from "@/modules/auth";
 import { appMeta, dashboardMenu, Menu, Route, routesMeta } from "../constants";
 
 export function getTitle(route: Route) {

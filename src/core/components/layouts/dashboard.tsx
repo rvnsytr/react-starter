@@ -47,7 +47,6 @@ export function DashboardMain({
           <Spinner variant="frame" className="size-5" />
         </div>
       )}
-      {children}
     </>
   );
 }

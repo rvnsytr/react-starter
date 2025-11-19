@@ -1,4 +1,5 @@
 import { cn } from "@/core/utils";
+import { useRouterState } from "@tanstack/react-router";
 import {
   FrameIcon,
   Loader2Icon,
@@ -46,4 +47,11 @@ export function LoadingSpinner({
   return loading
     ? (icon?.spinner ?? <Spinner {...props} />)
     : (icon?.base ?? null);
+}
+
+export function LinkSpinner({
+  ...props
+}: Omit<LoadingSpinnerProps, "loading">) {
+  const { isLoading } = useRouterState();
+  return <LoadingSpinner loading={isLoading} {...props} />;
 }
