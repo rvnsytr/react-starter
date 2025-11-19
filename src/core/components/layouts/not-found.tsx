@@ -1,4 +1,6 @@
-import { Button } from "@/core/components/ui/button";
+import { Link } from "@tanstack/react-router";
+import { Home } from "lucide-react";
+import { Button } from "../ui/button";
 import {
   Empty,
   EmptyContent,
@@ -6,9 +8,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/core/components/ui/empty";
-import { Link } from "@tanstack/react-router";
-import { Home } from "lucide-react";
+} from "../ui/empty";
 import { LinkSpinner } from "../ui/spinner";
 
 export function NotFound({ className }: { className?: string }) {
