@@ -42,16 +42,17 @@ export function AppLoadingFallback() {
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0 }}
-      className="flex min-h-dvh items-center justify-center"
+      className="flex min-h-dvh flex-col items-center justify-center gap-y-8"
     >
       <Spinner variant="frame" className="size-5" />
     </motion.div>
   );
 }
 
-export function AppErrorFallback({ error }: { error?: unknown }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function AppErrorFallback({ error }: { error?: any }) {
   return (
-    <div className="flex min-h-dvh items-center justify-center">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-y-8">
       <ErrorFallback error={error} />
     </div>
   );

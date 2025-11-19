@@ -18,16 +18,16 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
-type DynamicBreadcrumbMeta = { href: Route; displayName: string };
-type DynamicBreadcrumbData = Route | DynamicBreadcrumbMeta;
+type DynamicBreadcrumbContent = { to: Route; label: string };
+type DynamicBreadcrumbData = Route | DynamicBreadcrumbContent;
 export type DynamicBreadcrumbProps = {
   breadcrumb?: DynamicBreadcrumbData[];
   currentPage: string;
 };
 
-function getProps(data: DynamicBreadcrumbData): DynamicBreadcrumbMeta {
+function getProps(data: DynamicBreadcrumbData): DynamicBreadcrumbContent {
   return typeof data === "string"
-    ? { href: data, displayName: routesMeta[data].displayName }
+    ? { to: data, label: routesMeta[data].displayName }
     : data;
 }
 
@@ -41,15 +41,15 @@ export function DynamicBreadcrumb({
     <Breadcrumb className={className}>
       <BreadcrumbList>
         {breadcrumb?.map((item, index) => {
-          const { href, displayName } = getProps(item);
+          const { to, label } = getProps(item);
           if (isMobile && index !== 0) return;
 
           return (
-            <Fragment key={href}>
+            <Fragment key={to}>
               <BreadcrumbItem className="shrink-0">
                 <BreadcrumbLink asChild>
-                  <Link to={href} className="link">
-                    {displayName}
+                  <Link to={to} className="link">
+                    {label}
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -67,12 +67,12 @@ export function DynamicBreadcrumb({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   {breadcrumb?.map((item, index) => {
-                    const { href, displayName } = getProps(item);
+                    const { to, label } = getProps(item);
                     if (isMobile && index === 0) return;
 
                     return (
-                      <DropdownMenuItem key={href} asChild>
-                        <Link to={href}>{displayName}</Link>
+                      <DropdownMenuItem key={to} asChild>
+                        <Link to={to}>{label}</Link>
                       </DropdownMenuItem>
                     );
                   })}

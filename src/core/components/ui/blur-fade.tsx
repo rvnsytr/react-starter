@@ -12,6 +12,7 @@ type BlurFadeProps = MotionProps & {
   children: React.ReactNode;
   className?: string;
   variant?: { hidden: { y: number }; visible: { y: number } };
+  as?: React.HTMLElementType;
   duration?: number;
   delay?: number;
   offset?: number;
@@ -25,6 +26,7 @@ export function BlurFade({
   children,
   className,
   variant,
+  as = "div",
   duration = 0.4,
   delay = 0,
   offset = 6,
@@ -53,9 +55,12 @@ export function BlurFade({
 
   const combinedVariants = variant ?? defaultVariants;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Comp = motion[as] as React.ComponentType<any>;
+
   return (
     <AnimatePresence>
-      <motion.div
+      <Comp
         ref={ref}
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
@@ -66,7 +71,7 @@ export function BlurFade({
         {...props}
       >
         {children}
-      </motion.div>
+      </Comp>
     </AnimatePresence>
   );
 }
