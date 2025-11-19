@@ -7,10 +7,8 @@
     "**/routeTree.gen.ts": true,
     "**/core/**": true
   },
-  "search.exclude": {
-    "**/routeTree.gen.ts": true,
-    "**/core/**": true
-  },
+
+  "search.exclude": { "**/routeTree.gen.ts": true },
 
   "typescript.preferences.autoImportFileExcludePatterns": ["radix-ui"],
 
