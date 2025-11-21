@@ -1,5 +1,6 @@
 import { Route, routesMeta } from "@/core/constants";
 import { useIsMobile } from "@/core/hooks";
+import { normalizeRoute } from "@/core/utils";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {
@@ -38,6 +39,8 @@ export function DynamicBreadcrumb({
 }: DynamicBreadcrumbProps & { className?: string }) {
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
+
+  const normalizedPath = normalizeRoute(pathname);
 
   return (
     <Breadcrumb className={className}>
@@ -88,7 +91,7 @@ export function DynamicBreadcrumb({
 
         <BreadcrumbItem>
           <BreadcrumbPage className="line-clamp-1 cursor-default text-ellipsis">
-            {currentPage ?? routesMeta[pathname as Route].displayName}
+            {currentPage ?? routesMeta[normalizedPath].displayName}
           </BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>

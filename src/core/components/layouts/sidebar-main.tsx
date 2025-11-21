@@ -1,6 +1,12 @@
 import { dashboardfooterMenu, routesMeta } from "@/core/constants";
-import { cn, getActiveRoute, getMenuByRole, toKebabCase } from "@/core/utils";
-import { Session, SignOutButton, UserAvatar } from "@/modules/auth";
+import {
+  cn,
+  getActiveRoute,
+  getMenuByRole,
+  normalizeRoute,
+  toKebabCase,
+} from "@/core/utils";
+import { SignOutButton, useAuth, UserAvatar } from "@/modules/auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { Collapsible as CollapsiblePrimitive } from "radix-ui";
@@ -37,7 +43,10 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 
-export function SidebarMain({ data }: { data: Session["user"] }) {
+export function SidebarMain() {
+  const { session } = useAuth();
+  const data = session.user;
+
   const { pathname } = useLocation();
   const { isMobile, toggleSidebar } = useSidebar();
 
@@ -92,7 +101,8 @@ export function SidebarMain({ data }: { data: Session["user"] }) {
               {content.map(({ route, icon: Icon, disabled, subMenu }) => {
                 const { displayName } = routesMeta[route];
 
-                const isActive = route === getActiveRoute(pathname);
+                const normalizedPath = normalizeRoute(pathname);
+                const isActive = route === getActiveRoute(normalizedPath);
                 const iconElement = Icon && <Icon />;
 
                 if (disabled) {
