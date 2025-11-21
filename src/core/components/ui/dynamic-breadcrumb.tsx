@@ -1,6 +1,6 @@
 import { Route, routesMeta } from "@/core/constants";
 import { useIsMobile } from "@/core/hooks";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {
   Breadcrumb,
@@ -18,16 +18,16 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
-type DynamicBreadcrumbContent = { to: Route; label: string };
+type DynamicBreadcrumbContent = { href: Route; label: string };
 type DynamicBreadcrumbData = Route | DynamicBreadcrumbContent;
 export type DynamicBreadcrumbProps = {
   breadcrumb?: DynamicBreadcrumbData[];
-  currentPage: string;
+  currentPage?: string;
 };
 
 function getProps(data: DynamicBreadcrumbData): DynamicBreadcrumbContent {
   return typeof data === "string"
-    ? { to: data, label: routesMeta[data].displayName }
+    ? { href: data, label: routesMeta[data].displayName }
     : data;
 }
 
@@ -36,19 +36,21 @@ export function DynamicBreadcrumb({
   currentPage,
   className,
 }: DynamicBreadcrumbProps & { className?: string }) {
+  const { pathname } = useLocation();
   const isMobile = useIsMobile();
+
   return (
     <Breadcrumb className={className}>
       <BreadcrumbList>
         {breadcrumb?.map((item, index) => {
-          const { to, label } = getProps(item);
+          const { href, label } = getProps(item);
           if (isMobile && index !== 0) return;
 
           return (
-            <Fragment key={to}>
+            <Fragment key={href}>
               <BreadcrumbItem className="shrink-0">
                 <BreadcrumbLink asChild>
-                  <Link to={to} className="link">
+                  <Link to={href} className="link">
                     {label}
                   </Link>
                 </BreadcrumbLink>
@@ -67,12 +69,12 @@ export function DynamicBreadcrumb({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   {breadcrumb?.map((item, index) => {
-                    const { to, label } = getProps(item);
+                    const { href, label } = getProps(item);
                     if (isMobile && index === 0) return;
 
                     return (
-                      <DropdownMenuItem key={to} asChild>
-                        <Link to={to}>{label}</Link>
+                      <DropdownMenuItem key={href} asChild>
+                        <Link to={href}>{label}</Link>
                       </DropdownMenuItem>
                     );
                   })}
@@ -86,7 +88,7 @@ export function DynamicBreadcrumb({
 
         <BreadcrumbItem>
           <BreadcrumbPage className="line-clamp-1 cursor-default text-ellipsis">
-            {currentPage}
+            {currentPage ?? routesMeta[pathname as Route].displayName}
           </BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>

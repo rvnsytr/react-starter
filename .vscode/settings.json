@@ -4,12 +4,12 @@
     "**/core/**": true
   },
 
-  "files.watcherExclude": {
-    "**/routeTree.gen.ts": true,
-    "**/core/**": true
+  "files.readonlyExclude": {
+    "**/core/constants/menu.ts": true,
+    "**/core/constants/routes.ts": true
   },
 
-  "files.readonlyExclude": { "**/core/constants/routes.ts": true },
+  "files.watcherExclude": { "**/routeTree.gen.ts": true },
   "search.exclude": { "**/routeTree.gen.ts": true },
 
   "typescript.preferences.autoImportFileExcludePatterns": ["radix-ui"],
