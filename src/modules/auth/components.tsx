@@ -205,7 +205,7 @@ export function SignUpForm() {
         success: (res) => {
           setIsLoading(false);
           form.reset();
-          mutate("/user");
+          mutate("/users");
           return res.message;
         },
         error: (e) => {
