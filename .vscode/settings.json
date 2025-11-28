@@ -6,7 +6,8 @@
 
   "files.readonlyExclude": {
     "**/core/constants/menu.ts": true,
-    "**/core/constants/routes.ts": true
+    "**/core/constants/routes.ts": true,
+    "**/core/schemas.ts": true
   },
 
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
