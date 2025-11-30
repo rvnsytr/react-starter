@@ -44,13 +44,12 @@ import {
 } from "../ui/sidebar";
 
 export function SidebarMain() {
-  const { session } = useAuth();
-  const data = session.user;
+  const { user } = useAuth();
 
   const { pathname } = useLocation();
   const { isMobile, toggleSidebar } = useSidebar();
 
-  const menu = useMemo(() => getMenuByRole(data.role), [data.role]);
+  const menu = useMemo(() => getMenuByRole(user.role), [user.role]);
 
   return (
     <Sidebar collapsible="icon">
@@ -66,8 +65,8 @@ export function SidebarMain() {
               {/* <Link to="/dashboard/profile"> */}
               <Link to="/dashboard">
                 <UserAvatar
-                  name={data.name}
-                  image={data.image}
+                  name={user.name}
+                  image={user.image}
                   className="rounded-md"
                   classNames={{
                     image: "rounded-md group-hover/head-button:scale-105",
@@ -78,11 +77,11 @@ export function SidebarMain() {
                 <div className="grid break-all">
                   <div className="flex items-center gap-x-2">
                     <span className="line-clamp-1 text-sm font-semibold">
-                      {data.name}
+                      {user.name}
                     </span>
                   </div>
 
-                  <span className="line-clamp-1 text-xs">{data.email}</span>
+                  <span className="line-clamp-1 text-xs">{user.email}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -139,7 +138,7 @@ export function SidebarMain() {
                             </SidebarMenuAction>
                           </CollapsibleTrigger>
 
-                          <CollapsibleContent animate>
+                          <CollapsibleContent>
                             <SidebarMenuSub>
                               {subMenu.map(({ label, href, variant }, idx) => (
                                 <SidebarMenuSubItem key={idx}>

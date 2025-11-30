@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/core/utils";
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
@@ -51,13 +53,13 @@ function DialogOverlay({
 }
 
 function DialogContent({
-  showCloseButton = true,
+  hideCloseButton = false,
   classNames,
   className,
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  showCloseButton?: boolean;
+  hideCloseButton?: boolean;
   classNames?: { overlay?: string; closeButton?: string };
 }) {
   return (
@@ -72,7 +74,7 @@ function DialogContent({
           {...props}
         >
           {children}
-          {showCloseButton && (
+          {!hideCloseButton && (
             <DialogPrimitive.Close
               data-slot="dialog-close"
               className={cn(

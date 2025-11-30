@@ -5,9 +5,7 @@ import { createContext, ReactNode, useContext, useEffect } from "react";
 import { Session } from "./constants";
 import { useSession } from "./hooks";
 
-type AuthContextType = { session: Session };
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<Session | undefined>(undefined);
 
 export function AuthProvider({
   session: fallbackData,
@@ -27,7 +25,7 @@ export function AuthProvider({
 
   return (
     session && (
-      <AuthContext.Provider value={{ session }}>
+      <AuthContext.Provider value={{ ...session }}>
         {children}
       </AuthContext.Provider>
     )
