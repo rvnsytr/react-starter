@@ -9,7 +9,6 @@ import {
 import { SignOutButton, useAuth, UserAvatar } from "@/modules/auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { Collapsible as CollapsiblePrimitive } from "radix-ui";
 import {
   ComponentProps,
   useEffect,
@@ -23,6 +22,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
+import { CommandPalette } from "../ui/command-palette";
 import {
   Sidebar,
   SidebarContent,
@@ -42,6 +42,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "../ui/sidebar";
+import { LinkSpinner } from "../ui/spinner";
 
 export function SidebarMain() {
   const { user } = useAuth();
@@ -87,7 +88,8 @@ export function SidebarMain() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SidebarSeparator />
+        <SidebarSeparator className="mb-2" />
+        <CommandPalette data={menu} placeholder="Cari halaman..." />;
       </SidebarHeader>
 
       {/* Content */}
@@ -116,7 +118,11 @@ export function SidebarMain() {
                 }
 
                 return (
-                  <SidebarCollapsible key={route} isActive={isActive} asChild>
+                  <SidebarMainContentCollapsible
+                    key={route}
+                    isActive={isActive}
+                    asChild
+                  >
                     <SidebarMenuItem>
                       <SidebarMenuButton
                         onClick={() => isMobile && toggleSidebar()}
@@ -140,21 +146,23 @@ export function SidebarMain() {
 
                           <CollapsibleContent>
                             <SidebarMenuSub>
-                              {subMenu.map(({ label, href, variant }, idx) => (
+                              {subMenu.map((itm, idx) => (
                                 <SidebarMenuSubItem key={idx}>
                                   <SidebarMenuSubButton
-                                    variant={variant}
+                                    variant={itm.variant}
                                     className="flex justify-between"
                                     asChild
                                   >
                                     <Link
                                       to={
-                                        href ??
-                                        (`${route}/#${toKebabCase(label)}` as string)
+                                        itm.href ??
+                                        (`${route}/#${toKebabCase(itm.displayName)}` as string)
                                       }
-                                      className="line-clamp-1"
                                     >
-                                      {label}
+                                      <span className="line-clamp-1">
+                                        {itm.displayName}
+                                      </span>
+                                      <LinkSpinner />
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
@@ -164,7 +172,7 @@ export function SidebarMain() {
                         </>
                       )}
                     </SidebarMenuItem>
-                  </SidebarCollapsible>
+                  </SidebarMainContentCollapsible>
                 );
               })}
             </SidebarMenu>
@@ -223,19 +231,17 @@ export function SidebarMain() {
   );
 }
 
-function SidebarCollapsible({
+function SidebarMainContentCollapsible({
   isActive,
   ...props
-}: ComponentProps<typeof CollapsiblePrimitive.Root> & {
-  isActive: boolean;
-}) {
+}: ComponentProps<typeof Collapsible> & { isActive: boolean }) {
   const [isOpen, setIsOpen] = useState(isActive);
 
-  const onActiveRoute = useEffectEvent(() => setIsOpen(true));
+  const onActiveRoute = useEffectEvent(() => {
+    if (isActive && !isOpen) setIsOpen(true);
+  });
 
-  useEffect(() => {
-    if (isActive) onActiveRoute();
-  }, [isActive]);
+  useEffect(() => onActiveRoute, [isActive]);
 
   return <Collapsible open={isOpen} onOpenChange={setIsOpen} {...props} />;
 }
