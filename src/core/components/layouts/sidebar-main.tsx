@@ -88,8 +88,10 @@ export function SidebarMain() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+
         <SidebarSeparator className="mb-2" />
-        <CommandPalette data={menu} placeholder="Cari halaman..." />;
+
+        <CommandPalette data={menu} placeholder="Cari halaman..." />
       </SidebarHeader>
 
       {/* Content */}

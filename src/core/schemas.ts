@@ -215,3 +215,9 @@ export const sharedSchemas = {
   createdAt: z.coerce.date({ error: "Field 'created_at' tidak valid." }),
   createdBy: z.string({ error: "Field 'created_by' tidak valid." }).nullable(),
 };
+
+export const apiResponseSchema = z.object({
+  code: z.number(),
+  success: z.boolean(),
+  message: z.string(),
+});
