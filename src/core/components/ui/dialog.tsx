@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/core/utils";
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
