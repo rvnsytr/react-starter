@@ -40,8 +40,6 @@ export function DynamicBreadcrumb({
   const { pathname } = useLocation();
   const isMobile = useIsMobile();
 
-  const normalizedPath = normalizeRoute(pathname);
-
   return (
     <Breadcrumb className={className}>
       <BreadcrumbList>
@@ -91,7 +89,7 @@ export function DynamicBreadcrumb({
 
         <BreadcrumbItem>
           <BreadcrumbPage className="line-clamp-1 cursor-default text-ellipsis">
-            {currentPage ?? routesMeta[normalizedPath].displayName}
+            {currentPage ?? routesMeta[normalizeRoute(pathname)]?.displayName}
           </BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>

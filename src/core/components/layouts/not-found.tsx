@@ -1,3 +1,4 @@
+import { appMeta } from "@/core/constants";
 import { Link } from "@tanstack/react-router";
 import { Home } from "lucide-react";
 import { Button } from "../ui/button";
@@ -17,7 +18,7 @@ export function NotFound({ className }: { className?: string }) {
       <EmptyHeader className="lg:max-w-2xl">
         <EmptyMedia>
           <img
-            src="/404.png"
+            src={`${appMeta.baseUrl}404.png`}
             alt="Not found"
             width={1400}
             height={800}
