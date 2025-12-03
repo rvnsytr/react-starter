@@ -8,5 +8,6 @@ export const appMeta = {
   // },
 
   lang: "id",
+
   apiHost: "http://localhost:8000/api/v1",
 };
