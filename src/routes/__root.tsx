@@ -4,8 +4,9 @@ import { appMeta } from "@/core/constants";
 import { GlobalShortcuts } from "@/core/providers/global-shortcuts";
 import { ThemeProvider } from "@/core/providers/theme";
 import { getRouteTitle } from "@/core/utils";
+import { Session } from "@/modules/auth";
 import {
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
@@ -13,7 +14,9 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
 
-export const Route = createRootRoute({
+type RouterContext = { session: Session | null };
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { name: "name", content: appMeta.name },
@@ -22,7 +25,7 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
-  notFoundComponent: () => <NotFound className="min-h-dvh" />,
+  notFoundComponent: NotFound,
 });
 
 function RootComponent() {

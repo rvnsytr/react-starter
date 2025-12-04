@@ -1,7 +1,7 @@
 import { getRouteTitle } from "@/core/utils";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/(home)/_layout/about")({
+export const Route = createFileRoute("/(home)/about")({
   head: () => ({ meta: [{ title: getRouteTitle("/about") }] }),
   component: AboutPage,
 });
