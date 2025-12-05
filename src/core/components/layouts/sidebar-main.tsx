@@ -199,17 +199,17 @@ export function SidebarMain() {
           </SidebarMenuItem>
 
           {dashboardfooterMenu.map(
-            ({ url, displayName, icon: Icon, disabled }) => {
+            ({ route, displayName, icon: Icon, disabled }) => {
               const iconElement = Icon && <Icon />;
               return (
-                <SidebarMenuItem key={url}>
+                <SidebarMenuItem key={route}>
                   {disabled ? (
                     <SidebarMenuButton size="sm" disabled>
                       {iconElement} {displayName}
                     </SidebarMenuButton>
                   ) : (
                     <SidebarMenuButton size="sm" tooltip={displayName} asChild>
-                      <Link to={url}>
+                      <Link to={route}>
                         {iconElement}
                         {displayName}
                       </Link>

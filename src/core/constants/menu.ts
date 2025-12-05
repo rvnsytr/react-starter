@@ -1,5 +1,10 @@
 import { LinkProps } from "@tanstack/react-router";
-import { ExternalLink, LayoutDashboard, LucideIcon } from "lucide-react";
+import {
+  CircleHelp,
+  ExternalLink,
+  LayoutDashboard,
+  LucideIcon,
+} from "lucide-react";
 import { Route } from "./routes";
 
 type MenuContent = {
@@ -42,10 +47,12 @@ export const dashboardMenu: Menu[] = [
   },
 ];
 
-export const dashboardfooterMenu: (Omit<MenuContent, "route" | "subMenu"> & {
-  url: Route;
-  displayName: string;
-})[] = [
-  { url: "/", displayName: "Beranda", icon: ExternalLink },
-  // { url: "/help", displayName: "Bantuan", icon: CircleHelp, disabled: true },
+export const dashboardfooterMenu: (MenuContent & { displayName: string })[] = [
+  { route: "/", displayName: "Beranda", icon: ExternalLink },
+  {
+    route: "/dashboard",
+    displayName: "Bantuan",
+    icon: CircleHelp,
+    disabled: true,
+  },
 ];
