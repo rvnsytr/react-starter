@@ -1,5 +1,3 @@
-"use client";
-
 import { messages } from "@/core/constants";
 import { cn } from "@/core/utils";
 import { Check, Eye, EyeOff, LockKeyhole, X } from "lucide-react";
@@ -13,7 +11,12 @@ import {
   InputGroupInput,
 } from "./input-group";
 
-export function PasswordInput({ value, ...props }: Omit<InputProps, "type">) {
+export function PasswordInput({
+  icon,
+  withList = false,
+  value,
+  ...props
+}: Omit<InputProps, "type"> & { icon?: React.ReactNode; withList?: boolean }) {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const { lowercase, uppercase, number, character } = messages.password;
 
@@ -33,9 +36,7 @@ export function PasswordInput({ value, ...props }: Omit<InputProps, "type">) {
           {...props}
         />
 
-        <InputGroupAddon>
-          <LockKeyhole />
-        </InputGroupAddon>
+        <InputGroupAddon>{icon ?? <LockKeyhole />}</InputGroupAddon>
 
         <InputGroupAddon align="inline-end">
           <InputGroupButton
@@ -47,30 +48,32 @@ export function PasswordInput({ value, ...props }: Omit<InputProps, "type">) {
         </InputGroupAddon>
       </InputGroup>
 
-      <div className="space-y-1">
-        <FieldDescription>Kata sandi harus berisi:</FieldDescription>
+      {withList && (
+        <div className="space-y-1">
+          <FieldDescription>Kata sandi harus berisi:</FieldDescription>
 
-        <ul className="space-y-1">
-          {regexes.map(({ regex, text }) => {
-            const isValid = regex.test(String(value));
-            const Icon = isValid ? Check : X;
-            return (
-              <li
-                key={String(regex)}
-                className="text-muted-foreground flex items-center gap-2"
-              >
-                <Icon
-                  className={cn(
-                    "size-4",
-                    isValid ? "text-success" : "text-destructive",
-                  )}
-                />
-                <small>{text}</small>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+          <ul className="space-y-1">
+            {regexes.map(({ regex, text }) => {
+              const isValid = regex.test(String(value));
+              const Icon = isValid ? Check : X;
+              return (
+                <li
+                  key={String(regex)}
+                  className="text-muted-foreground flex items-center gap-2"
+                >
+                  <Icon
+                    className={cn(
+                      "size-4",
+                      isValid ? "text-success" : "text-destructive",
+                    )}
+                  />
+                  <small>{text}</small>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </>
   );
 }
