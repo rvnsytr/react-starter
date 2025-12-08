@@ -28,7 +28,7 @@ export function FieldWrapper({
   className,
   children,
 
-  props,
+  otherProps,
 }: {
   label?: ReactNode;
   htmlFor?: string;
@@ -39,7 +39,7 @@ export function FieldWrapper({
   children: ReactNode;
 
   // Other optional props
-  props?: {
+  otherProps?: {
     field?: Omit<FieldProps, "className" | "data-invalid">;
     label?: Omit<LabelProps, "htmlFor">;
     fieldDesc?: React.ComponentProps<"p">;
@@ -53,12 +53,12 @@ export function FieldWrapper({
         className,
       )}
       data-invalid={!!errors}
-      {...props?.field}
+      {...otherProps?.field}
     >
       {label && (
         <FieldLabel
           htmlFor={htmlFor}
-          className={cn("after:text-destructive", props?.label?.className)}
+          className={cn("after:text-destructive", otherProps?.label?.className)}
         >
           {label}
         </FieldLabel>
@@ -67,10 +67,12 @@ export function FieldWrapper({
       {children}
 
       {description && (
-        <FieldDescription {...props?.fieldDesc}>{description}</FieldDescription>
+        <FieldDescription {...otherProps?.fieldDesc}>
+          {description}
+        </FieldDescription>
       )}
 
-      <FieldError errors={errors} {...props?.fieldError} />
+      <FieldError errors={errors} {...otherProps?.fieldError} />
     </Field>
   );
 }
