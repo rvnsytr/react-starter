@@ -13,6 +13,8 @@ function HomeLayout() {
 
       <p>React Starter</p>
 
+      <Link to="/sign-in">Sign In</Link>
+
       <div className="flex items-center gap-x-2">
         <Link to="/" className="link [&.active]:font-semibold">
           Home

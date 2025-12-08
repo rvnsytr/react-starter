@@ -1,32 +1,47 @@
-import { apiFetcher } from "@/core/api";
-import { Route, routesMeta } from "@/core/constants";
-import { Role } from "./constants";
-import { sessionSchema } from "./schemas";
-
-export function authorize(currentRoute: Route, allowedRoles: Role[]) {
-  const meta = routesMeta[currentRoute];
-  if (!meta.role) return 404;
-
-  console.log(allowedRoles);
-  return 200;
-}
+import { authClient } from "@/core/auth";
 
 export async function getSession() {
-  const key = "/auth/session";
-  const schema = sessionSchema.nullable();
-  const config = { safeFetch: true };
-  const res = await apiFetcher(key, schema, config);
-  return res.data ?? null;
+  const { data, error } = await authClient.getSession();
+  if (error) throw new Error(error.message);
+  return data;
 }
 
-// export async function getAllUsers() {
-//   const headers = await nextHeaders();
-//   const schema = zodUserWithProfile.array();
-//   return (await apiFetcher("/user", schema, { headers })).data;
+export async function getSessionList() {
+  const { data, error } = await authClient.listSessions();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getUserList() {
+  const { data, error } = await authClient.admin.listUsers({
+    query: { sortBy: "createdAt", sortDirection: "desc" },
+  });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function revokeUserSessions(ids: string[]) {
+  return Promise.all(
+    ids.map(
+      async (id) => await authClient.admin.revokeUserSessions({ userId: id }),
+    ),
+  );
+}
+
+// export async function deleteProfilePicture(image: string) {
+//   await deleteFiles([await extractKeyFromPublicUrl(image)]);
 // }
 
-// export async function getMyProfile() {
-//   const headers = await nextHeaders();
-//   const schema = zodUserWithProfile;
-//   return (await apiFetcher("/user/me", schema, { headers })).data;
+// export async function deleteUsers(
+//   data: Pick<Session["user"], "id" | "image">[],
+// ) {
+//   return Promise.all(
+//     data.map(async ({ id, image }) => {
+//       if (image) await deleteProfilePicture(image);
+//       return await auth.api.removeUser({
+//         body: { userId: id },
+//         headers: await headers(),
+//       });
+//     }),
+//   );
 // }

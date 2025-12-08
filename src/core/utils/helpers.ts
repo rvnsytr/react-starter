@@ -3,7 +3,7 @@ import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { appMeta, dashboardMenu, Menu, Route, routesMeta } from "../constants";
 
-export function authorized(route: Route | null, role?: string) {
+export function authorized(route: Route | null, role?: string | null) {
   if (!route || !role) return false;
   const meta = routesMeta[route];
   if (!meta.role) return false;

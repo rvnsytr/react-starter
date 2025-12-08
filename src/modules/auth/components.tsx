@@ -1,4 +1,4 @@
-import { apiFetcher } from "@/core/api";
+import { authClient } from "@/core/auth";
 import {
   Avatar,
   AvatarFallback,
@@ -15,11 +15,14 @@ import {
   FieldLabel,
 } from "@/core/components/ui/field";
 import { FieldWrapper } from "@/core/components/ui/field-wrapper";
+import { GithubIcon } from "@/core/components/ui/icons";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/core/components/ui/input-group";
+import { Label } from "@/core/components/ui/label";
+import { PasswordInput } from "@/core/components/ui/password-input";
 import { SidebarMenuButton } from "@/core/components/ui/sidebar";
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import {
@@ -28,12 +31,11 @@ import {
   TooltipTrigger,
 } from "@/core/components/ui/tooltip";
 import { appMeta, messages } from "@/core/constants";
-import { sharedSchemas } from "@/core/schemas";
 import { cn } from "@/core/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "@tanstack/react-router";
 import {
-  IdCard,
-  LockKeyhole,
+  BadgeCheck,
   LogIn,
   LogOut,
   Mail,
@@ -43,15 +45,24 @@ import {
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { mutate } from "swr";
 import z from "zod";
 import { Role, rolesMeta, Session } from "./constants";
 import { userSchema } from "./schemas";
 
-export function SignOutButton() {
-  // const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const sharedText = {
+  signIn: "Berhasil masuk - Selamat datang!",
+  signOn: (social: string) => `Lanjutkan dengan ${social}`,
+  lastUsed: "Terakhir digunakan",
 
+  passwordNotMatch: messages.thingNotMatch("Kata sandi Anda"),
+  revokeSession: "Cabut Sesi",
+};
+
+// #region SIGN
+
+export function SignOutButton() {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   return (
     <SidebarMenuButton
       tooltip="Keluar"
@@ -60,21 +71,18 @@ export function SignOutButton() {
       disabled={isLoading}
       onClick={() => {
         setIsLoading(true);
-        toast.promise(
-          apiFetcher("/auth/logout", z.null(), { method: "DELETE" }),
-          {
-            loading: messages.loading,
-            success: (res) => {
-              setTimeout(() => (window.location.href = "/sign-in"), 1000);
-              // navigate({ to: "/sign-in" });
-              return res.message;
+        authClient.signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              toast.success("Berhasil keluar - Sampai jumpa!");
+              navigate({ to: "/sign-in" });
             },
-            error: (e) => {
+            onError: ({ error }) => {
               setIsLoading(false);
-              return e.message;
+              toast.error(error.message);
             },
           },
-        );
+        });
       }}
     >
       <LoadingSpinner loading={isLoading} icon={{ base: <LogOut /> }} /> Keluar
@@ -82,36 +90,74 @@ export function SignOutButton() {
   );
 }
 
-export function SignInForm() {
-  // const navigate = useNavigate();
+export function SignOnGithubButton() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const wasLastUsed = authClient.isLastUsedLoginMethod("github");
+
+  return (
+    <Button
+      variant="outline"
+      disabled={isLoading}
+      className="relative"
+      onClick={() => {
+        setIsLoading(true);
+        authClient.signIn.social(
+          {
+            provider: "github",
+            callbackURL: "/dashboard",
+            errorCallbackURL: "/sign-in",
+          },
+          {
+            onSuccess: () => {
+              toast.success(sharedText.signIn);
+            },
+            onError: ({ error }) => {
+              setIsLoading(false);
+              toast.error(error.message);
+            },
+          },
+        );
+      }}
+    >
+      <LoadingSpinner loading={isLoading} icon={{ base: <GithubIcon /> }} />
+      {sharedText.signOn("Github")}
+      {/* {wasLastUsed && (
+        <Badge
+          variant="outline"
+          className="bg-card absolute -top-3 right-1 shadow"
+        >
+          {sharedText.lastUsed}
+        </Badge>
+      )} */}
+    </Button>
+  );
+}
+
+export function SignInForm() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const wasLastUsed = authClient.isLastUsedLoginMethod("email");
 
   type FormSchema = z.infer<typeof formSchema>;
-  const formSchema = userSchema.pick({ email: true, password: true });
+  const formSchema = userSchema
+    .pick({ email: true, password: true })
+    .extend({ rememberMe: z.boolean() });
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", rememberMe: false },
   });
 
   const formHandler = (formData: FormSchema) => {
     setIsLoading(true);
-    toast.promise(
-      apiFetcher("/auth/login", z.any(), {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: { "Content-Type": "application/json" },
-      }),
+    authClient.signIn.email(
+      { ...formData, callbackURL: "/dashboard" },
       {
-        loading: messages.loading,
-        success: (res) => {
-          setTimeout(() => (window.location.href = "/dashboard"), 1000);
-          // navigate({ to: "/dashboard" });
-          return res.message;
+        onSuccess: () => {
+          toast.success(sharedText.signIn);
         },
-        error: (e) => {
+        onError: ({ error }) => {
           setIsLoading(false);
-          return e.message;
+          toast.error(error.message);
         },
       },
     );
@@ -154,26 +200,42 @@ export function SignInForm() {
             htmlFor={field.name}
             errors={fieldState.error}
           >
-            <InputGroup>
-              <InputGroupInput
-                type="password"
-                id={field.name}
-                aria-invalid={!!fieldState.error}
-                placeholder="Masukan kata sandi anda"
-                required
-                {...field}
-              />
-              <InputGroupAddon>
-                <LockKeyhole />
-              </InputGroupAddon>
-            </InputGroup>
+            <PasswordInput
+              id={field.name}
+              aria-invalid={!!fieldState.error}
+              placeholder="Masukan kata sandi anda"
+              required
+              {...field}
+            />
           </FieldWrapper>
         )}
       />
 
-      <Button type="submit" className="mt-2" disabled={isLoading}>
+      <Controller
+        name="rememberMe"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field orientation="horizontal" data-invalid={!!fieldState.error}>
+            <Checkbox
+              id={field.name}
+              name={field.name}
+              aria-invalid={!!fieldState.error}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+            <Label htmlFor={field.name}>Ingat Saya</Label>
+          </Field>
+        )}
+      />
+
+      <Button type="submit" className="relative" disabled={isLoading}>
         <LoadingSpinner loading={isLoading} icon={{ base: <LogIn /> }} />
         Masuk ke Dashboard
+        {/* {wasLastUsed && (
+          <Badge className="bg-primary absolute -top-3 right-1 border border-transparent shadow">
+            {sharedText.lastUsed}
+          </Badge>
+        )} */}
       </Button>
     </form>
   );
@@ -184,33 +246,43 @@ export function SignUpForm() {
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = userSchema
-    .pick({ name: true, email: true, agreement: true })
-    .extend({ no_peg: sharedSchemas.string("Nomor pegawai") });
+    .pick({ name: true, email: true, newPassword: true, confirmPassword: true })
+    .extend({
+      agreement: z.boolean().refine((v) => v, {
+        error:
+          "Mohon setujui ketentuan layanan dan kebijakan privasi untuk melanjutkan.",
+      }),
+    })
+    .refine((sc) => sc.newPassword === sc.confirmPassword, {
+      message: sharedText.passwordNotMatch,
+      path: ["confirmPassword"],
+    });
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", email: "", no_peg: "", agreement: false },
+    defaultValues: {
+      name: "",
+      email: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
   });
 
-  const formHandler = (formData: FormSchema) => {
+  const formHandler = ({ newPassword: password, ...rest }: FormSchema) => {
     setIsLoading(true);
-    toast.promise(
-      apiFetcher("/auth/register", z.any(), {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: { "Content-Type": "application/json" },
-      }),
+    authClient.signUp.email(
+      { password, ...rest },
       {
-        loading: messages.loading,
-        success: (res) => {
+        onSuccess: () => {
           setIsLoading(false);
           form.reset();
-          mutate("/users");
-          return res.message;
+          toast.success(
+            "Akun berhasil dibuat. Silakan masuk untuk melanjutkan.",
+          );
         },
-        error: (e) => {
+        onError: ({ error }) => {
           setIsLoading(false);
-          return e.message;
+          toast.error(error.message);
         },
       },
     );
@@ -271,27 +343,42 @@ export function SignUpForm() {
       />
 
       <Controller
-        name="no_peg"
+        name="newPassword"
         control={form.control}
         render={({ field, fieldState }) => (
           <FieldWrapper
-            label="Nomor Pegawai"
+            label="Kata sandi"
             htmlFor={field.name}
             errors={fieldState.error}
           >
-            <InputGroup>
-              <InputGroupInput
-                type="text"
-                id={field.name}
-                aria-invalid={!!fieldState.error}
-                placeholder="Masukan nomor pegawai anda"
-                required
-                {...field}
-              />
-              <InputGroupAddon>
-                <IdCard />
-              </InputGroupAddon>
-            </InputGroup>
+            <PasswordInput
+              id={field.name}
+              aria-invalid={!!fieldState.error}
+              placeholder="Masukan kata sandi anda"
+              required
+              withList
+              {...field}
+            />
+          </FieldWrapper>
+        )}
+      />
+
+      <Controller
+        name="confirmPassword"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldWrapper
+            label="Konfirmasi kata sandi"
+            htmlFor={field.name}
+            errors={fieldState.error}
+          >
+            <PasswordInput
+              id={field.name}
+              aria-invalid={!!fieldState.error}
+              placeholder="Konfirmasi kata sandi anda"
+              required
+              {...field}
+            />
           </FieldWrapper>
         )}
       />
@@ -314,7 +401,7 @@ export function SignUpForm() {
               </FieldLabel>
               <FieldDescription>
                 Saya menyetujui{" "}
-                <span className="text-foreground link-underline">
+                <span className="text-foreground">
                   ketentuan layanan dan kebijakan privasi
                 </span>{" "}
                 {appMeta.name}.
@@ -335,6 +422,10 @@ export function SignUpForm() {
     </form>
   );
 }
+
+// #endregion
+
+// #region USER
 
 export function UserRoleBadge({
   value,
@@ -368,6 +459,38 @@ export function UserRoleBadge({
   );
 }
 
+export function UserVerifiedBadge({
+  withoutText = false,
+  className,
+  classNames,
+}: {
+  withoutText?: boolean;
+  className?: string;
+  classNames?: { badge?: string; icon?: string; content?: string };
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger className={className} asChild>
+        {withoutText ? (
+          <BadgeCheck
+            className={cn("text-rvns size-4 shrink-0", classNames?.icon)}
+          />
+        ) : (
+          <Badge
+            variant="outline_rvns"
+            className={cn("capitalize", classNames?.badge)}
+          >
+            <BadgeCheck className={classNames?.icon} /> Terverifikasi
+          </Badge>
+        )}
+      </TooltipTrigger>
+      <TooltipContent className={classNames?.content}>
+        Pengguna ini telah memverifikasi email mereka.
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function UserAvatar({
   image,
   name,
@@ -389,3 +512,5 @@ export function UserAvatar({
     </Avatar>
   );
 }
+
+// #endregion

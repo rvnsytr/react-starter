@@ -15,12 +15,12 @@ import {
 } from "@/core/components/ui/tabs";
 import { appMeta } from "@/core/constants";
 import { getRouteTitle } from "@/core/utils";
-import { SignInForm, SignUpForm } from "@/modules/auth";
+import { SignInForm, SignOnGithubButton, SignUpForm } from "@/modules/auth";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/sign-in")({
-  beforeLoad: (ctx) => {
-    if (ctx.context.session) throw redirect({ to: "/dashboard" });
+  beforeLoad: (c) => {
+    if (c.context.session) throw redirect({ to: "/dashboard" });
   },
   head: () => ({ meta: [{ title: getRouteTitle("/sign-in") }] }),
   component: RouteComponent,
@@ -29,17 +29,19 @@ export const Route = createFileRoute("/sign-in")({
 function RouteComponent() {
   return (
     <main className="container flex min-h-dvh items-center justify-center">
-      <Card className="animate-fade w-full max-w-lg">
-        <CardHeader className="gap-y-4 border-b text-center">
+      <Card className="w-full max-w-lg">
+        <CardHeader className="text-center">
           <CardTitle className="mx-auto">
-            <Link to="/">{appMeta.name}</Link>
+            <Link to="/">
+              <h3>{appMeta.name}</h3>
+            </Link>
           </CardTitle>
           <CardDescription>
             Masuk ke Dashboard {appMeta.name} dengan aman menggunakan akun Anda.
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex flex-col gap-y-4">
           <Tabs defaultValue="masuk">
             <TabsList className="w-full">
               <TabsTrigger value="masuk">Masuk</TabsTrigger>
@@ -53,9 +55,19 @@ function RouteComponent() {
               <SignUpForm />
             </TabsContent>
           </Tabs>
+
+          <div className="flex items-center gap-x-4">
+            <div className="grow border-t before:border-t" />
+            <small className="text-muted-foreground text-xs font-medium">
+              Atau
+            </small>
+            <div className="grow border-t after:border-t" />
+          </div>
+
+          <SignOnGithubButton />
         </CardContent>
 
-        <CardFooter className="justify-center border-t text-center">
+        <CardFooter className="justify-center text-center">
           <FooterNote />
         </CardFooter>
       </Card>

@@ -26,7 +26,7 @@ function App() {
   const { data: session, isLoading, error } = useSession();
 
   if (error) return <AppErrorFallback error={error} />;
-  const isInitialLoading = !session && isLoading;
+  const isInitialLoading = session === undefined && isLoading;
 
   return (
     <>

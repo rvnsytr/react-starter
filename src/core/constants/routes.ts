@@ -9,9 +9,11 @@ export const routesMeta: Record<
   { displayName: string; role?: RouteRole }
 > = {
   "/": { displayName: "Beranda" },
-  "/dashboard": { displayName: "Dashboard" },
   "/about": { displayName: "Tentang" },
-  // "/sign-in": { displayName: "Masuk" },
+
+  "/sign-in": { displayName: "Masuk" },
+
+  "/dashboard": { displayName: "Dashboard" },
   // "/dashboard": { displayName: "Dashboard", role: "all" },
   // "/dashboard/profile": { displayName: "Profil Saya", role: "all" },
   // "/dashboard/users": { displayName: "Pengguna", role: ["admin"] },

@@ -1,8 +1,19 @@
 import useSWR, { mutate, SWRConfiguration } from "swr";
-import { getSession } from "./actions";
+import { getSession, getSessionList, getUserList } from "./actions";
 
 export function useSession(config?: SWRConfiguration) {
-  return useSWR("session", getSession, config);
+  return useSWR("/auth/get-session", getSession, config);
 }
 
-export const mutateSession = () => mutate("session");
+export function useSessionList(config?: SWRConfiguration) {
+  return useSWR("/auth/list-sessions", getSessionList, config);
+}
+
+export function useUsers(config?: SWRConfiguration) {
+  const fetcher = async () => (await getUserList()).users;
+  return useSWR("/auth/users", fetcher, config);
+}
+
+export const mutateSession = () => mutate("/auth/get-session");
+export const mutateSessionList = () => mutate("/auth/list-sessions");
+export const mutateUsers = () => mutate("/auth/users");
