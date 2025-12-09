@@ -3,7 +3,7 @@ import { GridPattern } from "@/core/components/ui/grid-pattern";
 import { appMeta } from "@/core/constants";
 import { GlobalShortcuts } from "@/core/providers/global-shortcuts";
 import { getRouteTitle } from "@/core/utils";
-import { Session } from "@/modules/auth";
+import { AuthSession } from "@/modules/auth";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -13,7 +13,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
 
-type RouterContext = { session: Session | null };
+type RouterContext = { session: AuthSession | null };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({

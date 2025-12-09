@@ -1,18 +1,59 @@
 import { authClient } from "@/core/auth";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/core/components/ui/alert-dialog";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/core/components/ui/avatar";
 import { Badge } from "@/core/components/ui/badge";
-import { Button } from "@/core/components/ui/button";
+import { Button, buttonVariants } from "@/core/components/ui/button";
 import { Checkbox } from "@/core/components/ui/checkbox";
+import {
+  ColumnCellCheckbox,
+  ColumnHeader,
+  ColumnHeaderCheckbox,
+} from "@/core/components/ui/column";
+import {
+  DataTable,
+  OtherDataTableProps,
+} from "@/core/components/ui/data-table";
+import { DetailList, DetailListData } from "@/core/components/ui/detail-list";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/core/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/core/components/ui/dropdown-menu";
+import { ErrorFallback, LoadingFallback } from "@/core/components/ui/fallback";
 import {
   Field,
   FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
+  FieldTitle,
 } from "@/core/components/ui/field";
 import { FieldWrapper } from "@/core/components/ui/field-wrapper";
 import { GithubIcon } from "@/core/components/ui/icons";
@@ -23,6 +64,17 @@ import {
 } from "@/core/components/ui/input-group";
 import { Label } from "@/core/components/ui/label";
 import { PasswordInput } from "@/core/components/ui/password-input";
+import { RadioGroup, RadioGroupItem } from "@/core/components/ui/radio-group";
+import { Separator } from "@/core/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/core/components/ui/sheet";
 import { SidebarMenuButton } from "@/core/components/ui/sidebar";
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import {
@@ -31,22 +83,42 @@ import {
   TooltipTrigger,
 } from "@/core/components/ui/tooltip";
 import { appMeta, messages } from "@/core/constants";
-import { cn } from "@/core/utils";
+import { cn, filterFn, formatDate } from "@/core/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
+import { createColumnHelper } from "@tanstack/react-table";
 import {
+  ArrowUpRight,
   BadgeCheck,
+  Ban,
+  CalendarCheck2,
+  CalendarSync,
+  CircleDot,
+  Info,
+  Layers2,
   LogIn,
   LogOut,
   Mail,
+  MonitorOff,
+  Save,
+  Settings2,
   UserRound,
   UserRoundPlus,
+  UserSquare2,
 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import z from "zod";
-import { Role, rolesMeta, Session } from "./constants";
+import { z } from "zod";
+import { revokeUserSessions } from "./actions";
+import {
+  allRoles,
+  AuthSession,
+  defaultRole,
+  Role,
+  rolesMeta,
+} from "./constants";
+import { mutateUsers, useUsers } from "./hooks";
+import { useAuth } from "./provider.auth";
 import { userSchema } from "./schemas";
 
 const sharedText = {
@@ -59,79 +131,6 @@ const sharedText = {
 };
 
 // #region SIGN
-
-export function SignOutButton() {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  return (
-    <SidebarMenuButton
-      tooltip="Keluar"
-      variant="outline_destructive"
-      className="text-destructive hover:text-destructive"
-      disabled={isLoading}
-      onClick={() => {
-        setIsLoading(true);
-        authClient.signOut({
-          fetchOptions: {
-            onSuccess: () => {
-              toast.success("Berhasil keluar - Sampai jumpa!");
-              navigate({ to: "/sign-in" });
-            },
-            onError: ({ error }) => {
-              setIsLoading(false);
-              toast.error(error.message);
-            },
-          },
-        });
-      }}
-    >
-      <LoadingSpinner loading={isLoading} icon={{ base: <LogOut /> }} /> Keluar
-    </SidebarMenuButton>
-  );
-}
-
-export function SignOnGithubButton() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const wasLastUsed = authClient.isLastUsedLoginMethod("github");
-
-  return (
-    <Button
-      variant="outline"
-      disabled={isLoading}
-      className="relative"
-      onClick={() => {
-        setIsLoading(true);
-        authClient.signIn.social(
-          {
-            provider: "github",
-            callbackURL: "/dashboard",
-            errorCallbackURL: "/sign-in",
-          },
-          {
-            onSuccess: () => {
-              toast.success(sharedText.signIn);
-            },
-            onError: ({ error }) => {
-              setIsLoading(false);
-              toast.error(error.message);
-            },
-          },
-        );
-      }}
-    >
-      <LoadingSpinner loading={isLoading} icon={{ base: <GithubIcon /> }} />
-      {sharedText.signOn("Github")}
-      {/* {wasLastUsed && (
-        <Badge
-          variant="outline"
-          className="bg-card absolute -top-3 right-1 shadow"
-        >
-          {sharedText.lastUsed}
-        </Badge>
-      )} */}
-    </Button>
-  );
-}
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -149,18 +148,17 @@ export function SignInForm() {
 
   const formHandler = (formData: FormSchema) => {
     setIsLoading(true);
-    authClient.signIn.email(
-      { ...formData, callbackURL: "/dashboard" },
-      {
-        onSuccess: () => {
-          toast.success(sharedText.signIn);
-        },
-        onError: ({ error }) => {
-          setIsLoading(false);
-          toast.error(error.message);
-        },
+    authClient.signIn.email(formData, {
+      onSuccess: () => {
+        toast.success(sharedText.signIn);
+        const url = `${import.meta.env.BASE_URL}dashboard`;
+        setTimeout(() => (window.location.href = url), 1000);
       },
-    );
+      onError: ({ error }) => {
+        setIsLoading(false);
+        toast.error(error.message);
+      },
+    });
   };
 
   return (
@@ -423,6 +421,79 @@ export function SignUpForm() {
   );
 }
 
+export function SignOnGithubButton() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const wasLastUsed = authClient.isLastUsedLoginMethod("github");
+
+  return (
+    <Button
+      variant="outline"
+      disabled={isLoading}
+      className="relative"
+      onClick={() => {
+        setIsLoading(true);
+        authClient.signIn.social(
+          {
+            provider: "github",
+            callbackURL: "/dashboard",
+            errorCallbackURL: "/sign-in",
+          },
+          {
+            onSuccess: () => {
+              toast.success(sharedText.signIn);
+            },
+            onError: ({ error }) => {
+              setIsLoading(false);
+              toast.error(error.message);
+            },
+          },
+        );
+      }}
+    >
+      <LoadingSpinner loading={isLoading} icon={{ base: <GithubIcon /> }} />
+      {sharedText.signOn("Github")}
+      {/* {wasLastUsed && (
+        <Badge
+          variant="outline"
+          className="bg-card absolute -top-3 right-1 shadow"
+        >
+          {sharedText.lastUsed}
+        </Badge>
+      )} */}
+    </Button>
+  );
+}
+
+export function SignOutButton() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  return (
+    <SidebarMenuButton
+      tooltip="Keluar"
+      variant="outline_destructive"
+      className="text-destructive hover:text-destructive"
+      disabled={isLoading}
+      onClick={() => {
+        setIsLoading(true);
+        authClient.signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              toast.success("Berhasil keluar - Sampai jumpa!");
+              const url = `${import.meta.env.BASE_URL}sign-in`;
+              setTimeout(() => (window.location.href = url), 1000);
+            },
+            onError: ({ error }) => {
+              setIsLoading(false);
+              toast.error(error.message);
+            },
+          },
+        });
+      }}
+    >
+      <LoadingSpinner loading={isLoading} icon={{ base: <LogOut /> }} /> Keluar
+    </SidebarMenuButton>
+  );
+}
+
 // #endregion
 
 // #region USER
@@ -496,7 +567,7 @@ export function UserAvatar({
   name,
   className,
   classNames,
-}: Pick<Session["user"], "image" | "name"> & {
+}: Pick<AuthSession["user"], "image" | "name"> & {
   className?: string;
   classNames?: { image?: string; fallback?: string };
 }) {
@@ -512,5 +583,927 @@ export function UserAvatar({
     </Avatar>
   );
 }
+
+const createUserColumn = createColumnHelper<AuthSession["user"]>();
+const getUserColumn = (currentUserId: string) => [
+  createUserColumn.display({
+    id: "select",
+    header: ({ table }) => <ColumnHeaderCheckbox table={table} />,
+    cell: ({ row }) => <ColumnCellCheckbox row={row} />,
+    enableHiding: false,
+    enableSorting: false,
+  }),
+  createUserColumn.display({
+    id: "no",
+    header: "No",
+    cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+    enableHiding: false,
+  }),
+  createUserColumn.accessor(({ image }) => image, {
+    id: "image",
+    header: ({ column }) => (
+      <ColumnHeader column={column} className="justify-center">
+        Foto Profil
+      </ColumnHeader>
+    ),
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <UserAvatar {...row.original} className="size-20" />
+      </div>
+    ),
+    meta: { displayName: "Foto Profil", type: "text", icon: UserSquare2 },
+    enableSorting: false,
+    enableColumnFilter: false,
+    enableGlobalFilter: false,
+    enablePinning: true,
+  }),
+  createUserColumn.accessor(({ name }) => name, {
+    id: "name",
+    header: ({ column }) => <ColumnHeader column={column}>Nama</ColumnHeader>,
+    cell: ({ row }) => (
+      <UserDetailSheet
+        data={row.original}
+        isCurrentUser={row.original.id === currentUserId}
+      />
+    ),
+    filterFn: filterFn("text"),
+    meta: { displayName: "Nama", type: "text", icon: UserRound },
+  }),
+  createUserColumn.accessor(({ email }) => email, {
+    id: "email",
+    header: ({ column }) => (
+      <ColumnHeader column={column}>Alamat Email</ColumnHeader>
+    ),
+    cell: ({ row, cell }) => {
+      return (
+        <div className="flex items-center gap-x-2">
+          <span>{cell.getValue()}</span>
+          {!row.original.emailVerified && <UserVerifiedBadge withoutText />}
+        </div>
+      );
+    },
+    filterFn: filterFn("text"),
+    meta: { displayName: "Alamat Email", type: "text", icon: Mail },
+  }),
+  createUserColumn.accessor(({ role }) => role, {
+    id: "role",
+    header: ({ column }) => <ColumnHeader column={column}>Role</ColumnHeader>,
+    cell: ({ cell }) => <UserRoleBadge value={cell.getValue() as Role} />,
+    filterFn: filterFn("option"),
+    meta: {
+      displayName: "Role",
+      type: "option",
+      icon: CircleDot,
+      transformOptionFn: (value) => {
+        const { displayName, icon } = rolesMeta[value as Role];
+        return { value, label: displayName, icon };
+      },
+    },
+  }),
+  createUserColumn.accessor(({ updatedAt }) => updatedAt, {
+    id: "updatedAt",
+    header: ({ column }) => (
+      <ColumnHeader column={column}>Terakhir Diperbarui</ColumnHeader>
+    ),
+    cell: ({ cell }) => formatDate(cell.getValue(), "PPPp"),
+    filterFn: filterFn("date"),
+    meta: {
+      displayName: "Terakhir Diperbarui",
+      type: "date",
+      icon: CalendarSync,
+    },
+  }),
+  createUserColumn.accessor(({ createdAt }) => createdAt, {
+    id: "createdAt",
+    header: ({ column }) => (
+      <ColumnHeader column={column}>Waktu Dibuat</ColumnHeader>
+    ),
+    cell: ({ cell }) => formatDate(cell.getValue(), "PPPp"),
+    filterFn: filterFn("date"),
+    meta: { displayName: "Waktu Dibuat", type: "date", icon: CalendarCheck2 },
+  }),
+];
+
+export function UserDataTable({
+  searchPlaceholder = "Cari Pengguna...",
+  ...props
+}: OtherDataTableProps<AuthSession["user"]>) {
+  const { user } = useAuth();
+  const { data, error, isLoading } = useUsers();
+
+  if (error) return <ErrorFallback error={error} />;
+  if (!data && isLoading) return <LoadingFallback />;
+
+  const columns = getUserColumn(user.id);
+
+  return (
+    <DataTable
+      data={data ?? []}
+      columns={columns}
+      searchPlaceholder={searchPlaceholder}
+      enableRowSelection={({ original }) => original.id !== user.id}
+      renderRowSelection={(data, table) => {
+        const filteredData = data.map(({ original }) => original);
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Settings2 /> {messages.actions.action}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="[&_button]:justify-start">
+              <DropdownMenuLabel className="text-center">
+                Akun dipilih: {filteredData.length}
+              </DropdownMenuLabel>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <AdminActionRevokeUserSessionsDialog
+                  ids={filteredData.map(({ id }) => id)}
+                  onSuccess={() => table.resetRowSelection()}
+                />
+              </DropdownMenuItem>
+
+              {/* // TODO */}
+              <DropdownMenuItem asChild>
+                <Button size="sm" variant="ghost_destructive" disabled>
+                  <Ban /> Ban
+                </Button>
+              </DropdownMenuItem>
+
+              {/* <DropdownMenuItem asChild>
+                <AdminActionRemoveUsersDialog
+                  data={filteredData}
+                  onSuccess={() => table.resetRowSelection()}
+                />
+              </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      }}
+      {...props}
+    />
+  );
+}
+
+export function UserDetailSheet({
+  data,
+  isCurrentUser,
+}: {
+  data: AuthSession["user"];
+  isCurrentUser: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const details: DetailListData = [
+    { label: "Alamat email", content: data.email },
+    { label: "Terakhir diperbarui", content: messages.dateAgo(data.updatedAt) },
+    { label: "Waktu dibuat", content: messages.dateAgo(data.createdAt) },
+  ];
+
+  return (
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
+        <span className="link-group">{data.name}</span>
+        <ArrowUpRight className="group-hover:text-primary size-3.5" />
+      </SheetTrigger>
+
+      <SheetContent>
+        <SheetHeader className="flex-row items-center">
+          <UserAvatar {...data} className="size-10" />
+          <div className="grid">
+            <SheetTitle className="text-base">{data.name}</SheetTitle>
+            <SheetDescription># {data.id.slice(0, 17)}</SheetDescription>
+          </div>
+        </SheetHeader>
+
+        <div className="flex flex-col gap-y-3 overflow-y-auto px-4">
+          <Separator />
+
+          <div className="flex items-center gap-2">
+            <UserRoleBadge value={data.role as Role} />
+            {data.emailVerified && <UserVerifiedBadge />}
+          </div>
+
+          <DetailList data={details} />
+
+          {!isCurrentUser && (
+            <>
+              <Separator />
+
+              <AdminChangeUserRoleForm data={data} setIsOpen={setIsOpen} />
+
+              <Separator />
+
+              {/* // TODO */}
+              <Button variant="outline_primary" disabled>
+                <Layers2 /> Tiru Sesi
+              </Button>
+
+              <AdminRevokeUserSessionsDialog {...data} />
+
+              {/* // TODO */}
+              <Button variant="outline_destructive" disabled>
+                <Ban /> Ban
+              </Button>
+            </>
+          )}
+        </div>
+
+        {!isCurrentUser && (
+          <SheetFooter>
+            {/* <AdminRemoveUserDialog data={data} setIsOpen={setIsOpen} /> */}
+          </SheetFooter>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// #endregion
+
+// #region ADMIN
+
+export function AdminCreateUserDialog() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  type FormSchema = z.infer<typeof formSchema>;
+  const formSchema = userSchema
+    .pick({
+      name: true,
+      email: true,
+      newPassword: true,
+      confirmPassword: true,
+      role: true,
+    })
+    .refine((sc) => sc.newPassword === sc.confirmPassword, {
+      message: sharedText.passwordNotMatch,
+      path: ["confirmPassword"],
+    });
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      newPassword: "",
+      confirmPassword: "",
+      role: "user",
+    },
+  });
+
+  const formHandler = ({ newPassword, role: newRole, ...rest }: FormSchema) => {
+    setIsLoading(true);
+
+    const role = newRole ?? defaultRole;
+    authClient.admin.createUser(
+      { password: newPassword, role, ...rest },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          mutateUsers();
+          form.reset();
+          toast.success(`Akun atas nama ${rest.name} berhasil dibuat.`);
+        },
+        onError: ({ error }) => {
+          toast.error(error.message);
+          setIsLoading(false);
+        },
+      },
+    );
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="w-full">
+          <UserRoundPlus /> Tambah Pengguna
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Tambah Pengguna</DialogTitle>
+          <DialogDescription>
+            Pastikan semua informasi sudah benar sebelum mengkonfirmasi.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FieldWrapper
+                label="Nama"
+                htmlFor={field.name}
+                errors={fieldState.error}
+              >
+                <InputGroup>
+                  <InputGroupInput
+                    type="text"
+                    id={field.name}
+                    aria-invalid={!!fieldState.error}
+                    placeholder="Masukan nama anda"
+                    required
+                    {...field}
+                  />
+                  <InputGroupAddon>
+                    <UserRound />
+                  </InputGroupAddon>
+                </InputGroup>
+              </FieldWrapper>
+            )}
+          />
+
+          <Controller
+            name="email"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FieldWrapper
+                label="Alamat email"
+                htmlFor={field.name}
+                errors={fieldState.error}
+              >
+                <InputGroup>
+                  <InputGroupInput
+                    type="email"
+                    id={field.name}
+                    aria-invalid={!!fieldState.error}
+                    placeholder="Masukan email anda"
+                    required
+                    {...field}
+                  />
+                  <InputGroupAddon>
+                    <Mail />
+                  </InputGroupAddon>
+                </InputGroup>
+              </FieldWrapper>
+            )}
+          />
+
+          <Controller
+            name="newPassword"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FieldWrapper
+                label="Kata sandi"
+                htmlFor={field.name}
+                errors={fieldState.error}
+              >
+                <PasswordInput
+                  id={field.name}
+                  aria-invalid={!!fieldState.error}
+                  placeholder="Masukan kata sandi anda"
+                  required
+                  withList
+                  {...field}
+                />
+              </FieldWrapper>
+            )}
+          />
+
+          <Controller
+            name="confirmPassword"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FieldWrapper
+                label="Konfirmasi kata sandi"
+                htmlFor={field.name}
+                errors={fieldState.error}
+              >
+                <PasswordInput
+                  id={field.name}
+                  aria-invalid={!!fieldState.error}
+                  placeholder="Konfirmasi kata sandi anda"
+                  required
+                  {...field}
+                />
+              </FieldWrapper>
+            )}
+          />
+
+          <Controller
+            name="role"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FieldWrapper
+                label="Ubah role"
+                htmlFor={field.name}
+                errors={fieldState.error}
+              >
+                <RadioGroup
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  className="flex-col"
+                  required
+                >
+                  {allRoles.map((value) => {
+                    const { icon: Icon, ...meta } = rolesMeta[value];
+                    return (
+                      <FieldLabel
+                        key={value}
+                        htmlFor={value}
+                        color={meta.color}
+                        className="border-(--field-color)/40"
+                      >
+                        <Field
+                          orientation="horizontal"
+                          data-invalid={!!fieldState.error}
+                        >
+                          <FieldContent>
+                            <FieldTitle className="text-(--field-color)">
+                              <Icon /> {meta.displayName}
+                            </FieldTitle>
+                            <FieldDescription className="text-(--field-color)/80">
+                              {meta.desc}
+                            </FieldDescription>
+                          </FieldContent>
+                          <RadioGroupItem
+                            value={value}
+                            id={value}
+                            classNames={{ circle: "fill-[var(--field-color)]" }}
+                            aria-invalid={!!fieldState.error}
+                          />
+                        </Field>
+                      </FieldLabel>
+                    );
+                  })}
+                </RadioGroup>
+              </FieldWrapper>
+            )}
+          />
+
+          <Separator />
+
+          <DialogFooter>
+            <DialogClose>{messages.actions.cancel}</DialogClose>
+            <Button type="submit" disabled={isLoading}>
+              <LoadingSpinner
+                loading={isLoading}
+                icon={{ base: <UserRoundPlus /> }}
+              />
+              {messages.actions.add}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AdminChangeUserRoleForm({
+  data,
+  setIsOpen,
+}: {
+  data: AuthSession["user"];
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  type FormSchema = z.infer<typeof formSchema>;
+  const formSchema = userSchema.pick({ role: true });
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { role: data.role === "user" ? "admin" : "user" },
+  });
+
+  const formHandler = ({ role: newRole }: FormSchema) => {
+    const role = newRole ?? defaultRole;
+    if (role === data.role)
+      return toast.info(messages.noChanges(`role ${data.name}`));
+
+    setIsLoading(true);
+    authClient.admin.setRole(
+      { userId: data.id, role },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          setIsOpen(false);
+          mutateUsers();
+          toast.success(
+            `Role ${data.name} berhasil diperbarui menjadi ${role}.`,
+          );
+        },
+        onError: ({ error }) => {
+          setIsLoading(false);
+          toast.error(error.message);
+        },
+      },
+    );
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+      <Controller
+        name="role"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldWrapper
+            label="Ubah role"
+            htmlFor={field.name}
+            errors={fieldState.error}
+          >
+            <RadioGroup
+              name={field.name}
+              value={field.value}
+              onValueChange={field.onChange}
+              className="flex-col"
+              required
+            >
+              {allRoles.map((value) => {
+                const {
+                  displayName,
+                  desc,
+                  color,
+                  icon: Icon,
+                } = rolesMeta[value];
+
+                return (
+                  <FieldLabel
+                    key={value}
+                    htmlFor={value}
+                    color={color}
+                    className="border-(--field-color)/40"
+                  >
+                    <Field
+                      orientation="horizontal"
+                      data-invalid={!!fieldState.error}
+                    >
+                      <FieldContent>
+                        <FieldTitle className="text-(--field-color)">
+                          <Icon /> {displayName}
+                        </FieldTitle>
+                        <FieldDescription className="text-(--field-color)/80">
+                          {desc}
+                        </FieldDescription>
+                      </FieldContent>
+                      <RadioGroupItem
+                        value={value}
+                        id={value}
+                        classNames={{ circle: "fill-[var(--field-color)]" }}
+                        aria-invalid={!!fieldState.error}
+                      />
+                    </Field>
+                  </FieldLabel>
+                );
+              })}
+            </RadioGroup>
+          </FieldWrapper>
+        )}
+      />
+
+      <Button type="submit" disabled={isLoading}>
+        <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
+        {messages.actions.update}
+      </Button>
+    </form>
+  );
+}
+
+function AdminRevokeUserSessionsDialog({
+  id,
+  name,
+}: Pick<AuthSession["user"], "id" | "name">) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const clickHandler = () => {
+    setIsLoading(true);
+    authClient.admin.revokeUserSessions(
+      { userId: id },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          toast.success(`Semua sesi aktif milik ${name} berhasil dicabut.`);
+        },
+        onError: ({ error }) => {
+          setIsLoading(false);
+          toast.error(error.message);
+        },
+      },
+    );
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline_warning" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <MonitorOff /> }} />
+          {sharedText.revokeSession}
+        </Button>
+      </AlertDialogTrigger>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-warning flex items-center gap-x-2">
+            <Info /> Cabut Semua Sesi Aktif untuk {name}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Tindakan ini akan langsung menghentikan semua sesi aktif milik
+            {name}. Yakin ingin melanjutkan?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
+
+          <AlertDialogAction
+            className={buttonVariants({ variant: "warning" })}
+            onClick={clickHandler}
+          >
+            {messages.actions.confirm}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// function AdminRemoveUserDialog({
+//   data,
+//   setIsOpen: setSheetOpen,
+// }: {
+//   data: Pick<AuthSession["user"], "id" | "name" | "image">;
+//   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+// }) {
+//   const [input, setInput] = useState<string>("");
+//   const [isOpen, setIsOpen] = useState<boolean>(false);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+//   type FormSchema = z.infer<typeof formSchema>;
+//   const formSchema = z
+//     .object({ input: sharedSchemas.string("Nama") })
+//     .refine((sc) => sc.input === data.name, {
+//       message: messages.thingNotMatch("Nama"),
+//       path: ["input"],
+//     });
+
+//   const form = useForm<FormSchema>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: { input: "" },
+//   });
+
+//   const formHandler = async () => {
+//     setIsLoading(true);
+//     if (data.image) await deleteProfilePicture(data.image);
+
+//     authClient.admin.removeUser(
+//       { userId: data.id },
+//       {
+//         onSuccess: () => {
+//           setIsLoading(false);
+//           setIsOpen(false);
+//           setSheetOpen(false);
+//           mutateUsers();
+//           toast.success(`Akun atas nama ${data.name} berhasil dihapus.`);
+//         },
+//         onError: ({ error }) => {
+//           setIsLoading(false);
+//           toast.error(error.message);
+//         },
+//       },
+//     );
+//   };
+
+//   return (
+//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+//       <DialogTrigger asChild>
+//         <Button variant="outline_destructive" disabled={isLoading}>
+//           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+//           {`${messages.actions.remove} ${data.name}`}
+//         </Button>
+//       </DialogTrigger>
+
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle className="text-destructive flex items-center gap-x-2">
+//             <TriangleAlert /> Hapus akun atas nama {data.name}
+//           </DialogTitle>
+//           <DialogDescription>
+//             PERINGATAN: Tindakan ini akan menghapus akun{" "}
+//             <span className="text-foreground">{data.name}</span> beserta seluruh
+//             datanya secara permanen. Harap berhati-hati karena aksi ini tidak
+//             dapat dibatalkan.
+//           </DialogDescription>
+//         </DialogHeader>
+
+//         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+//           <Controller
+//             name="input"
+//             control={form.control}
+//             render={({ field: { onChange, ...field }, fieldState }) => (
+//               <FieldWrapper
+//                 label={messages.removeLabel(data.name)}
+//                 errors={fieldState.error}
+//                 htmlFor={field.name}
+//               >
+//                 <Input
+//                   type="text"
+//                   id={field.name}
+//                   aria-invalid={!!fieldState.error}
+//                   placeholder={data.name}
+//                   onChange={(e) => {
+//                     setInput(e.target.value);
+//                     onChange(e);
+//                   }}
+//                   required
+//                   {...field}
+//                 />
+//               </FieldWrapper>
+//             )}
+//           />
+
+//           <DialogFooter>
+//             <DialogClose>{messages.actions.cancel}</DialogClose>
+//             <Button
+//               type="submit"
+//               variant="destructive"
+//               disabled={input !== data.name || isLoading}
+//             >
+//               <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+//               {messages.actions.confirm}
+//             </Button>
+//           </DialogFooter>
+//         </form>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+function AdminActionRevokeUserSessionsDialog({
+  ids,
+  onSuccess,
+}: {
+  ids: string[];
+  onSuccess: () => void;
+}) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const clickHandler = async () => {
+    setIsLoading(true);
+    toast.promise(revokeUserSessions(ids), {
+      loading: messages.loading,
+      success: (res) => {
+        onSuccess();
+        const successLength = res.filter(({ data }) => data?.success).length;
+        return `${successLength} dari ${ids.length} sesi pengguna berhasil dicabut.`;
+      },
+      error: (e) => {
+        setIsLoading(false);
+        return e;
+      },
+    });
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <MonitorOff /> }} />
+          {sharedText.revokeSession}
+        </Button>
+      </AlertDialogTrigger>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-x-2">
+            Cabut Sesi untuk {ids.length} Pengguna
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Ini akan menghentikan semua sesi aktif dari{" "}
+            <span className="text-foreground">{ids.length} pengguna</span> yang
+            dipilih. Yakin ingin melanjutkan?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
+          <AlertDialogAction
+            className={buttonVariants({ variant: "destructive" })}
+            onClick={clickHandler}
+          >
+            {messages.actions.confirm}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// function AdminActionRemoveUsersDialog({
+//   data,
+//   onSuccess,
+// }: {
+//   data: Pick<AuthSession["user"], "id" | "name" | "image">[];
+//   onSuccess: () => void;
+// }) {
+//   const [input, setInput] = useState<string>("");
+//   const [isOpen, setIsOpen] = useState<boolean>(false);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+//   const inputValue = `Hapus ${String(data.length)} pengguna`;
+
+//   type FormSchema = z.infer<typeof formSchema>;
+//   const formSchema = z
+//     .object({ input: sharedSchemas.string("Total pengguna yang dihapus") })
+//     .refine((sc) => sc.input === inputValue, {
+//       message: messages.thingNotMatch("Total pengguna yang dihapus"),
+//       path: ["input"],
+//     });
+
+//   const form = useForm<FormSchema>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: { input: "" },
+//   });
+
+//   const formHandler = () => {
+//     setIsLoading(true);
+//     toast.promise(deleteUsers(data), {
+//       loading: messages.loading,
+//       success: (res) => {
+//         setIsLoading(false);
+//         setIsOpen(false);
+
+//         onSuccess();
+//         mutateUsers();
+
+//         const successLength = res.filter(({ success }) => success).length;
+//         return `${successLength} dari ${data.length} akun pengguna berhasil dihapus.`;
+//       },
+//       error: (e) => {
+//         setIsLoading(false);
+//         return e;
+//       },
+//     });
+//   };
+
+//   return (
+//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+//       <DialogTrigger asChild>
+//         <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+//           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+//           {messages.actions.remove}
+//         </Button>
+//       </DialogTrigger>
+
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle className="text-destructive flex items-center gap-x-2">
+//             <TriangleAlert /> Hapus {data.length} Akun
+//           </DialogTitle>
+//           <DialogDescription>
+//             PERINGATAN: Tindakan ini akan menghapus{" "}
+//             <span className="text-foreground">{data.length} akun</span> yang
+//             dipilih beserta seluruh datanya secara permanen. Harap berhati-hati
+//             karena aksi ini tidak dapat dibatalkan.
+//           </DialogDescription>
+//         </DialogHeader>
+
+//         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+//           <Controller
+//             name="input"
+//             control={form.control}
+//             render={({ field: { onChange, ...field }, fieldState }) => (
+//               <FieldWrapper
+//                 label={messages.removeLabel(inputValue)}
+//                 errors={fieldState.error}
+//                 htmlFor={field.name}
+//               >
+//                 <Input
+//                   type="text"
+//                   id={field.name}
+//                   aria-invalid={!!fieldState.error}
+//                   placeholder={inputValue}
+//                   onChange={(e) => {
+//                     setInput(e.target.value);
+//                     onChange(e);
+//                   }}
+//                   required
+//                   {...field}
+//                 />
+//               </FieldWrapper>
+//             )}
+//           />
+
+//           <DialogFooter>
+//             <DialogClose>{messages.actions.cancel}</DialogClose>
+//             <Button
+//               type="submit"
+//               variant="destructive"
+//               disabled={input !== inputValue || isLoading}
+//             >
+//               <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+//               {messages.actions.confirm}
+//             </Button>
+//           </DialogFooter>
+//         </form>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
 
 // #endregion

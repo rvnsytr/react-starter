@@ -6,7 +6,7 @@ import {
   normalizeRoute,
   toKebabCase,
 } from "@/core/utils";
-import { SignOutButton, useAuth, UserAvatar } from "@/modules/auth";
+import { Role, SignOutButton, useAuth, UserAvatar } from "@/modules/auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import {
@@ -50,7 +50,7 @@ export function SidebarMain() {
   const { pathname } = useLocation();
   const { isMobile, toggleSidebar } = useSidebar();
 
-  const menu = useMemo(() => getMenuByRole(user.role), [user.role]);
+  const menu = useMemo(() => getMenuByRole(user.role as Role), [user.role]);
 
   return (
     <Sidebar collapsible="icon">

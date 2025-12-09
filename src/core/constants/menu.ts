@@ -4,6 +4,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LucideIcon,
+  UsersRound,
 } from "lucide-react";
 import { Route } from "./routes";
 
@@ -26,8 +27,8 @@ export const dashboardMenu: Menu[] = [
   {
     section: "Umum",
     content: [
-      { route: "/", icon: LayoutDashboard },
-      // { route: "/dashboard/users", icon: UsersRound },
+      { route: "/dashboard", icon: LayoutDashboard },
+      { route: "/dashboard/users", icon: UsersRound },
     ],
   },
   {

@@ -1,16 +1,16 @@
 import { authorized, normalizeRoute } from "@/core/utils";
 import { notFound, useLocation } from "@tanstack/react-router";
 import { createContext, ReactNode, useContext, useEffect } from "react";
-import { Session } from "./constants";
+import { AuthSession } from "./constants";
 import { useSession } from "./hooks";
 
-const AuthContext = createContext<Session | undefined>(undefined);
+const AuthContext = createContext<AuthSession | undefined>(undefined);
 
 export function AuthProvider({
   session: fallbackData,
   children,
 }: {
-  session: Session;
+  session: AuthSession;
   children: ReactNode;
 }) {
   const { pathname } = useLocation();
