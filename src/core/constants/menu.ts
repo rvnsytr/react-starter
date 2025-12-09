@@ -4,6 +4,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LucideIcon,
+  UserRound,
   UsersRound,
 } from "lucide-react";
 import { Route } from "./routes";
@@ -34,16 +35,15 @@ export const dashboardMenu: Menu[] = [
   {
     section: "Pengaturan",
     content: [
-      // {
-      //   route: "/dashboard/profile",
-      //   icon: UserRound,
-      //   subMenu: [
-      //     { displayName: "Informasi Pribadi" },
-      //     { displayName: "Ubah Kata Sandi" },
-      //     { displayName: "Sesi Aktif" },
-      //     { displayName: "Hapus Akun", variant: "destructive" },
-      //   ],
-      // },
+      {
+        route: "/dashboard/profile",
+        icon: UserRound,
+        subMenu: [
+          { displayName: "Informasi Pribadi" },
+          { displayName: "Ubah Kata Sandi" },
+          { displayName: "Sesi Aktif" },
+        ],
+      },
     ],
   },
 ];

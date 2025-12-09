@@ -17,6 +17,8 @@ import {
 } from "@/core/components/ui/avatar";
 import { Badge } from "@/core/components/ui/badge";
 import { Button, buttonVariants } from "@/core/components/ui/button";
+import { ResetButton } from "@/core/components/ui/buttons";
+import { CardContent, CardFooter } from "@/core/components/ui/card";
 import { Checkbox } from "@/core/components/ui/checkbox";
 import {
   ColumnCellCheckbox,
@@ -93,14 +95,21 @@ import {
   CalendarCheck2,
   CalendarSync,
   CircleDot,
+  Gamepad2,
   Info,
   Layers2,
+  LockKeyholeOpen,
   LogIn,
   LogOut,
   Mail,
+  Monitor,
   MonitorOff,
+  MonitorSmartphone,
   Save,
   Settings2,
+  Smartphone,
+  Tablet,
+  TvMinimal,
   UserRound,
   UserRoundPlus,
   UserSquare2,
@@ -108,6 +117,7 @@ import {
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { UAParser } from "ua-parser-js";
 import { z } from "zod";
 import { revokeUserSessions } from "./actions";
 import {
@@ -117,7 +127,13 @@ import {
   Role,
   rolesMeta,
 } from "./constants";
-import { mutateUsers, useUsers } from "./hooks";
+import {
+  mutateSession,
+  mutateSessionList,
+  mutateUsers,
+  useSessionList,
+  useUsers,
+} from "./hooks";
 import { useAuth } from "./provider.auth";
 import { userSchema } from "./schemas";
 
@@ -819,6 +835,536 @@ export function UserDetailSheet({
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+// export function ProfilePicture({
+//   data,
+// }: {
+//   data: Pick<AuthSession["user"], "id" | "name" | "image">;
+// }) {
+//   const { id, name, image } = data;
+
+//   const inputAvatarRef = useRef<HTMLInputElement>(null);
+//   const [isChange, setIsChange] = useState<boolean>(false);
+//   const [isRemoved, setIsRemoved] = useState<boolean>(false);
+
+//   const contentType = "image";
+//   const formSchema = sharedSchemas.file(contentType);
+
+//   const changeHandler = async (fileList: FileList) => {
+//     setIsChange(true);
+//     const files = Array.from(fileList).map((f) => f);
+
+//     const parseRes = formSchema.safeParse(files);
+//     if (!parseRes.success) return toast.error(parseRes.error.message);
+
+//     const file = files[0];
+//     const key = `${id}_${file.name}`;
+//     const url = await getFilePublicUrl(key);
+
+//     if (image && url !== image) await deleteProfilePicture(image);
+//     await uploadFiles({ files: [{ key, file }], ACL: "public-read" });
+
+//     authClient.updateUser(
+//       { image: url },
+//       {
+//         onSuccess: () => {
+//           toast.success("Foto profil Anda berhasil diperbarui.");
+//           setIsChange(false);
+//           mutateSession();
+//         },
+//         onError: ({ error }) => {
+//           toast.error(error.message);
+//           setIsChange(false);
+//         },
+//       },
+//     );
+//   };
+
+//   const deleteHandler = async () => {
+//     setIsRemoved(true);
+//     if (image) await deleteProfilePicture(image);
+
+//     await authClient.updateUser(
+//       { image: null },
+//       {
+//         onSuccess: () => {
+//           toast.success("Foto profil Anda berhasil dihapus.");
+//           setIsRemoved(false);
+//           mutateSession();
+//         },
+//         onError: ({ error }) => {
+//           toast.error(error.message);
+//           setIsRemoved(false);
+//         },
+//       },
+//     );
+//   };
+
+//   return (
+//     <div className="flex items-center gap-x-4">
+//       <UserAvatar name={name} image={image} className="size-24" />
+
+//       <input
+//         type="file"
+//         ref={inputAvatarRef}
+//         accept={fileMeta[contentType].mimeTypes.join(", ")}
+//         className="hidden"
+//         onChange={(e) => {
+//           const fileList = e.currentTarget.files;
+//           if (fileList) changeHandler(fileList);
+//         }}
+//       />
+
+//       <div className="space-y-2">
+//         <Label>Foto profil</Label>
+//         <div className="flex flex-wrap gap-2">
+//           <Button
+//             type="button"
+//             size="sm"
+//             variant="outline"
+//             disabled={isChange || isRemoved}
+//             onClick={() => inputAvatarRef.current?.click()}
+//           >
+//             <LoadingSpinner loading={isChange} /> {messages.actions.upload} foto
+//             profil
+//           </Button>
+
+//           <AlertDialog>
+//             <AlertDialogTrigger asChild>
+//               <Button
+//                 type="button"
+//                 size="sm"
+//                 variant="outline_destructive"
+//                 disabled={!image || isChange || isRemoved}
+//               >
+//                 <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
+//               </Button>
+//             </AlertDialogTrigger>
+
+//             <AlertDialogContent>
+//               <AlertDialogHeader>
+//                 <AlertDialogTitle>Hapus Foto Profil</AlertDialogTitle>
+//                 <AlertDialogDescription>
+//                   Aksi ini akan menghapus foto profil Anda saat ini. Yakin ingin
+//                   melanjutkan?
+//                 </AlertDialogDescription>
+//               </AlertDialogHeader>
+
+//               <AlertDialogFooter>
+//                 <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
+//                 <AlertDialogAction
+//                   className={buttonVariants({ variant: "destructive" })}
+//                   onClick={() => deleteHandler()}
+//                 >
+//                   {messages.actions.confirm}
+//                 </AlertDialogAction>
+//               </AlertDialogFooter>
+//             </AlertDialogContent>
+//           </AlertDialog>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+export function ProfileForm() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { user } = useAuth();
+
+  type FormSchema = z.infer<typeof formSchema>;
+  const formSchema = userSchema.pick({ name: true, email: true });
+  const defaultValues = user;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
+
+  const formHandler = ({ name: newName }: FormSchema) => {
+    if (newName === user.name)
+      return toast.info(messages.noChanges("profil Anda"));
+
+    setIsLoading(true);
+    authClient.updateUser(
+      { name: newName },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          mutateSession();
+          toast.success("Profil Anda berhasil diperbarui.");
+        },
+        onError: ({ error }) => {
+          setIsLoading(false);
+          toast.error(error.message);
+        },
+      },
+    );
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+      <CardContent className="flex flex-col gap-y-4">
+        {/* <ProfilePicture data={user} /> */}
+
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FieldWrapper
+              label="Alamat email"
+              htmlFor={field.name}
+              errors={fieldState.error}
+            >
+              <InputGroup>
+                <InputGroupInput
+                  type="email"
+                  id={field.name}
+                  aria-invalid={!!fieldState.error}
+                  placeholder="Masukan email anda"
+                  required
+                  {...field}
+                />
+                <InputGroupAddon>
+                  <Mail />
+                </InputGroupAddon>
+              </InputGroup>
+            </FieldWrapper>
+          )}
+        />
+
+        <Controller
+          name="name"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FieldWrapper
+              label="Nama"
+              htmlFor={field.name}
+              errors={fieldState.error}
+            >
+              <InputGroup>
+                <InputGroupInput
+                  type="text"
+                  id={field.name}
+                  aria-invalid={!!fieldState.error}
+                  placeholder="Masukan nama anda"
+                  required
+                  {...field}
+                />
+                <InputGroupAddon>
+                  <UserRound />
+                </InputGroupAddon>
+              </InputGroup>
+            </FieldWrapper>
+          )}
+        />
+      </CardContent>
+
+      <CardFooter className="flex-col items-stretch border-t md:flex-row md:items-center">
+        <Button type="submit" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
+          {messages.actions.update}
+        </Button>
+
+        <ResetButton onClick={() => form.reset(defaultValues)} />
+      </CardFooter>
+    </form>
+  );
+}
+
+export function ChangePasswordForm() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  type FormSchema = z.infer<typeof formSchema>;
+  const formSchema = userSchema
+    .pick({
+      currentPassword: true,
+      newPassword: true,
+      confirmPassword: true,
+      revokeOtherSessions: true,
+    })
+    .extend({ revokeOtherSessions: z.boolean() })
+    .refine((sc) => sc.newPassword === sc.confirmPassword, {
+      message: sharedText.passwordNotMatch,
+      path: ["confirmPassword"],
+    });
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+      revokeOtherSessions: false,
+    },
+  });
+
+  const formHandler = (formData: FormSchema) => {
+    setIsLoading(true);
+    authClient.changePassword(formData, {
+      onSuccess: () => {
+        setIsLoading(false);
+        form.reset();
+        toast.success("Kata sandi Anda berhasil diperbarui.");
+      },
+      onError: ({ error }) => {
+        setIsLoading(false);
+        toast.error(error.message);
+      },
+    });
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+      <CardContent className="flex flex-col gap-y-4">
+        <Controller
+          name="currentPassword"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FieldWrapper
+              label="Kata sandi saat ini"
+              htmlFor={field.name}
+              errors={fieldState.error}
+            >
+              <PasswordInput
+                id={field.name}
+                aria-invalid={!!fieldState.error}
+                placeholder="Masukan kata sandi saat ini"
+                icon={<LockKeyholeOpen />}
+                required
+                {...field}
+              />
+            </FieldWrapper>
+          )}
+        />
+
+        <Controller
+          name="newPassword"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FieldWrapper
+              label="Kata sandi baru"
+              htmlFor={field.name}
+              errors={fieldState.error}
+            >
+              <PasswordInput
+                id={field.name}
+                aria-invalid={!!fieldState.error}
+                placeholder="Masukan kata sandi anda"
+                required
+                withList
+                {...field}
+              />
+            </FieldWrapper>
+          )}
+        />
+
+        <Controller
+          name="confirmPassword"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FieldWrapper
+              label="Konfirmasi kata sandi"
+              htmlFor={field.name}
+              errors={fieldState.error}
+            >
+              <PasswordInput
+                id={field.name}
+                aria-invalid={!!fieldState.error}
+                placeholder="Konfirmasi kata sandi anda"
+                required
+                {...field}
+              />
+            </FieldWrapper>
+          )}
+        />
+
+        <Controller
+          name="revokeOtherSessions"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field orientation="horizontal" data-invalid={!!fieldState.error}>
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                aria-invalid={!!fieldState.error}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+              <FieldLabel htmlFor={field.name}>
+                Keluar dari perangkat lainnya
+              </FieldLabel>
+            </Field>
+          )}
+        />
+      </CardContent>
+
+      <CardFooter className="flex-col items-stretch border-t md:flex-row md:items-center">
+        <Button type="submit" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
+          {messages.actions.update}
+        </Button>
+
+        <ResetButton onClick={() => form.reset()} />
+      </CardFooter>
+    </form>
+  );
+}
+
+export function SessionList() {
+  const { data, error, isLoading } = useSessionList();
+
+  if (error) return <ErrorFallback error={error} />;
+  if (!data && isLoading) return <LoadingFallback />;
+
+  return (data ?? []).map((session) => (
+    <SessionListButton key={session.id} data={session} />
+  ));
+}
+
+function SessionListButton({ data }: { data: AuthSession["session"] }) {
+  const { id, updatedAt, userAgent, token } = data;
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { session } = useAuth();
+
+  const isCurrentSession = session.id === id;
+  const { browser, os, device } = new UAParser(userAgent!).getResult();
+
+  const DeviceIcons = {
+    desktop: Monitor,
+    mobile: Smartphone,
+    tablet: Tablet,
+    console: Gamepad2,
+    smarttv: TvMinimal,
+    wearable: MonitorSmartphone,
+    xr: MonitorSmartphone,
+    embedded: MonitorSmartphone,
+    other: MonitorSmartphone,
+  }[device.type ?? "other"];
+
+  const clickHandler = () => {
+    setIsLoading(true);
+    authClient.revokeSession(
+      { token },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          mutateSessionList();
+          toast.success("Sesi berhasil dicabut.");
+        },
+        onError: ({ error }) => {
+          setIsLoading(false);
+          toast.error(error.message);
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="bg-card flex items-center gap-x-4 rounded-lg border p-2 shadow-xs">
+      <div className="flex grow items-center gap-x-2">
+        <div className="bg-muted aspect-square size-fit rounded-md p-2">
+          <DeviceIcons className="shrink-0" />
+        </div>
+
+        <div className="grid gap-y-1 font-medium">
+          <small>
+            {`${browser.name ?? "Browser tidak dikenal"} - ${os.name ?? "OS tidak dikenal"}`}
+          </small>
+
+          {isCurrentSession ? (
+            <small className="text-success">Sesi saat ini</small>
+          ) : (
+            <small className="text-muted-foreground">
+              {messages.thingAgo("Terakhir terlihat", updatedAt)}
+            </small>
+          )}
+        </div>
+      </div>
+
+      {!isCurrentSession && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="icon-sm"
+              variant="outline_destructive"
+              disabled={isLoading}
+            >
+              <LoadingSpinner loading={isLoading} icon={{ base: <LogOut /> }} />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-x-2">
+                <DeviceIcons /> {sharedText.revokeSession}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Sesi ini akan segera dihentikan dari perangkat yang dipilih.
+                Yakin ingin melanjutkan?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
+              <AlertDialogAction onClick={clickHandler}>
+                {messages.actions.confirm}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </div>
+  );
+}
+
+export function RevokeOtherSessionsButton() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const clickHandler = () => {
+    setIsLoading(true);
+    authClient.revokeOtherSessions({
+      fetchOptions: {
+        onSuccess: () => {
+          setIsLoading(false);
+          mutateSessionList();
+          toast.success("Semua sesi aktif lainnya berhasil dicabut.");
+        },
+        onError: ({ error }) => {
+          setIsLoading(false);
+          toast.error(error.message);
+        },
+      },
+    });
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <MonitorOff /> }} />
+          Cabut Semua Sesi Lain
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-x-2">
+            <MonitorOff /> Cabut Semua Sesi Lain
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Semua sesi aktif lainnya akan dihentikan, kecuali sesi saat ini.
+            Yakin ingin melanjutkan?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
+          <AlertDialogAction onClick={clickHandler}>
+            {messages.actions.confirm}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

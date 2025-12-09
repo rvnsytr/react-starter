@@ -42,7 +42,6 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "../ui/sidebar";
-import { LinkSpinner } from "../ui/spinner";
 
 export function SidebarMain() {
   const { user } = useAuth();
@@ -160,11 +159,9 @@ export function SidebarMain() {
                                         itm.href ??
                                         (`${route}/#${toKebabCase(itm.displayName)}` as string)
                                       }
+                                      className="line-clamp-1"
                                     >
-                                      <span className="line-clamp-1">
-                                        {itm.displayName}
-                                      </span>
-                                      <LinkSpinner />
+                                      {itm.displayName}
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
