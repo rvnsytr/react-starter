@@ -1,5 +1,9 @@
+import { FooterNote, SidebarMain } from "@/core/components/layouts";
+import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
+import { LayoutProvider } from "@/core/providers";
 import { getRouteTitle } from "@/core/utils";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AuthProvider } from "@/modules/auth";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: (c) => {
@@ -9,9 +13,27 @@ export const Route = createFileRoute("/dashboard")({
   },
   loader: (c) => c.context,
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard") }] }),
-  component: RouteComponent,
+  component: DashboardLayout,
 });
 
-function RouteComponent() {
-  return <div>Hello "/dashboard"!</div>;
+function DashboardLayout() {
+  const { session } = Route.useLoaderData();
+
+  return (
+    <AuthProvider session={session}>
+      <SidebarProvider>
+        <SidebarMain />
+
+        <SidebarInset>
+          <LayoutProvider>
+            <Outlet />
+          </LayoutProvider>
+
+          <footer className="bg-background/90 z-10 mt-auto flex items-center justify-center border-t py-4 text-center md:h-12.5">
+            <FooterNote className="container" />
+          </footer>
+        </SidebarInset>
+      </SidebarProvider>
+    </AuthProvider>
+  );
 }

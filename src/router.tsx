@@ -6,6 +6,7 @@ import {
   AppErrorFallback,
   AppLoadingFallback,
 } from "./core/components/ui/fallback";
+import { ThemeProvider } from "./core/providers";
 import { useSession } from "./modules/auth";
 import { routeTree } from "./routeTree.gen";
 
@@ -29,7 +30,7 @@ function App() {
   const isInitialLoading = session === undefined && isLoading;
 
   return (
-    <>
+    <ThemeProvider defaultTheme="system" storageKey="theme">
       <AnimatePresence>
         {isInitialLoading && <AppLoadingFallback />}
       </AnimatePresence>
@@ -37,7 +38,7 @@ function App() {
       {!isInitialLoading && (
         <RouterProvider router={router} context={{ session }} />
       )}
-    </>
+    </ThemeProvider>
   );
 }
 

@@ -6,7 +6,7 @@ import { appMeta, dashboardMenu, Menu, Route, routesMeta } from "../constants";
 export function authorized(route: Route | null, role?: string | null) {
   if (!route || !role) return false;
   const meta = routesMeta[route];
-  if (!meta.role) return false;
+  if (!meta.role) return true;
   return meta.role && (meta.role === "all" || meta.role.includes(role as Role));
 }
 

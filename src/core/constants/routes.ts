@@ -13,8 +13,7 @@ export const routesMeta: Record<
 
   "/sign-in": { displayName: "Masuk" },
 
-  "/dashboard": { displayName: "Dashboard" },
-  // "/dashboard": { displayName: "Dashboard", role: "all" },
+  "/dashboard": { displayName: "Dashboard", role: "all" },
   // "/dashboard/profile": { displayName: "Profil Saya", role: "all" },
   // "/dashboard/users": { displayName: "Pengguna", role: ["admin"] },
 };
