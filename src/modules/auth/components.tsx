@@ -850,7 +850,7 @@ export function UserDetailSheet({
 //   const [isRemoved, setIsRemoved] = useState<boolean>(false);
 
 //   const contentType = "image";
-//   const formSchema = sharedSchemas.file(contentType);
+//   const formSchema = sharedSchemas.files(contentType);
 
 //   const changeHandler = async (fileList: FileList) => {
 //     setIsChange(true);

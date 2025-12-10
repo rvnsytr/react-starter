@@ -57,7 +57,7 @@ export const sharedSchemas = {
     return schema;
   },
 
-  file: (
+  files: (
     type: FileType,
     options?: {
       min?: number;
@@ -65,18 +65,17 @@ export const sharedSchemas = {
       maxFileSize?: number;
     },
   ) => {
-    const { tooLarge, tooFew, tooMany } = messages.file;
+    const { mimeInvalid, tooLarge, tooFew, tooMany } = messages.files;
     const { displayName, size, mimeTypes } = fileMeta[type];
 
     const min = options?.min;
     const max = options?.max;
-
     const maxFileSize = options?.maxFileSize ?? size.bytes;
     const maxFileSizeInMB = toMegabytes(maxFileSize).toFixed(2);
 
     let schema = z
       .file()
-      .mime(mimeTypes, { error: `Tipe ${displayName} tidak valid.` })
+      .mime(mimeTypes, { error: mimeInvalid(displayName) })
       .min(1)
       .max(maxFileSize, { error: tooLarge(displayName, maxFileSizeInMB) })
       .array();
@@ -203,7 +202,6 @@ export const sharedSchemas = {
     .string({ error: "Field 'deletedBy' tidak valid." })
     .nullable()
     .default(null),
-
   updatedAt: z.coerce
     .date({ error: "Field 'updatedAt' tidak valid." })
     .nullable()
@@ -212,9 +210,8 @@ export const sharedSchemas = {
     .string({ error: "Field 'updatedBy' tidak valid." })
     .nullable()
     .default(null),
-
   createdAt: z.coerce.date({ error: "Field 'createdAt' tidak valid." }),
-  createdBy: z.string({ error: "Field 'createdBy' tidak valid." }).nullable(),
+  createdBy: z.string({ error: "Field 'createdBy' tidak valid." }),
 };
 
 export const apiResponseSchema = z.object({
