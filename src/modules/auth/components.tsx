@@ -58,7 +58,6 @@ import {
   FieldTitle,
 } from "@/core/components/ui/field";
 import { FieldWrapper } from "@/core/components/ui/field-wrapper";
-import { GithubIcon } from "@/core/components/ui/icons";
 import {
   InputGroup,
   InputGroupAddon,
@@ -84,7 +83,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/core/components/ui/tooltip";
-import { appMeta, messages } from "@/core/constants";
+import { appMeta, fileMeta, messages } from "@/core/constants";
+import { sharedSchemas, userSchema } from "@/core/schemas";
+import { removeFile, uploadFiles } from "@/core/storage";
 import { cn, filterFn, formatDate } from "@/core/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -114,7 +115,7 @@ import {
   UserRoundPlus,
   UserSquare2,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UAParser } from "ua-parser-js";
@@ -129,7 +130,6 @@ import {
   useUsers,
 } from "./hooks";
 import { useAuth } from "./provider.auth";
-import { userSchema } from "./schemas";
 
 const sharedText = {
   signIn: "Berhasil masuk - Selamat datang!",
@@ -428,49 +428,6 @@ export function SignUpForm() {
         Daftar Sekarang
       </Button>
     </form>
-  );
-}
-
-export function SignOnGithubButton() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const wasLastUsed = authClient.isLastUsedLoginMethod("github");
-
-  return (
-    <Button
-      variant="outline"
-      disabled={isLoading}
-      className="relative"
-      onClick={() => {
-        setIsLoading(true);
-        authClient.signIn.social(
-          {
-            provider: "github",
-            callbackURL: "/dashboard",
-            errorCallbackURL: "/sign-in",
-          },
-          {
-            onSuccess: () => {
-              toast.success(sharedText.signIn);
-            },
-            onError: ({ error }) => {
-              setIsLoading(false);
-              toast.error(error.message);
-            },
-          },
-        );
-      }}
-    >
-      <LoadingSpinner loading={isLoading} icon={{ base: <GithubIcon /> }} />
-      {sharedText.signOn("Github")}
-      {/* {wasLastUsed && (
-        <Badge
-          variant="outline"
-          className="bg-card absolute -top-3 right-1 shadow"
-        >
-          {sharedText.lastUsed}
-        </Badge>
-      )} */}
-    </Button>
   );
 }
 
@@ -832,141 +789,148 @@ export function UserDetailSheet({
   );
 }
 
-// export function ProfilePicture({
-//   data,
-// }: {
-//   data: Pick<AuthSession["user"], "id" | "name" | "image">;
-// }) {
-//   const { id, name, image } = data;
+export function ProfilePicture({
+  data,
+}: {
+  data: Pick<AuthSession["user"], "id" | "name" | "image"> & {
+    imageId: string | null;
+  };
+}) {
+  const { id, name, image: imageUrl, imageId } = data;
 
-//   const inputAvatarRef = useRef<HTMLInputElement>(null);
-//   const [isChange, setIsChange] = useState<boolean>(false);
-//   const [isRemoved, setIsRemoved] = useState<boolean>(false);
+  const inputAvatarRef = useRef<HTMLInputElement>(null);
+  const [isChange, setIsChange] = useState<boolean>(false);
+  const [isRemoved, setIsRemoved] = useState<boolean>(false);
 
-//   const contentType = "image";
-//   const formSchema = sharedSchemas.files(contentType);
+  const formSchema = sharedSchemas.files("image");
 
-//   const changeHandler = async (fileList: FileList) => {
-//     setIsChange(true);
-//     const files = Array.from(fileList).map((f) => f);
+  const changeHandler = async (fileList: FileList) => {
+    toast.promise(
+      async () => {
+        setIsChange(true);
+        const files = Array.from(fileList).map((f) => f);
 
-//     const parseRes = formSchema.safeParse(files);
-//     if (!parseRes.success) return toast.error(parseRes.error.message);
+        const parseRes = formSchema.safeParse(files);
+        if (!parseRes.success) throw new Error(parseRes.error.message);
 
-//     const file = files[0];
-//     const key = `${id}_${file.name}`;
-//     const url = await getFilePublicUrl(key);
+        if (imageId) await removeFile(imageId);
 
-//     if (image && url !== image) await deleteProfilePicture(image);
-//     await uploadFiles({ files: [{ key, file }], ACL: "public-read" });
+        const body = new FormData();
+        body.append("image", files[0]);
+        const res = await uploadFiles(body, { fileName: id });
 
-//     authClient.updateUser(
-//       { image: url },
-//       {
-//         onSuccess: () => {
-//           toast.success("Foto profil Anda berhasil diperbarui.");
-//           setIsChange(false);
-//           mutateSession();
-//         },
-//         onError: ({ error }) => {
-//           toast.error(error.message);
-//           setIsChange(false);
-//         },
-//       },
-//     );
-//   };
+        const image = res.data[0].id;
+        const updateRes = await authClient.updateUser({ image });
+        if (updateRes.error) throw new Error(updateRes.error.message);
 
-//   const deleteHandler = async () => {
-//     setIsRemoved(true);
-//     if (image) await deleteProfilePicture(image);
+        await authClient.updateUser({ image });
+      },
+      {
+        success: () => {
+          setIsChange(false);
+          mutateSession();
+          return "Foto profil berhasil diperbarui.";
+        },
+        error: (e) => {
+          setIsChange(false);
+          return e.message;
+        },
+      },
+    );
+  };
 
-//     await authClient.updateUser(
-//       { image: null },
-//       {
-//         onSuccess: () => {
-//           toast.success("Foto profil Anda berhasil dihapus.");
-//           setIsRemoved(false);
-//           mutateSession();
-//         },
-//         onError: ({ error }) => {
-//           toast.error(error.message);
-//           setIsRemoved(false);
-//         },
-//       },
-//     );
-//   };
+  const deleteHandler = async () => {
+    toast.promise(
+      async () => {
+        setIsRemoved(true);
+        if (imageId) await removeFile(imageId);
+        await authClient.updateUser({ image: null });
+      },
+      {
+        success: () => {
+          setIsRemoved(false);
+          mutateSession();
+          return "Foto profil Anda berhasil dihapus.";
+        },
+        error: (e) => {
+          setIsRemoved(false);
+          return e.message;
+        },
+      },
+    );
+  };
 
-//   return (
-//     <div className="flex items-center gap-x-4">
-//       <UserAvatar name={name} image={image} className="size-24" />
+  return (
+    <div className="flex items-center gap-x-4">
+      <UserAvatar name={name} image={imageUrl} className="size-24" />
 
-//       <input
-//         type="file"
-//         ref={inputAvatarRef}
-//         accept={fileMeta[contentType].mimeTypes.join(", ")}
-//         className="hidden"
-//         onChange={(e) => {
-//           const fileList = e.currentTarget.files;
-//           if (fileList) changeHandler(fileList);
-//         }}
-//       />
+      <input
+        type="file"
+        ref={inputAvatarRef}
+        accept={fileMeta.image.mimeTypes.join(", ")}
+        className="hidden"
+        onChange={(e) => {
+          const fileList = e.currentTarget.files;
+          if (fileList) changeHandler(fileList);
+        }}
+      />
 
-//       <div className="space-y-2">
-//         <Label>Foto profil</Label>
-//         <div className="flex flex-wrap gap-2">
-//           <Button
-//             type="button"
-//             size="sm"
-//             variant="outline"
-//             disabled={isChange || isRemoved}
-//             onClick={() => inputAvatarRef.current?.click()}
-//           >
-//             <LoadingSpinner loading={isChange} /> {messages.actions.upload} foto
-//             profil
-//           </Button>
+      <div className="space-y-2">
+        <Label>Foto profil</Label>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={isChange || isRemoved}
+            onClick={() => inputAvatarRef.current?.click()}
+          >
+            <LoadingSpinner loading={isChange} /> {messages.actions.upload} foto
+            profil
+          </Button>
 
-//           <AlertDialog>
-//             <AlertDialogTrigger asChild>
-//               <Button
-//                 type="button"
-//                 size="sm"
-//                 variant="outline_destructive"
-//                 disabled={!image || isChange || isRemoved}
-//               >
-//                 <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
-//               </Button>
-//             </AlertDialogTrigger>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline_destructive"
+                disabled={!imageUrl || isChange || isRemoved}
+              >
+                <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
+              </Button>
+            </AlertDialogTrigger>
 
-//             <AlertDialogContent>
-//               <AlertDialogHeader>
-//                 <AlertDialogTitle>Hapus Foto Profil</AlertDialogTitle>
-//                 <AlertDialogDescription>
-//                   Aksi ini akan menghapus foto profil Anda saat ini. Yakin ingin
-//                   melanjutkan?
-//                 </AlertDialogDescription>
-//               </AlertDialogHeader>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Hapus Foto Profil</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Aksi ini akan menghapus foto profil Anda saat ini. Yakin ingin
+                  melanjutkan?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
 
-//               <AlertDialogFooter>
-//                 <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
-//                 <AlertDialogAction
-//                   className={buttonVariants({ variant: "destructive" })}
-//                   onClick={() => deleteHandler()}
-//                 >
-//                   {messages.actions.confirm}
-//                 </AlertDialogAction>
-//               </AlertDialogFooter>
-//             </AlertDialogContent>
-//           </AlertDialog>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+              <AlertDialogFooter>
+                <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
+                <AlertDialogAction
+                  className={buttonVariants({ variant: "destructive" })}
+                  onClick={() => deleteHandler()}
+                >
+                  {messages.actions.confirm}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function ProfileForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { user } = useAuth();
+  const { user, imageId } = useAuth();
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = userSchema.pick({ name: true, email: true });
@@ -1001,7 +965,7 @@ export function ProfileForm() {
   return (
     <form onSubmit={form.handleSubmit(formHandler)} noValidate>
       <CardContent className="flex flex-col gap-y-4">
-        {/* <ProfilePicture data={user} /> */}
+        <ProfilePicture data={{ imageId, ...user }} />
 
         <Controller
           name="email"
@@ -1408,8 +1372,8 @@ export function AdminCreateUserDialog() {
           toast.success(`Akun atas nama ${rest.name} berhasil dibuat.`);
         },
         onError: ({ error }) => {
-          toast.error(error.message);
           setIsLoading(false);
+          toast.error(error.message);
         },
       },
     );

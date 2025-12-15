@@ -4,7 +4,7 @@ import {
   getActiveRoute,
   getMenuByRole,
   normalizeRoute,
-  toKebabCase,
+  toKebab,
 } from "@/core/utils";
 import { Role, SignOutButton, useAuth, UserAvatar } from "@/modules/auth";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -157,7 +157,7 @@ export function SidebarMain() {
                                     <Link
                                       to={
                                         itm.href ??
-                                        (`${route}/#${toKebabCase(itm.displayName)}` as string)
+                                        (`${route}/#${toKebab(itm.displayName)}` as string)
                                       }
                                       className="line-clamp-1"
                                     >

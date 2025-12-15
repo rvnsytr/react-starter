@@ -1,6 +1,8 @@
+import { Role } from "@/modules/auth";
 import z from "zod";
 import { id } from "zod/locales";
 import { allGenders, fileMeta, FileType, messages } from "./constants";
+import { roles } from "./permission";
 import { toMegabytes } from "./utils";
 
 z.config(id());
@@ -218,4 +220,36 @@ export const apiResponseSchema = z.object({
   code: z.number(),
   success: z.boolean(),
   message: z.string(),
+});
+
+export const userSchema = z.object({
+  id: z.string(),
+
+  email: sharedSchemas.email,
+  name: sharedSchemas.string("Nama", { min: 1 }),
+  image: z.string().optional().nullable(),
+  role: z.enum(Object.keys(roles) as Role[]),
+
+  password: sharedSchemas.string("Kata sandi", { min: 1 }),
+  newPassword: sharedSchemas.password,
+  confirmPassword: sharedSchemas.string("Konfirmasi kata sandi", { min: 1 }),
+  currentPassword: sharedSchemas.string("Kata sandi saat ini", { min: 1 }),
+});
+
+export const storageSchema = z.object({
+  id: z.uuidv4(),
+
+  fileName: sharedSchemas.string("Nama file", { min: 1, max: 255 }),
+  category: z.enum(["image"]),
+  filePath: sharedSchemas.string("File path", { min: 1, max: 500 }),
+  mimeType: sharedSchemas.string("Tipe file", { max: 100 }),
+  fileSize: sharedSchemas.number("Ukuran file"),
+  fileUrl: sharedSchemas.string("File URL", { min: 1 }).optional(),
+
+  deletedAt: sharedSchemas.deletedAt,
+  deletedBy: sharedSchemas.deletedBy,
+  updatedAt: sharedSchemas.updatedAt,
+  updatedBy: sharedSchemas.updatedBy,
+  createdAt: sharedSchemas.createdAt,
+  createdBy: sharedSchemas.createdBy,
 });

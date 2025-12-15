@@ -1,9 +1,10 @@
 import { authClient } from "@/core/auth";
+import { roles } from "@/core/permission";
 import { LucideIcon, ShieldUser, UserRound } from "lucide-react";
 
 export type AuthSession = typeof authClient.$Infer.Session;
-export type Role = (typeof allRoles)[number];
-export const allRoles = ["user", "admin"] as const;
+export type Role = keyof typeof roles;
+export const allRoles = Object.keys(roles) as Role[];
 
 export const rolesMeta: Record<
   Role,

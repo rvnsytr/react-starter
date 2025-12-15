@@ -14,7 +14,7 @@ const router = createRouter({
   routeTree,
   basepath: import.meta.env.BASE_URL,
   trailingSlash: "never",
-  context: { session: null },
+  context: { session: null, imageId: null },
 });
 
 declare module "@tanstack/react-router" {
@@ -36,7 +36,10 @@ function App() {
       </AnimatePresence>
 
       {!isInitialLoading && (
-        <RouterProvider router={router} context={{ session }} />
+        <RouterProvider
+          router={router}
+          context={{ session, imageId: session?.imageId }}
+        />
       )}
     </ThemeProvider>
   );

@@ -13,7 +13,7 @@ function RouteComponent() {
   return (
     <DashboardMain className="items-center justify-center">
       <R />
-      <pre>{JSON.stringify(authSession, null, 2)}</pre>
+      <pre className="container">{JSON.stringify(authSession, null, 2)}</pre>
     </DashboardMain>
   );
 }

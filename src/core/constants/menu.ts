@@ -4,6 +4,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LucideIcon,
+  Settings,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -14,7 +15,7 @@ type MenuContent = {
   icon?: LucideIcon;
   disabled?: boolean;
 
-  // if href is not defined, the Link href prop will be `/{route}/#${toKebabCase(displayName)}`
+  // if href is not defined, the Link href prop will be `/{route}/#${toKebab(displayName)}`
   subMenu?: {
     displayName: string;
     href?: LinkProps["to"];
@@ -33,15 +34,21 @@ export const dashboardMenu: Menu[] = [
     ],
   },
   {
-    section: "Pengaturan",
+    section: "Lainnya",
     content: [
       {
         route: "/dashboard/profile",
         icon: UserRound,
+        subMenu: [{ displayName: "Informasi Pribadi" }],
+      },
+      {
+        route: "/dashboard/settings",
+        icon: Settings,
         subMenu: [
-          { displayName: "Informasi Pribadi" },
-          { displayName: "Ubah Kata Sandi" },
+          { displayName: "Tema" },
+          { displayName: "Layout" },
           { displayName: "Sesi Aktif" },
+          { displayName: "Ubah Kata Sandi" },
         ],
       },
     ],

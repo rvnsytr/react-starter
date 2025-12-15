@@ -2,20 +2,15 @@ import { DashboardMain } from "@/core/components/layouts";
 import {
   Card,
   CardAction,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
 import { appMeta } from "@/core/constants";
 import { getRouteTitle } from "@/core/utils";
 import {
-  ChangePasswordForm,
   ProfileForm,
-  RevokeOtherSessionsButton,
   Role,
-  SessionList,
   useAuth,
   UserRoleBadge,
   UserVerifiedBadge,
@@ -28,6 +23,7 @@ export const Route = createFileRoute("/dashboard/profile")({
 });
 
 function RouteComponent() {
+  const { imageId } = Route.useRouteContext();
   const { user } = useAuth();
 
   return (
@@ -44,35 +40,7 @@ function RouteComponent() {
           </CardAction>
         </CardHeader>
 
-        <ProfileForm />
-      </Card>
-
-      <Card id="ubah-kata-sandi" className="w-full scroll-m-20 lg:max-w-xl">
-        <CardHeader className="border-b">
-          <CardTitle>Ubah Kata Sandi</CardTitle>
-          <CardDescription>
-            Gunakan kata sandi yang kuat untuk menjaga keamanan akun Anda.
-          </CardDescription>
-        </CardHeader>
-
-        <ChangePasswordForm />
-      </Card>
-
-      <Card id="sesi-aktif" className="w-full scroll-m-20 lg:max-w-xl">
-        <CardHeader className="border-b">
-          <CardTitle>Sesi Aktif</CardTitle>
-          <CardDescription>
-            Tinjau dan kelola sesi yang saat ini sedang masuk ke akun Anda.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="flex flex-col gap-y-2">
-          <SessionList />
-        </CardContent>
-
-        <CardFooter className="flex-col items-stretch border-t md:flex-row md:items-center">
-          <RevokeOtherSessionsButton />
-        </CardFooter>
+        <ProfileForm imageId={imageId} />
       </Card>
     </DashboardMain>
   );
