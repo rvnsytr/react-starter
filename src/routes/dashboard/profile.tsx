@@ -23,7 +23,6 @@ export const Route = createFileRoute("/dashboard/profile")({
 });
 
 function RouteComponent() {
-  const { imageId } = Route.useRouteContext();
   const { user } = useAuth();
 
   return (
@@ -40,7 +39,7 @@ function RouteComponent() {
           </CardAction>
         </CardHeader>
 
-        <ProfileForm imageId={imageId} />
+        <ProfileForm />
       </Card>
     </DashboardMain>
   );

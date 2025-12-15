@@ -152,6 +152,7 @@ export function SidebarMain() {
                                   <SidebarMenuSubButton
                                     variant={itm.variant}
                                     className="flex justify-between"
+                                    disabled={itm.disabled}
                                     asChild
                                   >
                                     <Link

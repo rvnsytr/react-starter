@@ -8,7 +8,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { Route } from "./routes";
+import { Route, RouteRole } from "./routes";
 
 type MenuContent = {
   route: Route;
@@ -20,6 +20,8 @@ type MenuContent = {
     displayName: string;
     href?: LinkProps["to"];
     variant?: "default" | "destructive";
+    disabled?: boolean;
+    role?: RouteRole;
   }[];
 };
 

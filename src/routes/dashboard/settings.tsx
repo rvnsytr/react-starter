@@ -5,13 +5,18 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
 import { Kbd, KbdGroup } from "@/core/components/ui/kbd";
 import { appMeta } from "@/core/constants";
 import { getRouteTitle } from "@/core/utils";
-import { ChangePasswordForm } from "@/modules/auth";
+import {
+  ChangePasswordForm,
+  RevokeOtherSessionsButton,
+  SessionList,
+} from "@/modules/auth";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/settings")({
@@ -65,6 +70,23 @@ function RouteComponent() {
         <CardContent>
           <LayoutSettings />
         </CardContent>
+      </Card>
+
+      <Card id="sesi-aktif" className="w-full scroll-m-20 lg:max-w-xl">
+        <CardHeader className="border-b">
+          <CardTitle>Sesi Aktif</CardTitle>
+          <CardDescription>
+            Tinjau dan kelola sesi yang saat ini sedang masuk ke akun Anda.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="flex flex-col gap-y-2">
+          <SessionList />
+        </CardContent>
+
+        <CardFooter className="border-t *:w-full *:lg:w-fit">
+          <RevokeOtherSessionsButton />
+        </CardFooter>
       </Card>
 
       <Card id="ubah-kata-sandi" className="w-full scroll-m-20 lg:max-w-xl">

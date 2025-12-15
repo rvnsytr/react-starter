@@ -1020,7 +1020,7 @@ export function ProfileForm() {
         />
       </CardContent>
 
-      <CardFooter className="flex-col items-stretch border-t md:flex-row md:items-center">
+      <CardFooter className="flex-col items-stretch border-t md:flex-row">
         <Button type="submit" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
           {messages.actions.update}
@@ -1159,7 +1159,7 @@ export function ChangePasswordForm() {
         />
       </CardContent>
 
-      <CardFooter className="flex-col items-stretch border-t md:flex-row md:items-center">
+      <CardFooter className="flex-col items-stretch border-t md:flex-row">
         <Button type="submit" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
           {messages.actions.update}
