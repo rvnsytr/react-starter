@@ -219,22 +219,26 @@ export function SignInForm() {
         )}
       />
 
-      <Controller
-        name="rememberMe"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <Field orientation="horizontal" data-invalid={!!fieldState.error}>
-            <Checkbox
-              id={field.name}
-              name={field.name}
-              aria-invalid={!!fieldState.error}
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-            <Label htmlFor={field.name}>Ingat Saya</Label>
-          </Field>
-        )}
-      />
+      <div className="flex justify-between">
+        <Controller
+          name="rememberMe"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field orientation="horizontal" data-invalid={!!fieldState.error}>
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                aria-invalid={!!fieldState.error}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+              <Label htmlFor={field.name}>Ingat Saya</Label>
+            </Field>
+          )}
+        />
+
+        <Label className="link shrink-0">Lupa password?</Label>
+      </div>
 
       <Button type="submit" className="relative" disabled={isLoading}>
         <LoadingSpinner loading={isLoading} icon={{ base: <LogIn /> }} />
@@ -789,6 +793,99 @@ export function UserDetailSheet({
   );
 }
 
+// function ResetPasswordDialog({
+//   data,
+//   setIsOpen: setSheetOpen,
+// }: {
+//   data: Pick<AuthSession["user"], "email">;
+//   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+// }) {
+//   const [input, setInput] = useState<string>("");
+//   const [isOpen, setIsOpen] = useState<boolean>(false);
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+//   type FormSchema = z.infer<typeof formSchema>;
+//   const formSchema = z
+//     .object({ input: sharedSchemas.string("Nama") })
+//     .refine((sc) => sc.input === data.name, {
+//       message: messages.thingNotMatch("Nama"),
+//       path: ["input"],
+//     });
+
+//   const form = useForm<FormSchema>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: { input: "" },
+//   });
+
+//   const formHandler = async () => {
+//     // authClient.requestPasswordReset({ email: data.email });
+//   };
+
+//   return (
+//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+//       <DialogTrigger asChild>
+//         <Button variant="outline_destructive" disabled={isLoading}>
+//           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+//           {`${messages.actions.remove} ${data.name}`}
+//         </Button>
+//       </DialogTrigger>
+
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle className="text-destructive flex items-center gap-x-2">
+//                 Hapus akun atas nama {data.name}
+//           </DialogTitle>
+//           <DialogDescription>
+//             PERINGATAN: Tindakan ini akan menghapus akun{" "}
+//             <span className="text-foreground">{data.name}</span> beserta seluruh
+//             datanya secara permanen. Harap berhati-hati karena aksi ini tidak
+//             dapat dibatalkan.
+//           </DialogDescription>
+//         </DialogHeader>
+
+//         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+//           <Controller
+//             name="input"
+//             control={form.control}
+//             render={({ field: { onChange, ...field }, fieldState }) => (
+//               <FieldWrapper
+//                 label={messages.removeLabel(data.name)}
+//                 errors={fieldState.error}
+//                 htmlFor={field.name}
+//               >
+//                 <Input
+//                   type="text"
+//                   id={field.name}
+//                   aria-invalid={!!fieldState.error}
+//                   placeholder={data.name}
+//                   onChange={(e) => {
+//                     setInput(e.target.value);
+//                     onChange(e);
+//                   }}
+//                   required
+//                   {...field}
+//                 />
+//               </FieldWrapper>
+//             )}
+//           />
+
+//           <DialogFooter>
+//             <DialogClose>{messages.actions.cancel}</DialogClose>
+//             <Button
+//               type="submit"
+//               variant="destructive"
+//               disabled={input !== data.name || isLoading}
+//             >
+//               <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+//               {messages.actions.confirm}
+//             </Button>
+//           </DialogFooter>
+//         </form>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
 export function ProfilePicture({
   data,
 }: {
@@ -1177,15 +1274,13 @@ export function SessionList() {
   if (error) return <ErrorFallback error={error} />;
   if (!data && isLoading) return <LoadingFallback />;
 
-  return (data ?? []).map((session) => (
-    <SessionListButton key={session.id} data={session} />
-  ));
+  return (data ?? [])
+    ?.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .map((session) => <SessionListButton key={session.id} data={session} />);
 }
 
 function SessionListButton({ data }: { data: AuthSession["session"] }) {
-  const { id, updatedAt, userAgent, token } = data;
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { id, updatedAt, userAgent } = data;
   const { session } = useAuth();
 
   const isCurrentSession = session.id === id;
@@ -1203,76 +1298,25 @@ function SessionListButton({ data }: { data: AuthSession["session"] }) {
     other: MonitorSmartphone,
   }[device.type ?? "other"];
 
-  const clickHandler = () => {
-    setIsLoading(true);
-    authClient.revokeSession(
-      { token },
-      {
-        onSuccess: () => {
-          setIsLoading(false);
-          mutateSessionList();
-          toast.success("Sesi berhasil dicabut.");
-        },
-        onError: ({ error }) => {
-          setIsLoading(false);
-          toast.error(error.message);
-        },
-      },
-    );
-  };
-
   return (
-    <div className="bg-card flex items-center gap-x-4 rounded-lg border p-2 shadow-xs">
-      <div className="flex grow items-center gap-x-2">
-        <div className="bg-muted aspect-square size-fit rounded-md p-2">
-          <DeviceIcons className="shrink-0" />
-        </div>
-
-        <div className="grid gap-y-1 font-medium">
-          <small>
-            {`${browser.name ?? "Browser tidak dikenal"} - ${os.name ?? "OS tidak dikenal"}`}
-          </small>
-
-          {isCurrentSession ? (
-            <small className="text-success">Sesi saat ini</small>
-          ) : (
-            <small className="text-muted-foreground">
-              {messages.thingAgo("Terakhir terlihat", updatedAt)}
-            </small>
-          )}
-        </div>
+    <div className="bg-card flex items-center gap-x-2 rounded-lg border p-2 shadow-xs">
+      <div className="bg-muted aspect-square size-fit rounded-md p-2">
+        <DeviceIcons className="shrink-0" />
       </div>
 
-      {!isCurrentSession && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              size="icon-sm"
-              variant="outline_destructive"
-              disabled={isLoading}
-            >
-              <LoadingSpinner loading={isLoading} icon={{ base: <LogOut /> }} />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-x-2">
-                <DeviceIcons /> {sharedText.revokeSession}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Sesi ini akan segera dihentikan dari perangkat yang dipilih.
-                Yakin ingin melanjutkan?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
-              <AlertDialogAction onClick={clickHandler}>
-                {messages.actions.confirm}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <div className="grid gap-y-1 font-medium">
+        <small>
+          {`${browser.name ?? "Browser tidak dikenal"} - ${os.name ?? "OS tidak dikenal"}`}
+        </small>
+
+        {isCurrentSession ? (
+          <small className="text-success">Sesi saat ini</small>
+        ) : (
+          <small className="text-muted-foreground">
+            {messages.thingAgo("Terakhir terlihat", updatedAt)}
+          </small>
+        )}
+      </div>
     </div>
   );
 }
