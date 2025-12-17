@@ -4,9 +4,7 @@ import { createContext, ReactNode, useContext, useEffect } from "react";
 import { AuthSession } from "./constants";
 import { useSession } from "./hooks";
 
-type AuthContextType = AuthSession & { imageId: string | null };
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthSession | undefined>(undefined);
 
 export function AuthProvider({
   session: fallbackData,

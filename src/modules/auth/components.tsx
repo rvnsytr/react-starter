@@ -85,7 +85,7 @@ import {
 } from "@/core/components/ui/tooltip";
 import { appMeta, fileMeta, messages } from "@/core/constants";
 import { sharedSchemas, userSchema } from "@/core/schemas";
-import { removeFile, uploadFiles } from "@/core/storage";
+import { uploadFiles } from "@/core/storage";
 import { cn, filterFn, formatDate } from "@/core/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -889,11 +889,9 @@ export function UserDetailSheet({
 export function ProfilePicture({
   data,
 }: {
-  data: Pick<AuthSession["user"], "id" | "name" | "image"> & {
-    imageId: string | null;
-  };
+  data: Pick<AuthSession["user"], "id" | "name" | "image">;
 }) {
-  const { id, name, image: imageUrl, imageId } = data;
+  const { id, name, image } = data;
 
   const inputAvatarRef = useRef<HTMLInputElement>(null);
   const [isChange, setIsChange] = useState<boolean>(false);
@@ -908,25 +906,19 @@ export function ProfilePicture({
         const files = Array.from(fileList).map((f) => f);
 
         const parseRes = formSchema.safeParse(files);
-        if (!parseRes.success) throw new Error(parseRes.error.message);
-
-        if (imageId) await removeFile(imageId);
+        if (!parseRes.success) return toast.error(parseRes.error.message);
 
         const body = new FormData();
         body.append("image", files[0]);
         const res = await uploadFiles(body, { fileName: id });
 
-        const image = res.data[0].id;
-        const updateRes = await authClient.updateUser({ image });
-        if (updateRes.error) throw new Error(updateRes.error.message);
-
-        await authClient.updateUser({ image });
+        await authClient.updateUser({ image: res.data[0].id });
       },
       {
         success: () => {
           setIsChange(false);
           mutateSession();
-          return "Foto profil berhasil diperbarui.";
+          return "Foto profil Anda berhasil diperbarui.";
         },
         error: (e) => {
           setIsChange(false);
@@ -940,7 +932,6 @@ export function ProfilePicture({
     toast.promise(
       async () => {
         setIsRemoved(true);
-        if (imageId) await removeFile(imageId);
         await authClient.updateUser({ image: null });
       },
       {
@@ -959,7 +950,7 @@ export function ProfilePicture({
 
   return (
     <div className="flex items-center gap-x-4">
-      <UserAvatar name={name} image={imageUrl} className="size-24" />
+      <UserAvatar name={name} image={image} className="size-24" />
 
       <input
         type="file"
@@ -992,7 +983,7 @@ export function ProfilePicture({
                 type="button"
                 size="sm"
                 variant="outline_destructive"
-                disabled={!imageUrl || isChange || isRemoved}
+                disabled={!image || isChange || isRemoved}
               >
                 <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
               </Button>
@@ -1027,7 +1018,7 @@ export function ProfilePicture({
 export function ProfileForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { user, imageId } = useAuth();
+  const { user } = useAuth();
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = userSchema.pick({ name: true, email: true });
@@ -1062,7 +1053,7 @@ export function ProfileForm() {
   return (
     <form onSubmit={form.handleSubmit(formHandler)} noValidate>
       <CardContent className="flex flex-col gap-y-4">
-        <ProfilePicture data={{ imageId, ...user }} />
+        <ProfilePicture data={user} />
 
         <Controller
           name="email"

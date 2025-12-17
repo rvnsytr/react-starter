@@ -1,12 +1,12 @@
 import {
   FileArchive,
   Files,
-  FileSpreadsheet,
   FileText,
   Headphones,
   Image,
   LucideIcon,
   Presentation,
+  TableIcon,
   Upload,
   Video,
 } from "lucide-react";
@@ -71,7 +71,7 @@ const meta: Omit<FileMetaProps, "file" | "office"> = {
     ],
     extensions: [".xls", ".xlsx"],
     size: { mb: 2, bytes: toBytes(2) },
-    icon: FileSpreadsheet,
+    icon: TableIcon,
   },
 
   presentation: {

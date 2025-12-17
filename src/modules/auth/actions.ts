@@ -1,37 +1,9 @@
-import { apiFetcher } from "@/core/api";
 import { authClient } from "@/core/auth";
-import { storageSchema } from "@/core/schemas";
-import { AuthSession } from "./constants";
 
-export async function getSession(): Promise<
-  (AuthSession & { imageId: string | null }) | null
-> {
+export async function getSession() {
   const { data, error } = await authClient.getSession();
   if (error) throw new Error(error.message);
-
-  if (!data) return data;
-  const defaultData = { imageId: null, ...data };
-
-  const { session, user: userData } = data;
-  const { image: imageId, ...rest } = userData;
-
-  if (!imageId) return defaultData;
-
-  // TODO: Abstract this
-  const body = JSON.stringify({ data: [imageId] });
-  const res = await apiFetcher(
-    "/storage/presigned-url",
-    storageSchema.pick({ id: true, fileUrl: true }).array(),
-    { method: "POST", body, headers: { "Content-Type": "application/json" } },
-  );
-
-  if (!res.data) return defaultData;
-
-  return {
-    session,
-    user: { image: res.data[0].fileUrl, ...rest },
-    imageId,
-  };
+  return data;
 }
 
 export async function getSessionList() {
@@ -55,10 +27,6 @@ export async function revokeUserSessions(ids: string[]) {
     ),
   );
 }
-
-// export async function deleteProfilePicture(image: string) {
-//   await deleteFiles([await extractKeyFromPublicUrl(image)]);
-// }
 
 // export async function deleteUsers(
 //   data: Pick<Session["user"], "id" | "image">[],

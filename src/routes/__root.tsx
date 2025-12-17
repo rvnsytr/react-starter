@@ -13,10 +13,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
 
-type RouterContext = {
-  session: AuthSession | null;
-  imageId: string | null;
-};
+type RouterContext = { session: AuthSession | null };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
