@@ -65,8 +65,7 @@ export function SidebarMain() {
               {/* <Link to="/dashboard/profile"> */}
               <Link to="/dashboard">
                 <UserAvatar
-                  name={user.name}
-                  image={user.image}
+                  data={user}
                   className="rounded-md"
                   classNames={{
                     image: "rounded-md group-hover/head-button:scale-105",

@@ -58,6 +58,7 @@ import {
   FieldTitle,
 } from "@/core/components/ui/field";
 import { FieldWrapper } from "@/core/components/ui/field-wrapper";
+import { Input } from "@/core/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -85,7 +86,7 @@ import {
 } from "@/core/components/ui/tooltip";
 import { appMeta, fileMeta, messages } from "@/core/constants";
 import { sharedSchemas, userSchema } from "@/core/schemas";
-import { uploadFiles } from "@/core/storage";
+import { removeFiles, uploadFiles } from "@/core/storage";
 import { cn, filterFn, formatDate } from "@/core/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -110,6 +111,8 @@ import {
   Settings2,
   Smartphone,
   Tablet,
+  Trash2,
+  TriangleAlert,
   TvMinimal,
   UserRound,
   UserRoundPlus,
@@ -120,8 +123,14 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UAParser } from "ua-parser-js";
 import { z } from "zod";
-import { revokeUserSessions } from "./actions";
-import { allRoles, AuthSession, Role, rolesMeta } from "./constants";
+import { removeUsers, revokeUserSessions } from "./actions";
+import {
+  allRoles,
+  AuthSession,
+  defaultRole,
+  Role,
+  rolesMeta,
+} from "./constants";
 import {
   mutateSession,
   mutateSessionList,
@@ -159,7 +168,9 @@ export function SignInForm() {
     toast.promise(
       async () => {
         setIsLoading(true);
-        return await authClient.signIn.email(formData);
+        const res = await authClient.signIn.email(formData);
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: (res) => {
@@ -223,26 +234,22 @@ export function SignInForm() {
         )}
       />
 
-      <div className="flex justify-between">
-        <Controller
-          name="rememberMe"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field orientation="horizontal" data-invalid={!!fieldState.error}>
-              <Checkbox
-                id={field.name}
-                name={field.name}
-                aria-invalid={!!fieldState.error}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <Label htmlFor={field.name}>Ingat Saya</Label>
-            </Field>
-          )}
-        />
-
-        <Label className="link shrink-0">Lupa password?</Label>
-      </div>
+      <Controller
+        name="rememberMe"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field orientation="horizontal" data-invalid={!!fieldState.error}>
+            <Checkbox
+              id={field.name}
+              name={field.name}
+              aria-invalid={!!fieldState.error}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+            <Label htmlFor={field.name}>Ingat Saya</Label>
+          </Field>
+        )}
+      />
 
       <Button type="submit" className="relative" disabled={isLoading}>
         <LoadingSpinner loading={isLoading} icon={{ base: <LogIn /> }} />
@@ -288,7 +295,9 @@ export function SignUpForm() {
     toast.promise(
       async () => {
         setIsLoading(true);
-        return await authClient.signUp.email({ password, ...rest });
+        const res = await authClient.signUp.email({ password, ...rest });
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -451,7 +460,9 @@ export function SignOutButton() {
         toast.promise(
           async () => {
             setIsLoading(true);
-            return await authClient.signOut();
+            const res = await authClient.signOut();
+            if (res.error) throw new Error(res.error.message);
+            return res;
           },
           {
             success: () => {
@@ -541,22 +552,22 @@ export function UserVerifiedBadge({
 }
 
 export function UserAvatar({
-  image,
-  name,
+  data,
   className,
   classNames,
-}: Pick<AuthSession["user"], "image" | "name"> & {
+}: {
+  data: Pick<AuthSession["user"], "image" | "name">;
   className?: string;
   classNames?: { image?: string; fallback?: string };
 }) {
   return (
     <Avatar className={cn("rounded-lg", className)}>
       <AvatarImage
-        src={image ?? undefined}
+        src={data.image ?? undefined}
         className={cn("rounded-lg", classNames?.image)}
       />
       <AvatarFallback className={cn("rounded-lg", classNames?.fallback)}>
-        {name.slice(0, 2)}
+        {data.name.slice(0, 2)}
       </AvatarFallback>
     </Avatar>
   );
@@ -586,7 +597,7 @@ const getUserColumn = (currentUserId: string) => [
     ),
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <UserAvatar {...row.original} className="size-20" />
+        <UserAvatar data={row.original} className="size-20" />
       </div>
     ),
     meta: { displayName: "Foto Profil", type: "text", icon: UserSquare2 },
@@ -616,7 +627,7 @@ const getUserColumn = (currentUserId: string) => [
       return (
         <div className="flex items-center gap-x-2">
           <span>{cell.getValue()}</span>
-          {!row.original.emailVerified && <UserVerifiedBadge withoutText />}
+          {row.original.emailVerified && <UserVerifiedBadge withoutText />}
         </div>
       );
     },
@@ -711,12 +722,12 @@ export function UserDataTable({
                 </Button>
               </DropdownMenuItem>
 
-              {/* <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild>
                 <AdminActionRemoveUsersDialog
                   data={filteredData}
                   onSuccess={() => table.resetRowSelection()}
                 />
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -750,7 +761,7 @@ export function UserDetailSheet({
 
       <SheetContent>
         <SheetHeader className="flex-row items-center">
-          <UserAvatar {...data} className="size-10" />
+          <UserAvatar data={data} className="size-10" />
           <div className="grid">
             <SheetTitle className="text-base">{data.name}</SheetTitle>
             <SheetDescription># {data.id.slice(0, 17)}</SheetDescription>
@@ -792,7 +803,7 @@ export function UserDetailSheet({
 
         {!isCurrentUser && (
           <SheetFooter>
-            {/* <AdminRemoveUserDialog data={data} setIsOpen={setIsOpen} /> */}
+            <AdminRemoveUserDialog data={data} setIsOpen={setIsOpen} />
           </SheetFooter>
         )}
       </SheetContent>
@@ -803,17 +814,15 @@ export function UserDetailSheet({
 export function ProfilePicture({
   data,
 }: {
-  data: Pick<AuthSession["user"], "id" | "name" | "image">;
+  data: Pick<AuthSession["user"], "id" | "name" | "image" | "imageId">;
 }) {
-  const { id, name, image } = data;
-
   const inputAvatarRef = useRef<HTMLInputElement>(null);
   const [isChange, setIsChange] = useState<boolean>(false);
   const [isRemoved, setIsRemoved] = useState<boolean>(false);
 
   const formSchema = sharedSchemas.files("image");
 
-  const changeHandler = async (fileList: FileList) => {
+  const changeHandler = (fileList: FileList) => {
     toast.promise(
       async () => {
         setIsChange(true);
@@ -824,10 +833,13 @@ export function ProfilePicture({
 
         const body = new FormData();
         body.append("image", files[0]);
-        const res = await uploadFiles(body, { fileName: id });
+        const uploadRes = await uploadFiles(body, { fileName: data.id });
 
-        await authClient.updateUser({ image: res.data[0].id });
-        return res;
+        const image = uploadRes.data[0].id;
+        const res = await authClient.updateUser({ image });
+
+        if (res.error) throw new Error(res.error.message);
+        return uploadRes;
       },
       {
         success: () => {
@@ -847,7 +859,9 @@ export function ProfilePicture({
     toast.promise(
       async () => {
         setIsRemoved(true);
-        return await authClient.updateUser({ image: null });
+        const res = await authClient.updateUser({ image: null });
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -865,7 +879,7 @@ export function ProfilePicture({
 
   return (
     <div className="flex items-center gap-x-4">
-      <UserAvatar name={name} image={image} className="size-24" />
+      <UserAvatar data={data} className="size-24" />
 
       <input
         type="file"
@@ -898,7 +912,7 @@ export function ProfilePicture({
                 type="button"
                 size="sm"
                 variant="outline_destructive"
-                disabled={!image || isChange || isRemoved}
+                disabled={!data.image || isChange || isRemoved}
               >
                 <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
               </Button>
@@ -951,7 +965,9 @@ export function ProfileForm() {
     toast.promise(
       async () => {
         setIsLoading(true);
-        return await authClient.updateUser({ name: newName });
+        const res = await authClient.updateUser({ name: newName });
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -1065,11 +1081,12 @@ export function ChangePasswordForm() {
   });
 
   const formHandler = (formData: FormSchema) => {
-    setIsLoading(true);
     toast.promise(
       async () => {
         setIsLoading(true);
-        return await authClient.changePassword(formData);
+        const res = await authClient.changePassword(formData);
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -1242,7 +1259,9 @@ export function RevokeOtherSessionsButton() {
     toast.promise(
       async () => {
         setIsLoading(true);
-        return await authClient.revokeOtherSessions();
+        const res = await authClient.revokeOtherSessions();
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -1315,19 +1334,22 @@ export function AdminCreateUserDialog() {
       email: "",
       newPassword: "",
       confirmPassword: "",
-      role: "user",
+      role: defaultRole,
     },
   });
 
-  const formHandler = ({ newPassword, role, ...rest }: FormSchema) => {
+  const formHandler = ({ newPassword, role: newRole, ...rest }: FormSchema) => {
     toast.promise(
       async () => {
         setIsLoading(true);
-        return await authClient.admin.createUser({
+        const res = await authClient.admin.createUser({
           password: newPassword,
-          role,
+          role: newRole ?? defaultRole,
           ...rest,
         });
+
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -1541,14 +1563,17 @@ function AdminChangeUserRoleForm({
     defaultValues: { role: data.role === "user" ? "admin" : "user" },
   });
 
-  const formHandler = ({ role }: FormSchema) => {
+  const formHandler = ({ role: newRole }: FormSchema) => {
+    const role = newRole ?? defaultRole;
     if (role === data.role)
       return toast.info(messages.noChanges(`role ${data.name}`));
 
     toast.promise(
       async () => {
         setIsLoading(true);
-        authClient.admin.setRole({ userId: data.id, role });
+        const res = await authClient.admin.setRole({ userId: data.id, role });
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -1643,7 +1668,9 @@ function AdminRevokeUserSessionsDialog({
     toast.promise(
       async () => {
         setIsLoading(true);
-        authClient.admin.revokeUserSessions({ userId: id });
+        const res = await authClient.admin.revokeUserSessions({ userId: id });
+        if (res.error) throw new Error(res.error.message);
+        return res;
       },
       {
         success: () => {
@@ -1693,117 +1720,119 @@ function AdminRevokeUserSessionsDialog({
   );
 }
 
-// function AdminRemoveUserDialog({
-//   data,
-//   setIsOpen: setSheetOpen,
-// }: {
-//   data: Pick<AuthSession["user"], "id" | "name" | "image">;
-//   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-// }) {
-//   const [input, setInput] = useState<string>("");
-//   const [isOpen, setIsOpen] = useState<boolean>(false);
-//   const [isLoading, setIsLoading] = useState<boolean>(false);
+function AdminRemoveUserDialog({
+  data,
+  setIsOpen: setSheetOpen,
+}: {
+  data: Pick<AuthSession["user"], "id" | "name" | "image">;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const [input, setInput] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-//   type FormSchema = z.infer<typeof formSchema>;
-//   const formSchema = z
-//     .object({ input: sharedSchemas.string("Nama") })
-//     .refine((sc) => sc.input === data.name, {
-//       message: messages.thingNotMatch("Nama"),
-//       path: ["input"],
-//     });
+  type FormSchema = z.infer<typeof formSchema>;
+  const formSchema = z
+    .object({ input: sharedSchemas.string("Nama") })
+    .refine((sc) => sc.input === data.name, {
+      message: messages.thingNotMatch("Nama"),
+      path: ["input"],
+    });
 
-//   const form = useForm<FormSchema>({
-//     resolver: zodResolver(formSchema),
-//     defaultValues: { input: "" },
-//   });
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { input: "" },
+  });
 
-//   const formHandler = () => {
-//     toast.promise(
-//       async () => {
-//         setIsLoading(true);
-//         if (data.image) removeFiles([data.image], { isPublicUrl: true });
-//         return await authClient.admin.removeUser({ userId: data.id });
-//       },
-//       {
-//         success: () => {
-//           setIsLoading(false);
-//           setIsOpen(false);
-//           setSheetOpen(false);
-//           mutateUsers();
-//           return `Akun atas nama ${data.name} berhasil dihapus.`;
-//         },
-//         error: (e) => {
-//           setIsLoading(false);
-//           return e.message;
-//         },
-//       },
-//     );
-//   };
+  const formHandler = () => {
+    toast.promise(
+      async () => {
+        setIsLoading(true);
+        if (data.image) removeFiles([data.image]);
+        const res = await authClient.admin.removeUser({ userId: data.id });
+        if (res.error) throw new Error(res.error.message);
+        return res;
+      },
+      {
+        success: () => {
+          setIsLoading(false);
+          setIsOpen(false);
+          setSheetOpen(false);
+          mutateUsers();
+          return `Akun atas nama ${data.name} berhasil dihapus.`;
+        },
+        error: (e) => {
+          setIsLoading(false);
+          return e.message;
+        },
+      },
+    );
+  };
 
-//   return (
-//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-//       <DialogTrigger asChild>
-//         <Button variant="outline_destructive" disabled={isLoading}>
-//           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
-//           {`${messages.actions.remove} ${data.name}`}
-//         </Button>
-//       </DialogTrigger>
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline_destructive" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+          {`${messages.actions.remove} ${data.name}`}
+        </Button>
+      </DialogTrigger>
 
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle className="text-destructive flex items-center gap-x-2">
-//             <TriangleAlert /> Hapus akun atas nama {data.name}
-//           </DialogTitle>
-//           <DialogDescription>
-//             PERINGATAN: Tindakan ini akan menghapus akun{" "}
-//             <span className="text-foreground">{data.name}</span> beserta seluruh
-//             datanya secara permanen. Harap berhati-hati karena aksi ini tidak
-//             dapat dibatalkan.
-//           </DialogDescription>
-//         </DialogHeader>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-destructive flex items-center gap-x-2">
+            <TriangleAlert /> Hapus akun atas nama {data.name}
+          </DialogTitle>
+          <DialogDescription>
+            PERINGATAN: Tindakan ini akan menghapus akun{" "}
+            <span className="text-foreground">{data.name}</span> beserta seluruh
+            datanya secara permanen. Harap berhati-hati karena aksi ini tidak
+            dapat dibatalkan.
+          </DialogDescription>
+        </DialogHeader>
 
-//         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
-//           <Controller
-//             name="input"
-//             control={form.control}
-//             render={({ field: { onChange, ...field }, fieldState }) => (
-//               <FieldWrapper
-//                 label={messages.removeLabel(data.name)}
-//                 errors={fieldState.error}
-//                 htmlFor={field.name}
-//               >
-//                 <Input
-//                   type="text"
-//                   id={field.name}
-//                   aria-invalid={!!fieldState.error}
-//                   placeholder={data.name}
-//                   onChange={(e) => {
-//                     setInput(e.target.value);
-//                     onChange(e);
-//                   }}
-//                   required
-//                   {...field}
-//                 />
-//               </FieldWrapper>
-//             )}
-//           />
+        <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+          <Controller
+            name="input"
+            control={form.control}
+            render={({ field: { onChange, ...field }, fieldState }) => (
+              <FieldWrapper
+                label={messages.removeLabel(data.name)}
+                errors={fieldState.error}
+                htmlFor={field.name}
+              >
+                <Input
+                  type="text"
+                  id={field.name}
+                  aria-invalid={!!fieldState.error}
+                  placeholder={data.name}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    onChange(e);
+                  }}
+                  required
+                  {...field}
+                />
+              </FieldWrapper>
+            )}
+          />
 
-//           <DialogFooter>
-//             <DialogClose>{messages.actions.cancel}</DialogClose>
-//             <Button
-//               type="submit"
-//               variant="destructive"
-//               disabled={input !== data.name || isLoading}
-//             >
-//               <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
-//               {messages.actions.confirm}
-//             </Button>
-//           </DialogFooter>
-//         </form>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
+          <DialogFooter>
+            <DialogClose>{messages.actions.cancel}</DialogClose>
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={input !== data.name || isLoading}
+            >
+              <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+              {messages.actions.confirm}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function AdminActionRevokeUserSessionsDialog({
   ids,
@@ -1814,7 +1843,7 @@ function AdminActionRevokeUserSessionsDialog({
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const clickHandler = async () => {
+  const clickHandler = () => {
     setIsLoading(true);
     toast.promise(revokeUserSessions(ids), {
       loading: messages.loading,
@@ -1825,7 +1854,7 @@ function AdminActionRevokeUserSessionsDialog({
       },
       error: (e) => {
         setIsLoading(false);
-        return e;
+        return e.message;
       },
     });
   };
@@ -1865,116 +1894,116 @@ function AdminActionRevokeUserSessionsDialog({
   );
 }
 
-// function AdminActionRemoveUsersDialog({
-//   data,
-//   onSuccess,
-// }: {
-//   data: Pick<AuthSession["user"], "id" | "name" | "image">[];
-//   onSuccess: () => void;
-// }) {
-//   const [input, setInput] = useState<string>("");
-//   const [isOpen, setIsOpen] = useState<boolean>(false);
-//   const [isLoading, setIsLoading] = useState<boolean>(false);
+function AdminActionRemoveUsersDialog({
+  data,
+  onSuccess,
+}: {
+  data: Pick<AuthSession["user"], "id" | "name" | "image">[];
+  onSuccess: () => void;
+}) {
+  const [input, setInput] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-//   const inputValue = `Hapus ${String(data.length)} pengguna`;
+  const inputValue = `Hapus ${String(data.length)} pengguna`;
 
-//   type FormSchema = z.infer<typeof formSchema>;
-//   const formSchema = z
-//     .object({ input: sharedSchemas.string("Total pengguna yang dihapus") })
-//     .refine((sc) => sc.input === inputValue, {
-//       message: messages.thingNotMatch("Total pengguna yang dihapus"),
-//       path: ["input"],
-//     });
+  type FormSchema = z.infer<typeof formSchema>;
+  const formSchema = z
+    .object({ input: sharedSchemas.string("Total pengguna yang dihapus") })
+    .refine((sc) => sc.input === inputValue, {
+      message: messages.thingNotMatch("Total pengguna yang dihapus"),
+      path: ["input"],
+    });
 
-//   const form = useForm<FormSchema>({
-//     resolver: zodResolver(formSchema),
-//     defaultValues: { input: "" },
-//   });
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { input: "" },
+  });
 
-//   const formHandler = () => {
-//     setIsLoading(true);
-//     toast.promise(deleteUsers(data), {
-//       loading: messages.loading,
-//       success: (res) => {
-//         setIsLoading(false);
-//         setIsOpen(false);
+  const formHandler = () => {
+    setIsLoading(true);
+    toast.promise(removeUsers(data), {
+      loading: messages.loading,
+      success: (res) => {
+        setIsLoading(false);
+        setIsOpen(false);
 
-//         onSuccess();
-//         mutateUsers();
+        onSuccess();
+        mutateUsers();
 
-//         const successLength = res.filter(({ success }) => success).length;
-//         return `${successLength} dari ${data.length} akun pengguna berhasil dihapus.`;
-//       },
-//       error: (e) => {
-//         setIsLoading(false);
-//         return e;
-//       },
-//     });
-//   };
+        const successLength = res.filter(({ data }) => data?.success).length;
+        return `${successLength} dari ${data.length} akun pengguna berhasil dihapus.`;
+      },
+      error: (e) => {
+        setIsLoading(false);
+        return e.message;
+      },
+    });
+  };
 
-//   return (
-//     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-//       <DialogTrigger asChild>
-//         <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
-//           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
-//           {messages.actions.remove}
-//         </Button>
-//       </DialogTrigger>
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+          {messages.actions.remove}
+        </Button>
+      </DialogTrigger>
 
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle className="text-destructive flex items-center gap-x-2">
-//             <TriangleAlert /> Hapus {data.length} Akun
-//           </DialogTitle>
-//           <DialogDescription>
-//             PERINGATAN: Tindakan ini akan menghapus{" "}
-//             <span className="text-foreground">{data.length} akun</span> yang
-//             dipilih beserta seluruh datanya secara permanen. Harap berhati-hati
-//             karena aksi ini tidak dapat dibatalkan.
-//           </DialogDescription>
-//         </DialogHeader>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-destructive flex items-center gap-x-2">
+            <TriangleAlert /> Hapus {data.length} Akun
+          </DialogTitle>
+          <DialogDescription>
+            PERINGATAN: Tindakan ini akan menghapus{" "}
+            <span className="text-foreground">{data.length} akun</span> yang
+            dipilih beserta seluruh datanya secara permanen. Harap berhati-hati
+            karena aksi ini tidak dapat dibatalkan.
+          </DialogDescription>
+        </DialogHeader>
 
-//         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
-//           <Controller
-//             name="input"
-//             control={form.control}
-//             render={({ field: { onChange, ...field }, fieldState }) => (
-//               <FieldWrapper
-//                 label={messages.removeLabel(inputValue)}
-//                 errors={fieldState.error}
-//                 htmlFor={field.name}
-//               >
-//                 <Input
-//                   type="text"
-//                   id={field.name}
-//                   aria-invalid={!!fieldState.error}
-//                   placeholder={inputValue}
-//                   onChange={(e) => {
-//                     setInput(e.target.value);
-//                     onChange(e);
-//                   }}
-//                   required
-//                   {...field}
-//                 />
-//               </FieldWrapper>
-//             )}
-//           />
+        <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+          <Controller
+            name="input"
+            control={form.control}
+            render={({ field: { onChange, ...field }, fieldState }) => (
+              <FieldWrapper
+                label={messages.removeLabel(inputValue)}
+                errors={fieldState.error}
+                htmlFor={field.name}
+              >
+                <Input
+                  type="text"
+                  id={field.name}
+                  aria-invalid={!!fieldState.error}
+                  placeholder={inputValue}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    onChange(e);
+                  }}
+                  required
+                  {...field}
+                />
+              </FieldWrapper>
+            )}
+          />
 
-//           <DialogFooter>
-//             <DialogClose>{messages.actions.cancel}</DialogClose>
-//             <Button
-//               type="submit"
-//               variant="destructive"
-//               disabled={input !== inputValue || isLoading}
-//             >
-//               <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
-//               {messages.actions.confirm}
-//             </Button>
-//           </DialogFooter>
-//         </form>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
+          <DialogFooter>
+            <DialogClose>{messages.actions.cancel}</DialogClose>
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={input !== inputValue || isLoading}
+            >
+              <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
+              {messages.actions.confirm}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // #endregion

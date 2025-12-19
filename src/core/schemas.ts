@@ -1,8 +1,7 @@
-import { Role } from "@/modules/auth";
+import { allRoles } from "@/modules/auth";
 import z from "zod";
 import { id } from "zod/locales";
 import { allGenders, fileMeta, FileType, messages } from "./constants";
-import { roles } from "./permission";
 import { toMegabytes } from "./utils";
 
 z.config(id());
@@ -228,7 +227,7 @@ export const userSchema = z.object({
   email: sharedSchemas.email,
   name: sharedSchemas.string("Nama", { min: 1 }),
   image: z.string().optional().nullable(),
-  role: z.enum(Object.keys(roles) as Role[]),
+  role: z.lazy(() => z.enum(allRoles)),
 
   password: sharedSchemas.string("Kata sandi", { min: 1 }),
   newPassword: sharedSchemas.password,

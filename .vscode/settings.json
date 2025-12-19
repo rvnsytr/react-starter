@@ -1,7 +1,7 @@
 {
   "files.readonlyInclude": {
-    "**/routeTree.gen.ts": true,
-    "**/core/**": true
+    "**/routeTree.gen.ts": true
+    // "**/core/**": true
   },
 
   "files.readonlyExclude": {
