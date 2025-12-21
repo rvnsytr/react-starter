@@ -47,14 +47,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/core/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/core/components/ui/dropdown-menu";
 import { ErrorFallback, LoadingFallback } from "@/core/components/ui/fallback";
 import {
   Field,
@@ -73,17 +65,14 @@ import {
 } from "@/core/components/ui/input-group";
 import { Label } from "@/core/components/ui/label";
 import { PasswordInput } from "@/core/components/ui/password-input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/core/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/core/components/ui/radio-group";
 import { Separator } from "@/core/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/core/components/ui/sheet";
+import { SheetDescription, SheetTitle } from "@/core/components/ui/sheet";
 import { SidebarMenuButton } from "@/core/components/ui/sidebar";
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { Textarea } from "@/core/components/ui/textarea";
@@ -106,6 +95,7 @@ import {
   CalendarCheck2,
   CalendarSync,
   CircleDot,
+  Ellipsis,
   Gamepad2,
   Info,
   Layers2,
@@ -126,6 +116,7 @@ import {
   TvMinimal,
   UserRound,
   UserRoundPlus,
+  XIcon,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -637,7 +628,7 @@ const getUserColumn = (currentUserId: string) => [
     id: "name",
     header: ({ column }) => <ColumnHeader column={column}>Nama</ColumnHeader>,
     cell: ({ row }) => (
-      <UserDetailSheet
+      <UserDetailDialog
         data={row.original}
         isCurrentUser={row.original.id === currentUserId}
       />
@@ -741,41 +732,39 @@ export function UserDataTable({
       renderRowSelection={(data, table) => {
         const filteredData = data.map(({ original }) => original);
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <Button variant="outline">
                 <Settings2 /> {messages.actions.action}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="[&_button]:justify-start">
-              <DropdownMenuLabel className="text-center">
-                Akun dipilih: {filteredData.length}
-              </DropdownMenuLabel>
+            </PopoverTrigger>
 
-              <DropdownMenuSeparator />
+            <PopoverContent className="grid gap-y-1 p-1 [&_button]:justify-start">
+              <div className="flex justify-center py-1">
+                <small>
+                  Akun dipilih:{" "}
+                  <span className="font-medium">{filteredData.length}</span>
+                </small>
+              </div>
 
-              <DropdownMenuItem asChild>
-                <AdminActionRevokeUserSessionsDialog
-                  userIds={filteredData.map(({ id }) => id)}
-                  onSuccess={() => table.resetRowSelection()}
-                />
-              </DropdownMenuItem>
+              <Separator />
+
+              <AdminActionRevokeUserSessionsDialog
+                userIds={filteredData.map(({ id }) => id)}
+                onSuccess={() => table.resetRowSelection()}
+              />
 
               {/* // TODO */}
-              <DropdownMenuItem asChild>
-                <Button size="sm" variant="ghost_destructive" disabled>
-                  <Ban /> Ban
-                </Button>
-              </DropdownMenuItem>
+              <Button size="sm" variant="ghost_destructive" disabled>
+                <Ban /> Ban
+              </Button>
 
-              <DropdownMenuItem asChild>
-                <AdminActionRemoveUsersDialog
-                  data={filteredData}
-                  onSuccess={() => table.resetRowSelection()}
-                />
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <AdminActionRemoveUsersDialog
+                data={filteredData}
+                onSuccess={() => table.resetRowSelection()}
+              />
+            </PopoverContent>
+          </Popover>
         );
       }}
       {...props}
@@ -783,96 +772,120 @@ export function UserDataTable({
   );
 }
 
-export function UserDetailSheet({
+export function UserDetailDialog({
   data,
   isCurrentUser,
 }: {
   data: AuthSession["user"];
   isCurrentUser: boolean;
 }) {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const details: DetailListData = [
-    { label: "Alamat email", content: data.email },
     { label: "Terakhir diperbarui", content: messages.dateAgo(data.updatedAt) },
     { label: "Waktu dibuat", content: messages.dateAgo(data.createdAt) },
   ];
 
   return (
-    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <div className="flex items-center gap-x-3">
         <UserAvatar data={data} className="rounded-full" />
-        <SheetTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
+        <DialogTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
           <span className="link-group">{data.name}</span>
           <ArrowUpRight className="group-hover:text-primary size-3.5" />
-        </SheetTrigger>
+        </DialogTrigger>
       </div>
 
-      <SheetContent>
-        <SheetHeader className="flex-row items-center">
-          <UserAvatar data={data} className="size-10" />
-          <div className="grid">
-            <SheetTitle className="text-base">{data.name}</SheetTitle>
-            <SheetDescription># {data.id.slice(0, 17)}</SheetDescription>
+      <DialogContent hideCloseButton>
+        <DialogHeader className="flex-row justify-between gap-x-4">
+          <div className="flex items-center gap-x-3">
+            <UserAvatar data={data} className="size-12" />
+            <div className="grid">
+              <SheetTitle className="text-base">{data.name}</SheetTitle>
+              <SheetDescription>{data.email}</SheetDescription>
+            </div>
           </div>
-        </SheetHeader>
 
-        <div className="flex flex-col gap-y-3 overflow-y-auto px-4">
+          <div className="flex gap-x-2">
+            {!isCurrentUser && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button size="icon-xs" variant="outline">
+                    <Ellipsis />
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent
+                  className="grid gap-y-1 p-1 [&_button]:justify-start"
+                  align="end"
+                >
+                  <AdminRevokeUserSessionsDialog
+                    data={data}
+                    setIsDialogOpen={setIsDialogOpen}
+                  />
+
+                  {/* // TODO */}
+                  <Button size="sm" variant="ghost" disabled>
+                    <Layers2 /> Tiru Sesi
+                  </Button>
+
+                  <Separator />
+
+                  {data.banned ? (
+                    <AdminUnbanUserDialog
+                      data={data}
+                      setIsDialogOpen={setIsDialogOpen}
+                    />
+                  ) : (
+                    <AdminBanUserDialog
+                      data={data}
+                      setIsDialogOpen={setIsDialogOpen}
+                    />
+                  )}
+
+                  <AdminRemoveUserDialog
+                    data={data}
+                    setIsDialogOpen={setIsDialogOpen}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+
+            <DialogClose size="icon-xs">
+              <XIcon />
+            </DialogClose>
+          </div>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-y-3 overflow-y-auto">
           <Separator />
 
           <div className="flex items-center gap-2">
+            {isCurrentUser && (
+              <Badge variant="outline">Pengguna saat ini</Badge>
+            )}
+
             <UserRoleBadge value={data.role as Role} />
             {data.emailVerified && <UserVerifiedBadge />}
           </div>
 
           <DetailList data={details} />
 
-          {!isCurrentUser && (
-            <>
-              <Separator />
+          <Separator />
 
-              <AdminChangeUserRoleForm
-                data={data}
-                setIsSheetOpen={setIsSheetOpen}
-              />
-
-              <Separator />
-
-              {/* // TODO */}
-              <Button variant="outline_primary" disabled>
-                <Layers2 /> Tiru Sesi
-              </Button>
-
-              <AdminRevokeUserSessionsDialog
-                data={data}
-                setIsSheetOpen={setIsSheetOpen}
-              />
-
-              {data.banned ? (
-                <AdminUnbanUserDialog
-                  data={data}
-                  setIsSheetOpen={setIsSheetOpen}
-                />
-              ) : (
-                <AdminBanUserDialog
-                  data={data}
-                  setIsSheetOpen={setIsSheetOpen}
-                />
-              )}
-            </>
+          {!isCurrentUser ? (
+            <AdminChangeUserRoleForm
+              data={data}
+              setIsDialogOpen={setIsDialogOpen}
+            />
+          ) : (
+            <DialogFooter>
+              <DialogClose>{messages.actions.back}</DialogClose>
+            </DialogFooter>
           )}
         </div>
-
-        {!isCurrentUser && (
-          <SheetFooter>
-            <AdminRemoveUserDialog
-              data={data}
-              setIsSheetOpen={setIsSheetOpen}
-            />
-          </SheetFooter>
-        )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1417,7 +1430,7 @@ export function RevokeOtherSessionsButton() {
 
 // #endregion
 
-// #region ADMIN
+/// #region ADMIN
 
 export function AdminCreateUserDialog() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -1657,10 +1670,10 @@ export function AdminCreateUserDialog() {
 
 function AdminChangeUserRoleForm({
   data,
-  setIsSheetOpen,
+  setIsDialogOpen,
 }: {
   data: AuthSession["user"];
-  setIsSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -1687,7 +1700,7 @@ function AdminChangeUserRoleForm({
       {
         success: () => {
           setIsLoading(false);
-          setIsSheetOpen(false);
+          setIsDialogOpen(false);
           mutateUsers();
           return `Role ${data.name} berhasil diperbarui menjadi ${role}.`;
         },
@@ -1759,20 +1772,23 @@ function AdminChangeUserRoleForm({
         )}
       />
 
-      <Button type="submit" disabled={isLoading}>
-        <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
-        {messages.actions.update}
-      </Button>
+      <DialogFooter>
+        <DialogClose>{messages.actions.back}</DialogClose>
+        <Button type="submit" disabled={isLoading}>
+          <LoadingSpinner loading={isLoading} icon={{ base: <Save /> }} />
+          {messages.actions.update}
+        </Button>
+      </DialogFooter>
     </form>
   );
 }
 
 function AdminRevokeUserSessionsDialog({
   data,
-  setIsSheetOpen,
+  setIsDialogOpen,
 }: {
   data: Pick<AuthSession["user"], "id" | "name">;
-  setIsSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -1788,7 +1804,7 @@ function AdminRevokeUserSessionsDialog({
       {
         success: () => {
           setIsLoading(false);
-          setIsSheetOpen(false);
+          setIsDialogOpen(false);
           return `Semua sesi aktif milik ${data.name} berhasil dicabut.`;
         },
         error: ({ error }) => {
@@ -1802,7 +1818,7 @@ function AdminRevokeUserSessionsDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline_warning" disabled={isLoading}>
+        <Button size="sm" variant="ghost" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <MonitorOff /> }} />
           {sharedText.revokeSession}
         </Button>
@@ -1810,8 +1826,8 @@ function AdminRevokeUserSessionsDialog({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-warning flex items-center gap-x-2">
-            <Info /> Cabut Semua Sesi Aktif untuk {data.name}
+          <AlertDialogTitle className="flex items-center gap-x-2">
+            <MonitorOff /> Cabut Semua Sesi Aktif untuk {data.name}
           </AlertDialogTitle>
           <AlertDialogDescription>
             Tindakan ini akan langsung menghentikan semua sesi aktif milik
@@ -1822,10 +1838,7 @@ function AdminRevokeUserSessionsDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
 
-          <AlertDialogAction
-            className={buttonVariants({ variant: "warning" })}
-            onClick={clickHandler}
-          >
+          <AlertDialogAction onClick={clickHandler}>
             {messages.actions.confirm}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -1836,10 +1849,10 @@ function AdminRevokeUserSessionsDialog({
 
 function AdminBanUserDialog({
   data,
-  setIsSheetOpen,
+  setIsDialogOpen,
 }: {
   data: Pick<AuthSession["user"], "id" | "name" | "image">;
-  setIsSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -1877,7 +1890,7 @@ function AdminBanUserDialog({
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
-          setIsSheetOpen(false);
+          setIsDialogOpen(false);
           mutateUsers();
           return `Akun atas nama ${data.name} berhasil diblokir.`;
         },
@@ -1892,7 +1905,7 @@ function AdminBanUserDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline_destructive" disabled={isLoading}>
+        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Ban /> }} />
           Blokir {data.name}
         </Button>
@@ -1968,10 +1981,10 @@ function AdminBanUserDialog({
 
 function AdminUnbanUserDialog({
   data,
-  setIsSheetOpen,
+  setIsDialogOpen,
 }: {
   data: Pick<AuthSession["user"], "id" | "name">;
-  setIsSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -1987,7 +2000,7 @@ function AdminUnbanUserDialog({
       {
         success: () => {
           setIsLoading(false);
-          setIsSheetOpen(false);
+          setIsDialogOpen(false);
           mutateUsers();
           return `Akun atas nama ${data.name} berhasil dibuka.`;
         },
@@ -2002,7 +2015,7 @@ function AdminUnbanUserDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" disabled={isLoading}>
+        <Button size="sm" variant="ghost" disabled={isLoading}>
           <LoadingSpinner
             loading={isLoading}
             icon={{ base: <LockKeyholeOpen /> }}
@@ -2035,10 +2048,10 @@ function AdminUnbanUserDialog({
 
 function AdminRemoveUserDialog({
   data,
-  setIsSheetOpen,
+  setIsDialogOpen,
 }: {
   data: Pick<AuthSession["user"], "id" | "name" | "image">;
-  setIsSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [input, setInput] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -2070,7 +2083,7 @@ function AdminRemoveUserDialog({
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
-          setIsSheetOpen(false);
+          setIsDialogOpen(false);
           mutateUsers();
           return `Akun atas nama ${data.name} berhasil dihapus.`;
         },
@@ -2085,7 +2098,7 @@ function AdminRemoveUserDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline_destructive" disabled={isLoading}>
+        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2 /> }} />
           {`${messages.actions.remove} ${data.name}`}
         </Button>
@@ -2175,7 +2188,7 @@ function AdminActionRevokeUserSessionsDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+        <Button size="sm" variant="ghost" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <MonitorOff /> }} />
           {sharedText.revokeSession}
         </Button>
@@ -2184,7 +2197,7 @@ function AdminActionRevokeUserSessionsDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-x-2">
-            Cabut Sesi untuk {userIds.length} Pengguna
+            <MonitorOff /> Cabut Sesi untuk {userIds.length} Pengguna
           </AlertDialogTitle>
           <AlertDialogDescription>
             Ini akan menghentikan semua sesi aktif dari{" "}
@@ -2195,10 +2208,7 @@ function AdminActionRevokeUserSessionsDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel>{messages.actions.cancel}</AlertDialogCancel>
-          <AlertDialogAction
-            className={buttonVariants({ variant: "destructive" })}
-            onClick={clickHandler}
-          >
+          <AlertDialogAction onClick={clickHandler}>
             {messages.actions.confirm}
           </AlertDialogAction>
         </AlertDialogFooter>
