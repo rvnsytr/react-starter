@@ -10,8 +10,8 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/vite": "^4.1.18",
-    "@tanstack/react-router": "^1.141.6",
-    "@tanstack/react-router-devtools": "^1.141.6",
+    "@tanstack/react-router": "^1.141.8",
+    "@tanstack/react-router-devtools": "^1.141.8",
     "@tanstack/react-table": "^8.21.3",
     "better-auth": "^1.4.7",
     "class-variance-authority": "^0.7.1",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@tanstack/eslint-plugin-router": "^1.141.0",
-    "@tanstack/router-plugin": "^1.141.7",
+    "@tanstack/router-plugin": "^1.142.0",
     "@types/node": "^24.10.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
