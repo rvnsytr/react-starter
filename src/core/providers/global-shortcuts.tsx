@@ -1,17 +1,17 @@
 import { useEffect, useEffectEvent } from "react";
-import { useTheme } from "./theme";
+import { nextTheme, useTheme } from "../components/ui/theme";
 
 export function GlobalShortcuts() {
   const { theme, setTheme } = useTheme();
 
   const onTheme = useEffectEvent(() => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
+    const t = nextTheme(theme);
+    setTheme(t);
   });
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Theme
+      // ? Theme
       if (e.altKey && e.key === "t") {
         e.preventDefault();
         onTheme();
@@ -22,7 +22,7 @@ export function GlobalShortcuts() {
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, []);
+  }, [setTheme]);
 
   return null;
 }

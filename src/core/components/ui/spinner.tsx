@@ -1,13 +1,13 @@
 import { cn } from "@/core/utils";
 import { useRouterState } from "@tanstack/react-router";
 import {
-  Frame,
+  FrameIcon,
   Loader2Icon,
   LoaderIcon,
   LucideIcon,
   LucideProps,
-  Orbit,
-  RefreshCcw,
+  OrbitIcon,
+  RefreshCcwIcon,
 } from "lucide-react";
 
 type SpinnerVariant = "default" | "loader" | "refresh" | "frame" | "orbit";
@@ -26,9 +26,9 @@ export function Spinner({
   const allIcon: Record<SpinnerVariant, LucideIcon> = {
     default: Loader2Icon,
     loader: LoaderIcon,
-    refresh: RefreshCcw,
-    frame: Frame,
-    orbit: Orbit,
+    refresh: RefreshCcwIcon,
+    frame: FrameIcon,
+    orbit: OrbitIcon,
   };
 
   const reverseArr: SpinnerVariant[] = ["orbit"];

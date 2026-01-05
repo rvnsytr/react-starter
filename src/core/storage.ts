@@ -1,6 +1,6 @@
 import z from "zod";
 import { apiFetcher } from "./api";
-import { storageSchema } from "./schemas";
+import { storageSchema } from "./schema";
 
 export async function uploadFiles(
   body: FormData,
@@ -31,7 +31,7 @@ export async function uploadFiles(
 }
 
 export async function removeFiles(ids: string[]) {
-  return await apiFetcher("/storage", z.object({ count: z.number() }), {
+  return await apiFetcher("/storage", z.null(), {
     method: "DELETE",
     body: JSON.stringify({ ids }),
     headers: { "Content-Type": "application/json" },

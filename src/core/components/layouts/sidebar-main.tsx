@@ -1,14 +1,13 @@
 import { dashboardfooterMenu, routesMeta } from "@/core/constants";
+import { getActiveRoute, getMenuByRole, toKebab } from "@/core/utils";
 import {
-  cn,
-  getActiveRoute,
-  getMenuByRole,
-  normalizeRoute,
-  toKebab,
-} from "@/core/utils";
-import { Role, SignOutButton, useAuth, UserAvatar } from "@/modules/auth";
+  SignOutButton,
+  useAuth,
+  UserAvatar,
+  UserVerifiedBadge,
+} from "@/modules/auth";
 import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import {
   ComponentProps,
   useEffect,
@@ -33,7 +32,6 @@ import {
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
-  sidebarMenuButtonVariants,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
@@ -42,14 +40,15 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "../ui/sidebar";
+import { LinkSpinner } from "../ui/spinner";
 
 export function SidebarMain() {
   const { user } = useAuth();
-
-  const { pathname } = useLocation();
   const { isMobile, toggleSidebar } = useSidebar();
 
-  const menu = useMemo(() => getMenuByRole(user.role as Role), [user.role]);
+  const { pathname } = useLocation();
+
+  const menu = useMemo(() => getMenuByRole(user.role), [user.role]);
 
   return (
     <Sidebar collapsible="icon">
@@ -62,8 +61,7 @@ export function SidebarMain() {
               className="group/head-button h-13 group-data-[collapsible=icon]:my-2.5 group-data-[collapsible=icon]:p-0"
               asChild
             >
-              {/* <Link to="/dashboard/profile"> */}
-              <Link to="/dashboard">
+              <Link to="/dashboard/profile">
                 <UserAvatar
                   data={user}
                   className="rounded-md"
@@ -78,6 +76,12 @@ export function SidebarMain() {
                     <span className="line-clamp-1 text-sm font-semibold">
                       {user.name}
                     </span>
+                    {user.emailVerified && (
+                      <UserVerifiedBadge
+                        classNames={{ icon: "size-3.5" }}
+                        withoutText
+                      />
+                    )}
                   </div>
 
                   <span className="line-clamp-1 text-xs">{user.email}</span>
@@ -102,8 +106,7 @@ export function SidebarMain() {
               {content.map(({ route, icon: Icon, disabled, subMenu }) => {
                 const { displayName } = routesMeta[route];
 
-                const normalizedPath = normalizeRoute(pathname);
-                const isActive = route === getActiveRoute(normalizedPath);
+                const isActive = route === getActiveRoute(pathname);
                 const iconElement = Icon && <Icon />;
 
                 if (disabled) {
@@ -131,7 +134,7 @@ export function SidebarMain() {
                         asChild
                       >
                         <Link to={route}>
-                          {iconElement}
+                          <LinkSpinner icon={{ base: iconElement }} />
                           <span className="line-clamp-1">{displayName}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -140,7 +143,7 @@ export function SidebarMain() {
                         <>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuAction className="data-[state=open]:rotate-90">
-                              <ChevronRight />
+                              <ChevronRightIcon />
                             </SidebarMenuAction>
                           </CollapsibleTrigger>
 
@@ -159,9 +162,11 @@ export function SidebarMain() {
                                         itm.href ??
                                         (`${route}/#${toKebab(itm.displayName)}` as string)
                                       }
-                                      className="line-clamp-1"
                                     >
-                                      {itm.displayName}
+                                      <span className="line-clamp-1">
+                                        {itm.displayName}
+                                      </span>
+                                      <LinkSpinner />
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
@@ -185,12 +190,9 @@ export function SidebarMain() {
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Refresh Page" asChild>
               <RefreshButton
-                size="sm"
+                size="xs"
                 variant="ghost"
-                className={cn(
-                  sidebarMenuButtonVariants({ size: "sm" }),
-                  "justify-start",
-                )}
+                className="justify-start text-xs"
               />
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -207,7 +209,7 @@ export function SidebarMain() {
                   ) : (
                     <SidebarMenuButton size="sm" tooltip={displayName} asChild>
                       <Link to={route}>
-                        {iconElement}
+                        <LinkSpinner icon={{ base: iconElement }} />
                         {displayName}
                       </Link>
                     </SidebarMenuButton>
@@ -218,6 +220,8 @@ export function SidebarMain() {
           )}
 
           <SidebarSeparator />
+
+          <StopImpersonateUserMenuItem />
 
           <SidebarMenuItem>
             <SignOutButton />

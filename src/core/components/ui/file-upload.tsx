@@ -1,8 +1,8 @@
 import { fileMeta, FileType, messages } from "@/core/constants";
-import { sharedSchemas } from "@/core/schemas";
+import { sharedSchemas } from "@/core/schema";
 import { cn, toMegabytes } from "@/core/utils";
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Dot, X } from "lucide-react";
+import { ArrowUpRightIcon, DotIcon, XIcon } from "lucide-react";
 import {
   DragEvent,
   KeyboardEvent,
@@ -153,7 +153,7 @@ export function FileUpload({
           <span>Maksimal {fileSize.mb} MB</span>
           {extensions.length > 0 && (
             <>
-              <Dot className="hidden md:block" />
+              <DotIcon className="hidden md:block" />
               <span>{`( ${extensions.join(" ")} )`}</span>
             </>
           )}
@@ -179,7 +179,7 @@ export function FileUpload({
             variant="outline_destructive"
             onClick={resetFiles}
           >
-            <X /> {messages.actions.clear}
+            <XIcon /> {messages.actions.clear}
           </Button>
         </div>
       )}
@@ -203,7 +203,7 @@ export function FileUpload({
                   variant="destructive"
                   className="absolute -top-2 -right-2 z-10 rounded-full hover:cursor-pointer"
                 >
-                  <X />
+                  <XIcon />
                 </Button>
 
                 <Link
@@ -246,7 +246,8 @@ export function FileUpload({
                     )}
                   >
                     <span className="flex gap-x-2">
-                      {file.name} <ArrowUpRight className="size-4 shrink-0" />
+                      {file.name}
+                      <ArrowUpRightIcon className="size-4 shrink-0" />
                     </span>
                   </Link>
 

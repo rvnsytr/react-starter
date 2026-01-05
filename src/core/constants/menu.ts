@@ -1,12 +1,12 @@
 import { LinkProps } from "@tanstack/react-router";
 import {
-  CircleHelp,
-  ExternalLink,
-  LayoutDashboard,
+  CircleHelpIcon,
+  ExternalLinkIcon,
+  LayoutDashboardIcon,
   LucideIcon,
-  Settings,
-  UserRound,
-  UsersRound,
+  SettingsIcon,
+  UserRoundIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import { Route, RouteRole } from "./routes";
 
@@ -31,8 +31,8 @@ export const dashboardMenu: Menu[] = [
   {
     section: "Umum",
     content: [
-      { route: "/dashboard", icon: LayoutDashboard },
-      { route: "/dashboard/users", icon: UsersRound },
+      { route: "/dashboard", icon: LayoutDashboardIcon },
+      { route: "/dashboard/users", icon: UsersRoundIcon },
     ],
   },
   {
@@ -40,12 +40,12 @@ export const dashboardMenu: Menu[] = [
     content: [
       {
         route: "/dashboard/profile",
-        icon: UserRound,
+        icon: UserRoundIcon,
         subMenu: [{ displayName: "Informasi Pribadi" }],
       },
       {
         route: "/dashboard/settings",
-        icon: Settings,
+        icon: SettingsIcon,
         subMenu: [
           { displayName: "Tema" },
           { displayName: "Layout" },
@@ -58,11 +58,11 @@ export const dashboardMenu: Menu[] = [
 ];
 
 export const dashboardfooterMenu: (MenuContent & { displayName: string })[] = [
-  { route: "/", displayName: "Beranda", icon: ExternalLink },
+  { route: "/", displayName: "Beranda", icon: ExternalLinkIcon },
   {
     route: "/dashboard",
     displayName: "Bantuan",
-    icon: CircleHelp,
+    icon: CircleHelpIcon,
     disabled: true,
   },
 ];

@@ -1,34 +1,11 @@
 import { messages, Route } from "@/core/constants";
-import {
-  defaultLayout,
-  LayoutMode,
-  useLayout,
-  useTheme,
-} from "@/core/providers";
 import { cn, delay } from "@/core/utils";
 import { Link, useRouter } from "@tanstack/react-router";
-import {
-  ArrowUp,
-  Check,
-  Copy,
-  Frame,
-  Minimize,
-  Monitor,
-  Moon,
-  RefreshCcw,
-  RotateCcw,
-  Scan,
-  Sun,
-} from "lucide-react";
-import { ComponentProps, useEffect, useEffectEvent, useState } from "react";
+import { ArrowUp, Check, Copy, RefreshCcw, RotateCcw } from "lucide-react";
+import { useState } from "react";
 import { Button, ButtonProps } from "./button";
-import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";
-import { Kbd, KbdGroup } from "./kbd";
-import { RadioGroup, RadioGroupItem } from "./radio-group";
 import { LoadingSpinner } from "./spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
-type ButtonPropsWithoutChildren = Omit<ButtonProps, "children">;
 type ButtonIconSize = "icon-xs" | "icon-sm" | "icon" | "icon-lg";
 
 export function ResetButton({
@@ -36,7 +13,7 @@ export function ResetButton({
   size = "default",
   variant = "outline",
   ...props
-}: ButtonPropsWithoutChildren) {
+}: Omit<ButtonProps, "children">) {
   return (
     <Button type={type} size={size} variant={variant} {...props}>
       <RotateCcw /> {messages.actions.reset}
@@ -78,180 +55,13 @@ export function PulsatingButton({
   );
 }
 
-export function ThemeButton({
-  align,
-  size = "icon",
-  variant = "ghost",
-  onClick,
-  ...props
-}: ButtonPropsWithoutChildren &
-  Pick<ComponentProps<typeof TooltipContent>, "align">) {
-  const { theme, setTheme } = useTheme();
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size={size}
-          variant={variant}
-          onClick={(e) => {
-            onClick?.(e);
-            const newTheme = theme === "dark" ? "light" : "dark";
-            setTheme(newTheme);
-          }}
-          {...props}
-        >
-          <Sun className="flex dark:hidden" />
-          <Moon className="hidden dark:flex" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent
-        align={align}
-        className="flex flex-col items-center gap-2"
-      >
-        <span>Toggle Theme</span>
-        <KbdGroup>
-          <Kbd>Alt</Kbd>
-          <span>+</span>
-          <Kbd>T</Kbd>
-        </KbdGroup>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-export function ThemeSettings() {
-  const { theme, setTheme } = useTheme();
-
-  const data = [
-    { name: "Light", value: "light", icon: Sun },
-    { name: "System", value: "system", icon: Monitor },
-    { name: "Dark", value: "dark", icon: Moon },
-  ];
-
-  return (
-    <RadioGroup
-      value={theme ?? "system"}
-      onValueChange={setTheme}
-      className="grid grid-cols-3"
-      required
-    >
-      {data.map(({ name, value, icon: Icon }) => (
-        <FieldLabel key={value} htmlFor={`rd-theme-${value}`}>
-          <Field>
-            <FieldContent className="items-center">
-              <FieldTitle className="flex-col md:flex-row">
-                <Icon /> {name}
-              </FieldTitle>
-            </FieldContent>
-            <RadioGroupItem id={`rd-theme-${value}`} value={value} hidden />
-          </Field>
-        </FieldLabel>
-      ))}
-    </RadioGroup>
-  );
-}
-
-export function LayoutButton({
-  align,
-  size = "icon",
-  variant = "ghost",
-  onClick,
-  className,
-  disabled,
-  ...props
-}: ButtonPropsWithoutChildren &
-  Pick<ComponentProps<typeof TooltipContent>, "align">) {
-  const { layout, setLayout } = useLayout();
-  const LayoutIcon = !layout
-    ? Frame
-    : { fullwidth: Scan, centered: Minimize }[layout];
-
-  const toggleLayout = () =>
-    setLayout((prev) => (prev === "fullwidth" ? "centered" : "fullwidth"));
-  const onLayout = useEffectEvent(() => toggleLayout());
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === "l") {
-        e.preventDefault();
-        onLayout();
-      }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size={size}
-          variant={variant}
-          onClick={(e) => {
-            onClick?.(e);
-            toggleLayout();
-          }}
-          className={cn("hidden md:inline-flex", className)}
-          disabled={disabled ?? !layout}
-          {...props}
-        >
-          <LayoutIcon />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent
-        align={align}
-        className="flex flex-col items-center gap-2"
-      >
-        <span>Toggle Layout</span>
-        <KbdGroup>
-          <Kbd>Alt</Kbd>
-          <span>+</span>
-          <Kbd>L</Kbd>
-        </KbdGroup>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-export function LayoutSettings() {
-  const { layout, setLayout } = useLayout();
-
-  const data = [
-    { name: "Fullwidth", value: "fullwidth", icon: Scan },
-    { name: "Centered", value: "centered", icon: Minimize },
-  ];
-
-  return (
-    <RadioGroup
-      value={layout ?? defaultLayout}
-      onValueChange={(v) => setLayout(v as LayoutMode)}
-      className="grid grid-cols-2"
-      required
-    >
-      {data.map(({ name, value, icon: Icon }) => (
-        <FieldLabel key={value} htmlFor={`rd-theme-${value}`}>
-          <Field>
-            <FieldContent className="items-center">
-              <FieldTitle className="flex-col md:flex-row">
-                <Icon /> {name}
-              </FieldTitle>
-            </FieldContent>
-            <RadioGroupItem id={`rd-theme-${value}`} value={value} hidden />
-          </Field>
-        </FieldLabel>
-      ))}
-    </RadioGroup>
-  );
-}
-
 export function CopyButton({
   value,
   size = "icon",
   disabled,
   onClick,
   ...props
-}: Omit<ButtonPropsWithoutChildren, "value" | "size"> & {
+}: Omit<Omit<ButtonProps, "children">, "value" | "size"> & {
   value: string;
   size?: ButtonIconSize;
 }) {
@@ -279,11 +89,11 @@ export function CopyButton({
 }
 
 export function RefreshButton({
-  text = messages.actions.refresh,
+  text = "Muat Ulang",
   disabled,
   onClick,
   ...props
-}: ButtonPropsWithoutChildren & { text?: string }) {
+}: Omit<ButtonProps, "children"> & { text?: string }) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -315,7 +125,7 @@ export function ScrollToTopButton({
   className,
   onClick,
   ...props
-}: ButtonPropsWithoutChildren) {
+}: Omit<ButtonProps, "children">) {
   return (
     <Button
       size={size}

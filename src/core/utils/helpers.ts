@@ -10,11 +10,11 @@ import {
   routesMeta,
 } from "../constants";
 
-export function authorized(route: Route | null, role?: string | null) {
+export function authorizedRoute(route: Route | null, role?: Role) {
   if (!route || !role) return false;
   const meta = routesMeta[route];
   if (!meta.role) return true;
-  return meta.role && (meta.role === "all" || meta.role.includes(role as Role));
+  return meta.role && (meta.role === "all" || meta.role.includes(role));
 }
 
 export function cn(...inputs: ClassValue[]) {
@@ -23,6 +23,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function delay(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
+export function clamp(num: number, min: number, max: number) {
+  return Math.min(Math.max(num, min), max);
 }
 
 export function normalizeRoute(route?: string | null): Route {

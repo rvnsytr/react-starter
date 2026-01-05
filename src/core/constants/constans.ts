@@ -1,4 +1,15 @@
-import { LucideIcon, Mars, Venus } from "lucide-react";
+import { LucideIcon, MarsIcon, VenusIcon } from "lucide-react";
+
+export const allRequestMetaKey = [
+  "basePath",
+  "href",
+  "origin",
+  "hostname",
+  "pathname",
+  "hash",
+  "search",
+] as const;
+export type RequestMetaKey = (typeof allRequestMetaKey)[number];
 
 export const allGenders = ["m", "f"] as const;
 export type Gender = (typeof allGenders)[number];
@@ -6,8 +17,16 @@ export const genderMeta: Record<
   Gender,
   { displayName: string; icon: LucideIcon; color: string }
 > = {
-  m: { displayName: "Laki-laki", icon: Mars, color: "var(--color-sky-500)" },
-  f: { displayName: "Perempuan", icon: Venus, color: "var(--color-pink-500)" },
+  m: {
+    displayName: "Laki-laki",
+    icon: MarsIcon,
+    color: "var(--color-sky-500)",
+  },
+  f: {
+    displayName: "Perempuan",
+    icon: VenusIcon,
+    color: "var(--color-pink-500)",
+  },
 };
 
 export const allLanguages = ["en", "id", "es", "fr", "de", "ar"] as const;

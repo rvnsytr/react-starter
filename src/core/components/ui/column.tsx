@@ -1,12 +1,12 @@
 import { cn } from "@/core/utils";
 import { CellContext, HeaderContext } from "@tanstack/react-table";
 import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpDown,
-  Pin,
-  PinOff,
-  X,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowUpDownIcon,
+  PinIcon,
+  PinOffIcon,
+  XIcon,
 } from "lucide-react";
 import { Button } from "./button";
 import { Checkbox, CheckboxProps } from "./checkbox";
@@ -26,7 +26,7 @@ export function ColumnHeader<TData, TValue>({
   children: React.ReactNode;
 }) {
   const columnPinned = column.getIsPinned();
-  const ColumnPinIcon = columnPinned ? PinOff : Pin;
+  const ColumnPinIcon = columnPinned ? PinOffIcon : PinIcon;
 
   return (
     <div
@@ -44,7 +44,7 @@ export function ColumnHeader<TData, TValue>({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <ArrowUpDown />
+            <ArrowUpDownIcon />
           </Button>
         )}
 
@@ -61,7 +61,7 @@ export function ColumnHeader<TData, TValue>({
                 onClick={() => column.pin("left")}
                 disabled={columnPinned === "left"}
               >
-                <ArrowLeft />
+                <ArrowLeftIcon />
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
@@ -69,14 +69,14 @@ export function ColumnHeader<TData, TValue>({
                 onClick={() => column.pin(false)}
                 disabled={columnPinned === false}
               >
-                <X />
+                <XIcon />
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="size-6"
                 onClick={() => column.pin("right")}
                 disabled={columnPinned === "right"}
               >
-                <ArrowRight />
+                <ArrowRightIcon />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -109,6 +109,7 @@ export function ColumnCellCheckbox<TData, TValue>({
   ...props
 }: Pick<CellContext<TData, TValue>, "row"> &
   Omit<CheckboxProps, "checked" | "onCheckedChange">) {
+  if (!row.getCanSelect()) return;
   return (
     <Checkbox
       aria-label="Select row"
@@ -117,4 +118,14 @@ export function ColumnCellCheckbox<TData, TValue>({
       {...props}
     />
   );
+}
+
+export function ColumnCellNumber<TData, TValue>({
+  table,
+  row,
+}: Pick<CellContext<TData, TValue>, "table" | "row">) {
+  const pageIndex = table.getState().pagination.pageIndex;
+  const pageSize = table.getState().pagination.pageSize;
+  const rowNumber = pageIndex * pageSize + row.index + 1;
+  return <div className="text-center">{rowNumber}</div>;
 }

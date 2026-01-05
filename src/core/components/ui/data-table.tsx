@@ -1,16 +1,19 @@
+import { ApiResponse } from "@/core/api";
 import { messages } from "@/core/constants";
-import { useIsMobile } from "@/core/hooks";
-import { cn, formatNumber } from "@/core/utils";
+import { useDebounce, useIsMobile } from "@/core/hooks";
+import {
+  allDateFilterOperators,
+  allMultiOptionFilterOperators,
+  allNumberFilterOperators,
+  allOptionFilterOperators,
+  allTextFilterOperators,
+  cn,
+  formatNumber,
+} from "@/core/utils";
 import {
   ColumnDef,
   ColumnFiltersState,
-  ColumnPinningState,
   Table as DataTableType,
-  InitialTableState,
-  Row,
-  SortingState,
-  TableOptions,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -18,18 +21,34 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  PaginationState,
+  Row,
+  SortingState,
+  TableOptions,
   useReactTable,
 } from "@tanstack/react-table";
+import { isValid } from "date-fns";
 import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Columns3,
-  RotateCcw,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+  RotateCcwSquareIcon,
   SearchIcon,
+  ViewIcon,
 } from "lucide-react";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import {
+  createParser,
+  parseAsArrayOf,
+  parseAsIndex,
+  parseAsInteger,
+  parseAsString,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
+import useSWR, { mutate, SWRConfiguration } from "swr";
+import z from "zod";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
 import { RefreshButton } from "./buttons";
@@ -47,6 +66,7 @@ import {
   FilterActions,
   FilterSelector,
 } from "./data-table-filter";
+import { ErrorFallback } from "./fallback";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
 import { Kbd } from "./kbd";
 import { Label } from "./label";
@@ -59,6 +79,7 @@ import {
   SelectValue,
 } from "./select";
 import { Separator } from "./separator";
+import { Skeleton } from "./skeleton";
 import {
   Table,
   TableBody,
@@ -68,22 +89,40 @@ import {
   TableRow,
 } from "./table";
 
-type DataTableProps<TData> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: ColumnDef<TData, any>[];
-  data: TData[];
+export type DataTableState = {
+  pagination: PaginationState;
+  sorting: SortingState;
+  columnFilters: z.infer<typeof columnFilterSchema>[];
+  globalFilter: string;
 };
 
-export type TableProps<TData> = { table: DataTableType<TData> };
-export type ToolBoxProps = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DataTableColumnDef<TData> = ColumnDef<TData, any>[];
+
+type CoreDataTableProps<TData> = {
+  mode: "client" | "server";
+  swr: {
+    key: string;
+    fetcher: (state: DataTableState) => Promise<ApiResponse<TData[]>>;
+    config?: SWRConfiguration;
+  };
+  getColumns: (res?: ApiResponse<TData[]>) => DataTableColumnDef<TData>;
+};
+
+type ToolBoxProps<TData> = {
   searchPlaceholder?: string;
   withRefresh?: boolean;
+
+  renderRowSelection?: (props: {
+    rows: Row<TData>[];
+    table: DataTableType<TData>;
+  }) => ReactNode;
 };
 
-export type OtherDataTableProps<TData> = ToolBoxProps & {
+export type DataTableProps<TData> = ToolBoxProps<TData> & {
+  id?: string;
   caption?: string;
   placeholder?: string;
-
   className?: string;
   classNames?: {
     toolbox?: string;
@@ -92,97 +131,274 @@ export type OtherDataTableProps<TData> = ToolBoxProps & {
     table?: string;
     footer?: string;
   };
-
-  initialState?: InitialTableState;
-  renderRowSelection?: (
-    data: Row<TData>[],
-    table: DataTableType<TData>,
-  ) => ReactNode;
 };
 
-const rowsLimitArr = [5, 10, 20, 30, 40, 50, 100];
-const defaultRowsLimit = rowsLimitArr[2];
+const pageSizes = [5, 10, 20, 30, 40, 50, 100];
+const defaultPageSize = pageSizes[1];
+
+const columnFilterSchema = z.object({
+  id: z.string(),
+  value: z.union([
+    z.object({
+      operator: z.enum([
+        ...allTextFilterOperators,
+        ...allOptionFilterOperators,
+        ...allMultiOptionFilterOperators,
+      ]),
+      values: z.string().array(),
+    }),
+    z.object({
+      operator: z.enum(allNumberFilterOperators),
+      values: z.number().array(),
+    }),
+    z.object({
+      operator: z.enum(allDateFilterOperators),
+      values: z.date().array(),
+    }),
+  ]),
+});
+
+const arrayQSParser = parseAsArrayOf(parseAsString).withDefault([]);
+
+const getRecordQSParser = (parseValue: boolean) =>
+  createParser<Record<string, boolean>>({
+    parse: (value) => {
+      if (!value) return {};
+      return Object.fromEntries(value.split(",").map((v) => [v, parseValue]));
+    },
+    serialize: (value) => {
+      const entries = Object.entries(value);
+      // Nuqs TS bug? it should returned `string | null`
+      if (!entries?.length) return null as unknown as string;
+      return entries
+        .map(([k, v]) => (v === parseValue ? k : null))
+        .filter((v) => !!v)
+        .join(",");
+    },
+  }).withDefault({});
+
+const sortingParser = createParser<SortingState>({
+  parse: (value) => {
+    if (!value) return [];
+    return value
+      .split(";")
+      .map((part) => {
+        const [id, rawDir] = part.split(":");
+        const parsed = z.enum(["asc", "desc"]).safeParse(rawDir);
+        if (!id || !parsed.success) return null;
+        return { id, desc: parsed.data === "desc" };
+      })
+      .filter((v) => !!v);
+  },
+  serialize: (value) => {
+    // Nuqs TS bug? it should returned `string | null`
+    if (!value?.length) return null as unknown as string;
+    return value.map((s) => `${s.id}:${s.desc ? "desc" : "asc"}`).join(";");
+  },
+}).withDefault([]);
+
+export function columnFiltersParser<TData>(
+  getColumns: () => DataTableColumnDef<TData>,
+) {
+  return createParser<ColumnFiltersState>({
+    parse: (value) => {
+      if (!value) return [];
+      return value
+        .split(";")
+        .map((part) => {
+          const [id, operator, rawValues = ""] = part.split(":");
+          if (!id || !operator || !rawValues) return null;
+
+          const col = getColumns().find((c) => c.id === id);
+          if (!col) return null;
+
+          const values = rawValues
+            ? rawValues
+                .split(",")
+                .map((v) => {
+                  if (col.meta?.type === "date") {
+                    const d = new Date(Number(v));
+                    if (isValid(d)) return d;
+                    else return null;
+                  }
+
+                  if (col.meta?.type === "number") {
+                    const n = Number(v);
+                    if (!Number.isNaN(n)) return n;
+                    else return null;
+                  }
+
+                  return v;
+                })
+                .filter((v) => !!v)
+            : [];
+
+          if (!values.length) return null;
+          return { id, value: { operator, values } };
+        })
+        .filter((v) => !!v);
+    },
+    serialize: (value) => {
+      // Nuqs TS bug? it should returned `string | null`
+      if (!value?.length) return null as unknown as string;
+
+      return value
+        .map(({ id, value: rawValue }) => {
+          const parsed = columnFilterSchema.shape.value.safeParse(rawValue);
+          if (!parsed.success) return null;
+
+          const { operator, values } = parsed.data;
+          const serializedValues = values.map((v) =>
+            v instanceof Date ? v.getTime() : String(v),
+          );
+
+          return `${id}:${operator}:${serializedValues.join(",")}`;
+        })
+        .filter((v) => !!v)
+        .join(";");
+    },
+  }).withDefault([]);
+}
+
+export const mutateDataTable = (key: string) =>
+  mutate((a) => !!a && typeof a === "object" && "key" in a && a.key === key);
 
 export function DataTable<TData>({
-  data,
-  columns,
+  mode,
+  swr,
+  getColumns,
+
+  id,
   caption,
   placeholder,
   className,
   classNames,
-  initialState,
-  renderRowSelection,
-  enableRowSelection,
-  ...props
-}: DataTableProps<TData> &
-  OtherDataTableProps<TData> &
-  Pick<TableOptions<TData>, "enableRowSelection">) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState<string>("");
 
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
-  });
+  getRowId,
+  enableRowSelection,
+
+  ...props
+}: CoreDataTableProps<TData> &
+  DataTableProps<TData> &
+  Pick<TableOptions<TData>, "getRowId" | "enableRowSelection">) {
+  const isServer = mode === "server";
+  const prefix = id ? `${id}-` : "";
 
   const isMobile = useIsMobile();
-  const [rowSelector, setRowSelector] = useState<ReactNode>(null);
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+  const [columnVisibility, setColumnVisibility] = useQueryState(
+    `${prefix}col-vis`,
+    getRecordQSParser(false),
+  );
 
-    globalFilterFn: "includesString",
-    onGlobalFilterChange: setGlobalFilter,
+  const [columnPinning, setColumnPinning] = useQueryStates(
+    { left: arrayQSParser, right: arrayQSParser },
+    { urlKeys: { left: `${prefix}pin-l`, right: `${prefix}pin-r` } },
+  );
 
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+  const [rowSelection, setRowSelection] = useQueryState(
+    `${prefix}row-selected`,
+    getRecordQSParser(true),
+  );
 
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
+  const [globalFilter, setGlobalFilter] = useQueryState(
+    `${prefix}global-filter`,
+    parseAsString.withDefault(""),
+  );
 
-    onColumnVisibilityChange: setColumnVisibility,
+  const [columnFilters, setColumnFilters] = useQueryState(
+    `${prefix}filter`,
+    columnFiltersParser(getColumns),
+  );
 
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
+  const [sorting, setSorting] = useQueryState(`${prefix}sort`, sortingParser);
 
-    enableRowSelection,
-    onRowSelectionChange: setRowSelection,
-
-    onColumnPinningChange: setColumnPinning,
-
-    initialState: {
-      pagination: { pageIndex: 0, pageSize: defaultRowsLimit },
-      ...initialState,
+  const [pagination, setPagination] = useQueryStates(
+    {
+      pageIndex: parseAsIndex.withDefault(0),
+      pageSize: parseAsInteger.withDefault(defaultPageSize),
     },
+    { urlKeys: { pageIndex: `${prefix}page`, pageSize: `${prefix}size` } },
+  );
+
+  const debouncedGlobalFilter = useDebounce(globalFilter);
+
+  const allStates: DataTableState = useMemo(() => {
+    const parsed = columnFilterSchema.array().safeParse(columnFilters);
+    return {
+      globalFilter: debouncedGlobalFilter,
+      columnFilters: parsed.data ?? [],
+      sorting,
+      pagination,
+    };
+  }, [debouncedGlobalFilter, columnFilters, sorting, pagination]);
+
+  const baseArgument = { key: swr.key };
+  const { data, isLoading, error } = useSWR(
+    isServer ? { ...baseArgument, ...allStates } : baseArgument,
+    async () => await swr.fetcher(allStates),
+    swr.config,
+  );
+
+  const columns = useMemo(() => {
+    if (data?.success) return getColumns(data);
+    return getColumns();
+  }, [data, getColumns]);
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    columns,
+    data: data?.success ? data.data : [],
 
     state: {
-      sorting,
       globalFilter,
+      sorting,
       columnFilters,
+      pagination,
       columnVisibility,
       rowSelection,
       columnPinning,
     },
+
+    getCoreRowModel: getCoreRowModel(),
+
+    // ? Column Faceting
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+
+    // ? Column Pinning
+    onColumnPinningChange: setColumnPinning,
+    onColumnVisibilityChange: setColumnVisibility,
+
+    // ? Row Selection
+    getRowId,
+    enableRowSelection,
+    onRowSelectionChange: setRowSelection,
+
+    // * Global Searching
+    manualFiltering: isServer,
+    globalFilterFn: "includesString",
+    onGlobalFilterChange: setGlobalFilter,
+
+    // TODO: Column Filtering
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: !isServer ? getFilteredRowModel() : undefined,
+
+    // * Column Sorting
+    manualSorting: isServer,
+    onSortingChange: setSorting,
+    getSortedRowModel: !isServer ? getSortedRowModel() : undefined,
+
+    // * Pagination
+    manualPagination: isServer,
+    rowCount: data?.success ? (data.count?.total ?? 0) : 0,
+    onPaginationChange: setPagination,
+    getPaginationRowModel: !isServer ? getPaginationRowModel() : undefined,
   });
 
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-  const filteredRows = table.getFilteredRowModel().rows;
-
-  const totalPage = table.getPageCount() > 0 ? table.getPageCount() : 1;
-  const pageNumber =
-    table.getPageCount() > 0 ? table.getState().pagination.pageIndex + 1 : 1;
-
-  useEffect(() => {
-    if (renderRowSelection)
-      setRowSelector(renderRowSelection(selectedRows, table));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderRowSelection, selectedRows]);
+  if (error) return <ErrorFallback error={error} />;
+  if (!isLoading && data && !data.success)
+    return <ErrorFallback error={data.error} />;
 
   return (
     <div className={cn("flex flex-col gap-y-4", className)}>
@@ -191,9 +407,7 @@ export function DataTable<TData>({
         isMobile={isMobile}
         className={classNames?.toolbox}
         {...props}
-      >
-        {selectedRows.length > 0 && rowSelector}
-      </ToolBox>
+      />
 
       {table.getState().columnFilters.length > 0 && (
         <ActiveFiltersMobileContainer className={classNames?.filterContainer}>
@@ -239,7 +453,15 @@ export function DataTable<TData>({
         </TableHeader>
 
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {isLoading ? (
+            Array.from({ length: pagination.pageSize }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell colSpan={columns.length}>
+                  <Skeleton className="h-8 w-full" />
+                </TableCell>
+              </TableRow>
+            ))
+          ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -289,13 +511,15 @@ export function DataTable<TData>({
         <RowsPerPage
           table={table}
           isMobile={isMobile}
-          rowsLimitArr={rowsLimitArr}
           className="order-4 shrink-0 lg:order-1"
         />
 
         <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
-          {formatNumber(selectedRows.length)} dari{" "}
-          {formatNumber(filteredRows.length)} baris dipilih
+          {formatNumber(table.getFilteredSelectedRowModel().rows.length)} dari{" "}
+          {isLoading
+            ? "?"
+            : formatNumber(table.getFilteredRowModel().rows.length)}{" "}
+          baris dipilih
         </small>
 
         <small className="text-muted-foreground order-1 mx-auto text-sm lg:order-3">
@@ -303,7 +527,8 @@ export function DataTable<TData>({
         </small>
 
         <small className="order-2 shrink-0 tabular-nums lg:order-4">
-          Halaman {formatNumber(pageNumber)} dari {formatNumber(totalPage)}
+          Halaman {isLoading ? "?" : formatNumber(pagination.pageIndex + 1)}{" "}
+          dari {isLoading ? "?" : formatNumber(table.getPageCount())}
         </small>
 
         <Pagination
@@ -318,17 +543,19 @@ export function DataTable<TData>({
 
 function ToolBox<TData>({
   table,
-  searchPlaceholder,
-  withRefresh = false,
-  isMobile = false,
+  isMobile,
   className,
-  children,
-}: TableProps<TData> &
-  ToolBoxProps & {
-    isMobile?: boolean;
-    className?: string;
-    children: ReactNode;
-  }) {
+  searchPlaceholder = "Cari...",
+  withRefresh = false,
+  renderRowSelection,
+}: ToolBoxProps<TData> & {
+  table: DataTableType<TData>;
+  isMobile: boolean;
+  className?: string;
+}) {
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const isSelected = selectedRows.length > 0;
+
   return (
     <div
       className={cn(
@@ -343,11 +570,11 @@ function ToolBox<TData>({
           {withRefresh && <RefreshButton variant="outline" />}
         </ButtonGroup>
 
-        {children && !isMobile && (
-          <Separator orientation="vertical" className="h-5" />
+        {isSelected && !isMobile && (
+          <Separator orientation="vertical" className="h-4" />
         )}
 
-        {children}
+        {isSelected && renderRowSelection?.({ table, rows: selectedRows })}
       </div>
 
       <div className="flex gap-x-2 *:grow">
@@ -366,13 +593,16 @@ function View<TData>({
   table,
   isMobile,
   withRefresh,
-}: TableProps<TData> &
-  Pick<ToolBoxProps, "withRefresh"> & { isMobile: boolean }) {
+}: {
+  table: DataTableType<TData>;
+  isMobile: boolean;
+  withRefresh: boolean;
+}) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline">
-          <Columns3 /> {messages.actions.view}
+          <ViewIcon /> Lihat
         </Button>
       </PopoverTrigger>
 
@@ -424,34 +654,40 @@ function View<TData>({
 function Reset<TData>({
   table,
   className,
-}: TableProps<TData> & { className?: string }) {
+}: {
+  table: DataTableType<TData>;
+  className?: string;
+}) {
   return (
     <Button
       variant="outline"
       className={className}
       onClick={() => {
         table.reset();
-        table.resetColumnFilters();
+
+        table.resetPagination();
+        // table.resetPageIndex();
+        // table.resetPageSize();
+
         table.resetColumnOrder();
-        table.resetColumnPinning();
         table.resetColumnSizing();
         table.resetColumnVisibility();
-        table.resetExpanded();
+        table.resetColumnPinning();
+        table.resetColumnFilters();
 
-        table.resetGlobalFilter();
-        table.setGlobalFilter("");
-
-        table.resetGrouping();
-        table.resetHeaderSizeInfo();
-        table.resetPageIndex();
-        table.resetPageSize();
-        table.resetPagination();
         table.resetRowPinning();
         table.resetRowSelection();
+
+        // table.resetGlobalFilter();
+        table.setGlobalFilter("");
+
         table.resetSorting();
+        table.resetGrouping();
+        table.resetExpanded();
+        table.resetHeaderSizeInfo();
       }}
     >
-      <RotateCcw /> {messages.actions.reset}
+      <RotateCcwSquareIcon /> {messages.actions.reset}
     </Button>
   );
 }
@@ -460,7 +696,11 @@ function Search<TData>({
   table,
   placeholder = "Cari...",
   className,
-}: TableProps<TData> & { placeholder?: string; className?: string }) {
+}: {
+  table: DataTableType<TData>;
+  placeholder?: string;
+  className?: string;
+}) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -500,7 +740,11 @@ function Pagination<TData>({
   table,
   isMobile,
   className,
-}: TableProps<TData> & { isMobile: boolean; className?: string }) {
+}: {
+  table: DataTableType<TData>;
+  isMobile: boolean;
+  className?: string;
+}) {
   const size = isMobile ? "icon" : "icon-sm";
   const variant = "outline";
   return (
@@ -511,7 +755,7 @@ function Pagination<TData>({
         onClick={() => table.firstPage()}
         disabled={!table.getCanPreviousPage()}
       >
-        <ChevronsLeft />
+        <ChevronsLeftIcon />
       </Button>
 
       <Button
@@ -520,7 +764,7 @@ function Pagination<TData>({
         onClick={() => table.previousPage()}
         disabled={!table.getCanPreviousPage()}
       >
-        <ChevronLeft />
+        <ChevronLeftIcon />
       </Button>
 
       <Button
@@ -529,7 +773,7 @@ function Pagination<TData>({
         onClick={() => table.nextPage()}
         disabled={!table.getCanNextPage()}
       >
-        <ChevronRight />
+        <ChevronRightIcon />
       </Button>
 
       <Button
@@ -538,7 +782,7 @@ function Pagination<TData>({
         onClick={() => table.lastPage()}
         disabled={!table.getCanNextPage()}
       >
-        <ChevronsRight />
+        <ChevronsRightIcon />
       </Button>
     </ButtonGroup>
   );
@@ -547,10 +791,9 @@ function Pagination<TData>({
 function RowsPerPage<TData>({
   table,
   isMobile,
-  rowsLimitArr,
   className,
-}: TableProps<TData> & {
-  rowsLimitArr: number[];
+}: {
+  table: DataTableType<TData>;
   isMobile: boolean;
   className?: string;
 }) {
@@ -558,19 +801,21 @@ function RowsPerPage<TData>({
     <div className={cn("flex items-center gap-x-2", className)}>
       <Label>Baris per halaman</Label>
       <Select
-        value={String(table.getState().pagination.pageSize ?? defaultRowsLimit)}
-        onValueChange={(value) => {
-          table.setPageSize(Number(value));
-        }}
+        value={String(table.getState().pagination.pageSize ?? defaultPageSize)}
+        onValueChange={(value) => table.setPageSize(Number(value))}
       >
         <SelectTrigger size={isMobile ? "default" : "sm"}>
           <SelectValue />
         </SelectTrigger>
 
         <SelectContent>
-          {rowsLimitArr.map((item) => (
-            <SelectItem key={item} value={String(item)}>
-              {formatNumber(item)}
+          {pageSizes.map((v) => (
+            <SelectItem
+              key={v}
+              value={String(v)}
+              className={cn(v === defaultPageSize && "font-semibold")}
+            >
+              {formatNumber(v)}
             </SelectItem>
           ))}
         </SelectContent>

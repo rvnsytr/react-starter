@@ -70,9 +70,7 @@ export const defineMeta = <
   TType extends ColumnDataType,
 >(
   _accessor: TAccessor,
-  meta: Omit<ColumnMeta<TData, TVal>, "type"> & {
-    type: TType;
-  },
+  meta: Omit<ColumnMeta<TData, TVal>, "type"> & { type: TType },
 ): ColumnMeta<TData, TVal> => meta;
 
 /*
@@ -84,7 +82,9 @@ export type ColumnOption = {
   /* The internal value of the option. */
   value: string;
   /* An optional icon to display next to the label. */
-  icon?: React.ReactElement | React.ElementType;
+  icon?: LucideIcon;
+
+  count?: number;
 };
 
 /*
@@ -101,44 +101,67 @@ export type ColumnDataType =
   | "multiOption";
 
 /* Operators for text data */
-export type TextFilterOperator = "contains" | "does not contain";
+export const allTextFilterOperators = ["contains", "does not contain"] as const;
+export type TextFilterOperator = (typeof allTextFilterOperators)[number];
 
 /* Operators for number data */
-export type NumberFilterOperator =
-  | "is"
-  | "is not"
-  | "is less than"
-  | "is greater than or equal to"
-  | "is greater than"
-  | "is less than or equal to"
-  | "is between"
-  | "is not between";
+export const allNumberFilterOperators = [
+  "is",
+  "is not",
+  "is less than",
+  "is greater than or equal to",
+  "is greater than",
+  "is less than or equal to",
+  "is between",
+  "is not between",
+] as const;
+export type NumberFilterOperator = (typeof allNumberFilterOperators)[number];
 
 /* Operators for date data */
-export type DateFilterOperator =
-  | "is"
-  | "is not"
-  | "is before"
-  | "is on or after"
-  | "is after"
-  | "is on or before"
-  | "is between"
-  | "is not between";
+export const allDateFilterOperators = [
+  "is",
+  "is not",
+  "is before",
+  "is on or after",
+  "is after",
+  "is on or before",
+  "is between",
+  "is not between",
+] as const;
+export type DateFilterOperator = (typeof allDateFilterOperators)[number];
 
 /* Operators for option data */
-export type OptionFilterOperator = "is" | "is not" | "is any of" | "is none of";
+export const allOptionFilterOperators = [
+  "is",
+  "is not",
+  "is any of",
+  "is none of",
+] as const;
+export type OptionFilterOperator = (typeof allOptionFilterOperators)[number];
 
 /* Operators for multi-option data */
+export const allMultiOptionFilterOperators = [
+  "include",
+  "exclude",
+  "include any of",
+  "exclude if any of",
+  "include all of",
+  "exclude if all",
+] as const;
 export type MultiOptionFilterOperator =
-  | "include"
-  | "exclude"
-  | "include any of"
-  | "include all of"
-  | "exclude if any of"
-  | "exclude if all";
+  (typeof allMultiOptionFilterOperators)[number];
+
+export const allFilterOperators = [
+  ...allTextFilterOperators,
+  ...allNumberFilterOperators,
+  ...allDateFilterOperators,
+  ...allOptionFilterOperators,
+  ...allMultiOptionFilterOperators,
+];
+export type FilterOperators = (typeof allFilterOperators)[number];
 
 /* Maps filter operators to their respective data types */
-type FilterOperators = {
+type FilterOperatorsMap = {
   text: TextFilterOperator;
   number: NumberFilterOperator;
   date: DateFilterOperator;
@@ -165,7 +188,7 @@ export type FilterTypes = {
  *
  */
 export type FilterModel<T extends ColumnDataType, TData> = {
-  operator: FilterOperators[T];
+  operator: FilterOperatorsMap[T];
   values: FilterTypes[T][];
   columnMeta: Column<TData>["columnDef"]["meta"];
 };
@@ -174,7 +197,7 @@ export type FilterModel<T extends ColumnDataType, TData> = {
  * FilterDetails is a type that represents the details of all the filter operators for a specific column data type.
  */
 export type FilterDetails<T extends ColumnDataType> = {
-  [key in FilterOperators[T]]: FilterOperatorDetails<key, T>;
+  [key in FilterOperatorsMap[T]]: FilterOperatorDetails<key, T>;
 };
 
 type FilterOperatorDetailsBase<OperatorValue, T extends ColumnDataType> = {
@@ -185,17 +208,17 @@ type FilterOperatorDetailsBase<OperatorValue, T extends ColumnDataType> = {
   /* How much data the operator applies to. */
   target: "single" | "multiple";
   /* The plural form of the operator, if applicable. */
-  singularOf?: FilterOperators[T];
+  singularOf?: FilterOperatorsMap[T];
   /* The singular form of the operator, if applicable. */
-  pluralOf?: FilterOperators[T];
+  pluralOf?: FilterOperatorsMap[T];
   /* All related operators. Normally, all the operators which share the same target. */
-  relativeOf: FilterOperators[T] | FilterOperators[T][];
+  relativeOf: FilterOperatorsMap[T] | FilterOperatorsMap[T][];
   /* Whether the operator is negated. */
   isNegated: boolean;
   /* If the operator is not negated, this provides the negated equivalent. */
-  negation?: FilterOperators[T];
+  negation?: FilterOperatorsMap[T];
   /* If the operator is negated, this provides the positive equivalent. */
-  negationOf?: FilterOperators[T];
+  negationOf?: FilterOperatorsMap[T];
 };
 
 /*
@@ -210,12 +233,16 @@ export type FilterOperatorDetails<
 > = FilterOperatorDetailsBase<OperatorValue, T> &
   (
     | { singularOf?: never; pluralOf?: never }
-    | { target: "single"; singularOf: FilterOperators[T]; pluralOf?: never }
-    | { target: "multiple"; singularOf?: never; pluralOf: FilterOperators[T] }
+    | { target: "single"; singularOf: FilterOperatorsMap[T]; pluralOf?: never }
+    | {
+        target: "multiple";
+        singularOf?: never;
+        pluralOf: FilterOperatorsMap[T];
+      }
   ) &
   (
-    | { isNegated: false; negation: FilterOperators[T]; negationOf?: never }
-    | { isNegated: true; negation?: never; negationOf: FilterOperators[T] }
+    | { isNegated: false; negation: FilterOperatorsMap[T]; negationOf?: never }
+    | { isNegated: true; negation?: never; negationOf: FilterOperatorsMap[T] }
   );
 
 /* Details for all the filter operators for option data type */
@@ -562,8 +589,8 @@ export function determineNewOperator<T extends ColumnDataType>(
   type: T,
   oldVals: FilterTypes[T][],
   nextVals: FilterTypes[T][],
-  currentOperator: FilterOperators[T],
-): FilterOperators[T] {
+  currentOperator: FilterOperatorsMap[T],
+): FilterOperatorsMap[T] {
   const a =
     Array.isArray(oldVals) && Array.isArray(oldVals[0])
       ? oldVals[0].length

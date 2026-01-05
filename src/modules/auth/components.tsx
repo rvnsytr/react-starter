@@ -82,7 +82,7 @@ import {
   TooltipTrigger,
 } from "@/core/components/ui/tooltip";
 import { appMeta, fileMeta, messages } from "@/core/constants";
-import { sharedSchemas, userSchema } from "@/core/schemas";
+import { sharedSchemas, userSchema } from "@/core/schema";
 import { removeFiles, uploadFiles } from "@/core/storage";
 import { cn, filterFn, formatDate } from "@/core/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1140,7 +1140,6 @@ export function ChangePasswordForm() {
       currentPassword: true,
       newPassword: true,
       confirmPassword: true,
-      revokeOtherSessions: true,
     })
     .extend({ revokeOtherSessions: z.boolean() })
     .refine((sc) => sc.newPassword === sc.confirmPassword, {

@@ -7,19 +7,17 @@ export const messages = {
     // updated: "diperbarui",
     // uploaded: "diunggah",
 
-    action: "Tindakan",
+    action: "Aksi",
     add: "Tambah",
     back: "Kembali",
     cancel: "Batal",
     clear: "Bersihkan",
     confirm: "Konfirmasi",
-    refresh: "Muat Ulang",
     remove: "Hapus",
     reset: "Atur Ulang",
     save: "Simpan",
     update: "Simpan Perubahan",
     upload: "Unggah",
-    view: "Lihat",
 
     prev: "Sebelumnya",
     next: "Selanjutnya",
@@ -28,8 +26,12 @@ export const messages = {
   empty: "Tidak ada hasil yang ditemukan.",
   loading: "Mohon tunggu sebentar...",
 
+  success: "Sukses",
   error: "Terjadi kesalahan. Silakan coba lagi nanti.",
-  notAuthorized: "Anda tidak memiliki izin untuk melakukan tindakan ini.",
+  notFound: "Sumber daya yang diminta tidak ditemukan.",
+
+  unauthorized: "Anda harus login untuk mengakses fitur ini.",
+  forbidden: "Anda tidak memiliki izin untuk melakukan tindakan ini.",
 
   removeLabel: (thing: string) =>
     `Untuk mengonfirmasi, ketik "${thing}" pada kolom di bawah ini.`,
