@@ -1,6 +1,6 @@
 import { FooterNote, SidebarMain } from "@/core/components/layouts";
-import { LayoutProvider } from "@/core/components/ui/layout";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
+import { LayoutProvider } from "@/core/providers";
 import { getRouteTitle } from "@/core/utils";
 import { AuthProvider } from "@/modules/auth";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";

@@ -6,7 +6,7 @@ import {
   AppErrorFallback,
   AppLoadingFallback,
 } from "./core/components/ui/fallback";
-import { ThemeProvider } from "./core/components/ui/theme";
+import { ThemeProvider } from "./core/providers";
 import { useSession } from "./modules/auth";
 import { routeTree } from "./routeTree.gen";
 
