@@ -41,7 +41,6 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "../ui/sidebar";
-import { LinkSpinner } from "../ui/spinner";
 
 export function SidebarMain() {
   const { user } = useAuth();
@@ -135,7 +134,7 @@ export function SidebarMain() {
                         asChild
                       >
                         <Link to={route}>
-                          <LinkSpinner icon={{ base: iconElement }} />
+                          {iconElement}
                           <span className="line-clamp-1">{displayName}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -163,11 +162,9 @@ export function SidebarMain() {
                                         itm.href ??
                                         (`${route}/#${toKebab(itm.displayName)}` as string)
                                       }
+                                      className="line-clamp-1"
                                     >
-                                      <span className="line-clamp-1">
-                                        {itm.displayName}
-                                      </span>
-                                      <LinkSpinner />
+                                      {itm.displayName}
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
@@ -210,8 +207,7 @@ export function SidebarMain() {
                   ) : (
                     <SidebarMenuButton size="sm" tooltip={displayName} asChild>
                       <Link to={route}>
-                        <LinkSpinner icon={{ base: iconElement }} />
-                        {displayName}
+                        {iconElement} {displayName}
                       </Link>
                     </SidebarMenuButton>
                   )}
