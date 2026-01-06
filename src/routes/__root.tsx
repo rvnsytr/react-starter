@@ -1,4 +1,4 @@
-import { NotFound } from "@/core/components/layouts";
+import { NotFound } from "@/core/components/layout";
 import { GridPattern } from "@/core/components/ui/grid-pattern";
 import { appMeta } from "@/core/constants";
 import { GlobalShortcuts } from "@/core/providers/global-shortcuts";

@@ -1,5 +1,5 @@
+import { useTheme } from "@/core/providers";
 import { Toaster as Sonner, ToasterProps } from "sonner";
-import { useTheme } from "./theme";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme } = useTheme();

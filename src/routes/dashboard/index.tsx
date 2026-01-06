@@ -1,4 +1,4 @@
-import { DashboardMain } from "@/core/components/layouts";
+import { DashboardMain } from "@/core/components/layout";
 import { R } from "@/core/components/ui/motion";
 import { useAuth } from "@/modules/auth";
 import { createFileRoute } from "@tanstack/react-router";

@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent } from "react";
-import { nextTheme, useTheme } from "../components/ui/theme";
+import { nextTheme, useTheme } from "./theme";
 
 export function GlobalShortcuts() {
   const { theme, setTheme } = useTheme();
