@@ -1,15 +1,14 @@
 import { ApiResponse } from "@/core/api";
 import { messages } from "@/core/constants";
-import { useDebounce, useIsMobile } from "@/core/hooks";
 import {
   allDateFilterOperators,
   allMultiOptionFilterOperators,
   allNumberFilterOperators,
   allOptionFilterOperators,
   allTextFilterOperators,
-  cn,
-  formatNumber,
-} from "@/core/utils";
+} from "@/core/filter";
+import { useDebounce, useIsMobile } from "@/core/hooks";
+import { cn, formatNumber } from "@/core/utils";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -380,7 +379,7 @@ export function DataTable<TData>({
     globalFilterFn: "includesString",
     onGlobalFilterChange: setGlobalFilter,
 
-    // TODO: Column Filtering
+    // * Column Filtering
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: !isServer ? getFilteredRowModel() : undefined,
 
