@@ -1,13 +1,13 @@
 {
   "files.readonlyInclude": {
-    "**/routeTree.gen.ts": true
-    // "**/core/**": true
+    "**/routeTree.gen.ts": true,
+    "**/core/**": true
   },
 
   "files.readonlyExclude": {
     "**/core/constants/menu.ts": true,
     "**/core/constants/routes.ts": true,
-    "**/core/schemas.ts": true
+    "**/core/schema.ts": true
   },
 
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
