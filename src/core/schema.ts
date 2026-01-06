@@ -1,4 +1,8 @@
 import { allRoles } from "@/modules/auth";
+import {
+  sessionSchema as authSessionSchema,
+  userSchema as authUserSchema,
+} from "better-auth";
 import z from "zod";
 import { id } from "zod/locales";
 import { allGenders, fileMeta, FileType, messages } from "./constants";
@@ -176,6 +180,18 @@ export const sharedSchemas = {
     { error: "Pilih rentang tanggal yang valid." },
   ),
 
+  jsonString: <T extends z.ZodTypeAny>(schema: T) =>
+    z
+      .string()
+      .transform((str) => {
+        try {
+          return JSON.parse(str);
+        } catch {
+          throw new Error(messages.invalid("JSON"));
+        }
+      })
+      .pipe(schema),
+
   email: z
     .email({ error: messages.invalid("Alamat email") })
     .trim()
@@ -227,20 +243,6 @@ export const apiResponseSchema = z.object({
     .optional(),
 });
 
-export const userSchema = z.object({
-  id: z.string(),
-
-  email: sharedSchemas.email,
-  name: sharedSchemas.string("Nama", { min: 1 }),
-  image: z.string().optional().nullable(),
-  role: z.lazy(() => z.enum(allRoles)),
-
-  password: sharedSchemas.string("Kata sandi", { min: 1 }),
-  newPassword: sharedSchemas.password,
-  confirmPassword: sharedSchemas.string("Konfirmasi kata sandi", { min: 1 }),
-  currentPassword: sharedSchemas.string("Kata sandi saat ini", { min: 1 }),
-});
-
 export const storageSchema = z.object({
   id: z.uuidv4(),
 
@@ -257,4 +259,25 @@ export const storageSchema = z.object({
   updatedBy: sharedSchemas.updatedBy,
   createdAt: sharedSchemas.createdAt,
   createdBy: sharedSchemas.createdBy,
+});
+
+export const passwordSchema = z.object({
+  password: sharedSchemas.string("Kata sandi", { min: 1 }),
+  newPassword: sharedSchemas.password,
+  confirmPassword: sharedSchemas.string("Konfirmasi kata sandi", { min: 1 }),
+  currentPassword: sharedSchemas.string("Kata sandi saat ini", { min: 1 }),
+});
+
+export const userSchema = authUserSchema.extend({
+  email: sharedSchemas.email,
+  name: sharedSchemas.string("Nama", { min: 1 }),
+  image: z.string().optional().nullable(),
+  role: z.lazy(() => z.enum(allRoles)),
+  banned: z.boolean().optional().nullable(),
+  bannedReason: z.string().optional().nullable(),
+  bannedExpires: z.date().optional().nullable(),
+});
+
+export const sessionSchema = authSessionSchema.extend({
+  impersonatedBy: z.string().nullable().optional(),
 });

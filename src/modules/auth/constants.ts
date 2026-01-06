@@ -1,4 +1,4 @@
-import { authClient } from "@/core/auth";
+import { sessionSchema, userSchema } from "@/core/schema";
 import {
   BanIcon,
   CircleDotIcon,
@@ -6,14 +6,11 @@ import {
   ShieldUserIcon,
   UserRoundIcon,
 } from "lucide-react";
+import z from "zod";
 
-type InferedAuthSession = typeof authClient.$Infer.Session;
 export type AuthSession = {
-  session: InferedAuthSession["session"];
-  user: Omit<InferedAuthSession["user"], "role"> & {
-    role: Role;
-    imageId: string;
-  };
+  session: z.infer<typeof sessionSchema>;
+  user: z.infer<typeof userSchema> & { imageId: string };
 };
 
 export type Role = (typeof allRoles)[number];
