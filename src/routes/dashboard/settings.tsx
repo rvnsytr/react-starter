@@ -1,5 +1,4 @@
 import { DashboardMain } from "@/core/components/layouts";
-import { LayoutSettings, ThemeSettings } from "@/core/components/ui/buttons";
 import {
   Card,
   CardAction,
@@ -10,6 +9,8 @@ import {
   CardTitle,
 } from "@/core/components/ui/card";
 import { Kbd, KbdGroup } from "@/core/components/ui/kbd";
+import { LayoutSettings } from "@/core/components/ui/layout";
+import { ThemeSettings } from "@/core/components/ui/theme";
 import { appMeta } from "@/core/constants";
 import { getRouteTitle } from "@/core/utils";
 import {
@@ -26,8 +27,8 @@ export const Route = createFileRoute("/dashboard/settings")({
 
 function RouteComponent() {
   return (
-    <DashboardMain className="items-center">
-      <Card id="tema" className="w-full scroll-m-20 lg:max-w-xl">
+    <DashboardMain className="items-center" noLayoutLoader>
+      <Card id="tema" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
           <CardTitle>Tema</CardTitle>
           <CardDescription>
@@ -50,7 +51,7 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      <Card id="layout" className="w-full scroll-m-20 lg:max-w-xl">
+      <Card id="layout" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
           <CardTitle>Layout</CardTitle>
           <CardDescription>
@@ -72,7 +73,7 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      <Card id="sesi-aktif" className="w-full scroll-m-20 lg:max-w-xl">
+      <Card id="sesi-aktif" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
           <CardTitle>Sesi Aktif</CardTitle>
           <CardDescription>
@@ -89,7 +90,7 @@ function RouteComponent() {
         </CardFooter>
       </Card>
 
-      <Card id="ubah-kata-sandi" className="w-full scroll-m-20 lg:max-w-xl">
+      <Card id="ubah-kata-sandi" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
           <CardTitle>Ubah Kata Sandi</CardTitle>
           <CardDescription>

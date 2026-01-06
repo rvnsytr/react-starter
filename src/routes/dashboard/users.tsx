@@ -7,7 +7,7 @@ import {
 } from "@/core/components/ui/card";
 import { Separator } from "@/core/components/ui/separator";
 import { getRouteTitle } from "@/core/utils";
-import { AdminCreateUserDialog, UserDataTable } from "@/modules/auth";
+import { CreateUserDialog, UserDataTable } from "@/modules/auth";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/users")({
@@ -24,7 +24,7 @@ function RouteComponent() {
           Kelola dan lihat detail semua pengguna yang telah terdaftar.
         </CardDescription>
         <CardAction asPageAction>
-          <AdminCreateUserDialog />
+          <CreateUserDialog />
         </CardAction>
       </CardHeader>
 

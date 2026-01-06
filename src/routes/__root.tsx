@@ -11,6 +11,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Toaster } from "sonner";
 
 type RouterContext = { session: AuthSession | null };
@@ -29,7 +30,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootLayout() {
   return (
-    <>
+    <NuqsAdapter>
       <HeadContent />
 
       <GridPattern className="stroke-muted dark:stroke-muted/60 -z-1 min-h-dvh" />
@@ -43,6 +44,6 @@ function RootLayout() {
       <Scripts />
 
       <TanStackRouterDevtools />
-    </>
+    </NuqsAdapter>
   );
 }

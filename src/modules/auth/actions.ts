@@ -1,4 +1,6 @@
+import { ApiResponse } from "@/core/api";
 import { authClient } from "@/core/auth";
+import { DataTableState } from "@/core/components/ui/data-table";
 import { removeFiles } from "@/core/storage";
 import { AuthSession } from "./constants";
 
@@ -8,16 +10,34 @@ export async function getSession() {
   return data as AuthSession | null;
 }
 
-export async function getSessionList() {
+// TODO
+export async function listUsers(
+  state: DataTableState,
+): Promise<ApiResponse<AuthSession["user"][]>> {
+  const { data, error } = await authClient.admin.listUsers({ query: {} });
+  if (error) throw new Error(error.message);
+
+  console.log(state);
+
+  return {
+    code: 200,
+    success: true,
+    message: "",
+    count: { total: data.total },
+    data: data.users as AuthSession["user"][],
+  };
+}
+
+export async function listSessions() {
   const { data, error } = await authClient.listSessions();
   if (error) throw new Error(error.message);
   return data;
 }
 
-export async function getUserList() {
-  const { data, error } = await authClient.admin.listUsers({ query: {} });
+export async function listUserSessions(userId: string) {
+  const { data, error } = await authClient.admin.listUserSessions({ userId });
   if (error) throw new Error(error.message);
-  return data;
+  return data.sessions as AuthSession["session"][];
 }
 
 export async function revokeUserSessions(ids: string[]) {

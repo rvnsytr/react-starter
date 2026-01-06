@@ -13,6 +13,7 @@ export async function uploadFiles(
         .map(([key, value]) => `${key}=${String(value)}`)
         .join("&")
     : "";
+
   const url = `${basePath}${optionsQuery}`;
 
   const schema = storageSchema

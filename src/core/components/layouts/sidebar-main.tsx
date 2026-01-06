@@ -2,6 +2,7 @@ import { dashboardfooterMenu, routesMeta } from "@/core/constants";
 import { getActiveRoute, getMenuByRole, toKebab } from "@/core/utils";
 import {
   SignOutButton,
+  StopImpersonateUserMenuItem,
   useAuth,
   UserAvatar,
   UserVerifiedBadge,

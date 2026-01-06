@@ -26,8 +26,8 @@ function RouteComponent() {
   const { user } = useAuth();
 
   return (
-    <DashboardMain className="items-center">
-      <Card id="informasi-pribadi" className="w-full scroll-m-20 lg:max-w-xl">
+    <DashboardMain className="items-center" noLayoutLoader>
+      <Card id="informasi-pribadi" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader className="border-b">
           <CardTitle>Informasi Pribadi</CardTitle>
           <CardDescription>
