@@ -79,7 +79,7 @@ export function SidebarMain() {
                     {user.emailVerified && (
                       <UserVerifiedBadge
                         classNames={{ icon: "size-3.5" }}
-                        withoutText
+                        noText
                       />
                     )}
                   </div>

@@ -274,8 +274,8 @@ export const userSchema = authUserSchema.extend({
   image: z.string().optional().nullable(),
   role: z.lazy(() => z.enum(allRoles)),
   banned: z.boolean().optional().nullable(),
-  bannedReason: z.string().optional().nullable(),
-  bannedExpires: z.date().optional().nullable(),
+  banReason: z.string().optional().nullable(),
+  banExpires: z.date().optional().nullable(),
 });
 
 export const sessionSchema = authSessionSchema.extend({
