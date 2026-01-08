@@ -1,6 +1,7 @@
-import { ApiResponse } from "@/core/api";
+import { apiFetcher, ApiResponse } from "@/core/api";
 import { authClient } from "@/core/auth";
 import { DataTableState } from "@/core/components/ui/data-table";
+import { userSchema } from "@/core/schema";
 import { removeFiles } from "@/core/storage";
 import { AuthSession } from "./constants";
 
@@ -10,19 +11,20 @@ export async function getSession() {
   return data as AuthSession | null;
 }
 
-// TODO
 export async function listUsers(
   state: DataTableState,
 ): Promise<ApiResponse<AuthSession["user"][]>> {
-  console.log(state);
+  const { data, ...rest } = await apiFetcher(
+    "/auth/admin/list-users",
+    userSchema.array(),
+    {
+      method: "POST",
+      body: JSON.stringify({ state }),
+      headers: { "Content-Type": "application/json" },
+    },
+  );
 
-  return {
-    code: 200,
-    success: true,
-    message: "",
-    count: { total: 0 },
-    data: [] as AuthSession["user"][],
-  };
+  return { ...rest, data: data as AuthSession["user"][] };
 }
 
 export async function listSessions() {

@@ -1,7 +1,9 @@
 import { allRoles } from "@/modules/auth";
 import {
-  sessionSchema as authSessionSchema,
-  userSchema as authUserSchema,
+  accountSchema as betterAuthAccountSchema,
+  sessionSchema as betterAuthSessionSchema,
+  userSchema as betterAuthUserSchema,
+  verificationSchema as betterAuthVerificationSchema,
 } from "better-auth";
 import z from "zod";
 import { id } from "zod/locales";
@@ -9,6 +11,8 @@ import { allGenders, fileMeta, FileType, messages } from "./constants";
 import { toMegabytes } from "./utils";
 
 z.config(id());
+
+// #region CORE
 
 export const sharedSchemas = {
   string: (
@@ -240,8 +244,10 @@ export const apiResponseSchema = z.object({
       z.object({ total: z.number() }),
       z.record(z.string(), z.number()),
     )
-    .optional(),
+    .nullable(),
 });
+
+// #endregion
 
 export const storageSchema = z.object({
   id: z.uuidv4(),
@@ -268,16 +274,30 @@ export const passwordSchema = z.object({
   currentPassword: sharedSchemas.string("Kata sandi saat ini", { min: 1 }),
 });
 
-export const userSchema = authUserSchema.extend({
+export const userSchema = betterAuthUserSchema.extend({
   email: sharedSchemas.email,
   name: sharedSchemas.string("Nama", { min: 1 }),
   image: z.string().optional().nullable(),
   role: z.lazy(() => z.enum(allRoles)),
   banned: z.boolean().optional().nullable(),
-  banReason: z.string().optional().nullable(),
-  banExpires: z.date().optional().nullable(),
+  bannedReason: z.string().optional().nullable(),
+  bannedExpires: z.date().optional().nullable(),
+  createdAt: sharedSchemas.createdAt,
+  updatedAt: sharedSchemas.updatedAt,
 });
 
-export const sessionSchema = authSessionSchema.extend({
+export const accountTableSchema = betterAuthAccountSchema.extend({
+  createdAt: sharedSchemas.createdAt,
+  updatedAt: sharedSchemas.updatedAt,
+});
+
+export const sessionSchema = betterAuthSessionSchema.extend({
+  createdAt: sharedSchemas.createdAt,
+  updatedAt: sharedSchemas.updatedAt,
   impersonatedBy: z.string().nullable().optional(),
+});
+
+export const verificationTableSchema = betterAuthVerificationSchema.extend({
+  createdAt: sharedSchemas.createdAt,
+  updatedAt: sharedSchemas.updatedAt,
 });
