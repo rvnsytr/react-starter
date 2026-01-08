@@ -19,7 +19,7 @@ export async function listUsers(
     userSchema.array(),
     {
       method: "POST",
-      body: JSON.stringify({ state }),
+      body: JSON.stringify(state),
       headers: { "Content-Type": "application/json" },
     },
   );
