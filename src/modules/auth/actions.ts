@@ -14,17 +14,14 @@ export async function getSession() {
 export async function listUsers(
   state: DataTableState,
 ): Promise<ApiResponse<AuthSession["user"][]>> {
-  const { data, error } = await authClient.admin.listUsers({ query: {} });
-  if (error) throw new Error(error.message);
-
   console.log(state);
 
   return {
     code: 200,
     success: true,
     message: "",
-    count: { total: data.total },
-    data: data.users as AuthSession["user"][],
+    count: { total: 0 },
+    data: [] as AuthSession["user"][],
   };
 }
 
