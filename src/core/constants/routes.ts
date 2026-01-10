@@ -12,6 +12,7 @@ export const routesMeta: Record<
   "/about": { displayName: "Tentang" },
 
   "/sign-in": { displayName: "Masuk" },
+  "/verify-user": { displayName: "Verifikasi Pengguna" },
 
   "/dashboard": { displayName: "Dashboard", role: "all" },
   "/dashboard/users": { displayName: "Pengguna", role: ["admin"] },

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyUserRouteImport } from './routes/verify-user'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as homeRouteRouteImport } from './routes/(home)/route'
@@ -19,6 +20,11 @@ import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settin
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
 import { Route as homeAboutRouteImport } from './routes/(home)/about'
 
+const VerifyUserRoute = VerifyUserRouteImport.update({
+  id: '/verify-user',
+  path: '/verify-user',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -67,6 +73,7 @@ const homeAboutRoute = homeAboutRouteImport.update({
 export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/verify-user': typeof VerifyUserRoute
   '/about': typeof homeAboutRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
+  '/verify-user': typeof VerifyUserRoute
   '/about': typeof homeAboutRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/(home)': typeof homeRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/verify-user': typeof VerifyUserRoute
   '/(home)/about': typeof homeAboutRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/dashboard'
     | '/sign-in'
+    | '/verify-user'
     | '/about'
     | '/dashboard/profile'
     | '/dashboard/settings'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
+    | '/verify-user'
     | '/about'
     | '/dashboard/profile'
     | '/dashboard/settings'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/(home)'
     | '/dashboard'
     | '/sign-in'
+    | '/verify-user'
     | '/(home)/about'
     | '/dashboard/profile'
     | '/dashboard/settings'
@@ -132,10 +144,18 @@ export interface RootRouteChildren {
   homeRouteRoute: typeof homeRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
+  VerifyUserRoute: typeof VerifyUserRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-user': {
+      id: '/verify-user'
+      path: '/verify-user'
+      fullPath: '/verify-user'
+      preLoaderRoute: typeof VerifyUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
@@ -238,6 +258,7 @@ const rootRouteChildren: RootRouteChildren = {
   homeRouteRoute: homeRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   SignInRoute: SignInRoute,
+  VerifyUserRoute: VerifyUserRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
