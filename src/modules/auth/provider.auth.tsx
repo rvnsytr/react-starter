@@ -1,7 +1,7 @@
 import { authorizedRoute, normalizeRoute } from "@/core/utils";
 import { notFound, useLocation } from "@tanstack/react-router";
 import { createContext, ReactNode, useContext, useEffect } from "react";
-import { AuthSession, Role } from "./constants";
+import { AuthSession } from "./constants";
 import { useSession } from "./hooks";
 
 const AuthContext = createContext<AuthSession | undefined>(undefined);
@@ -18,7 +18,7 @@ export function AuthProvider({
 
   useEffect(() => {
     const normalizedPath = normalizeRoute(pathname);
-    const role = session?.user.role as Role;
+    const role = session?.user.role;
     const isAuthorized = authorizedRoute(normalizedPath, role);
     if (!isAuthorized && !isValidating) throw notFound();
   }, [pathname, session, isValidating]);

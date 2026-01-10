@@ -84,7 +84,7 @@ export function DatePicker({
           setStrValue(sanitized);
           const parsed = parseDDMMYYYY(sanitized);
 
-          if (parsed && (!selected || parsed.getTime() !== selected.getTime()))
+          if (parsed && parsed.getTime() !== selected?.getTime())
             onSelect(parsed);
         }}
       />
