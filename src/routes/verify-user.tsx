@@ -44,7 +44,7 @@ function RouteComponent() {
     } else {
       setIsverifying(false);
       navigate({ to: "/sign-in" });
-      toast.error("Verifikasi gagal, token atau tipe tidak ditemukan");
+      toast.error("Verifikasi gagal, token tidak ditemukan");
     }
   });
 
