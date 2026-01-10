@@ -1,9 +1,7 @@
 import { allRoles } from "@/modules/auth";
 import {
-  accountSchema as betterAuthAccountSchema,
   sessionSchema as betterAuthSessionSchema,
   userSchema as betterAuthUserSchema,
-  verificationSchema as betterAuthVerificationSchema,
 } from "better-auth";
 import z from "zod";
 import { id } from "zod/locales";
@@ -244,7 +242,7 @@ export const apiResponseSchema = z.object({
       z.object({ total: z.number() }),
       z.record(z.string(), z.number()),
     )
-    .nullable(),
+    .optional(),
 });
 
 // #endregion
@@ -280,24 +278,12 @@ export const userSchema = betterAuthUserSchema.extend({
   image: z.string().optional().nullable(),
   role: z.lazy(() => z.enum(allRoles)),
   banned: z.boolean().optional().nullable(),
-  bannedReason: z.string().optional().nullable(),
-  bannedExpires: z.date().optional().nullable(),
+  banReason: z.string().optional().nullable(),
+  banExpires: z.date().optional().nullable(),
   createdAt: sharedSchemas.createdAt,
-  updatedAt: sharedSchemas.updatedAt,
-});
-
-export const accountTableSchema = betterAuthAccountSchema.extend({
-  createdAt: sharedSchemas.createdAt,
-  updatedAt: sharedSchemas.updatedAt,
+  updatedAt: z.coerce.date({ error: "Field 'updatedAt' tidak valid." }),
 });
 
 export const sessionSchema = betterAuthSessionSchema.extend({
-  createdAt: sharedSchemas.createdAt,
-  updatedAt: sharedSchemas.updatedAt,
   impersonatedBy: z.string().nullable().optional(),
-});
-
-export const verificationTableSchema = betterAuthVerificationSchema.extend({
-  createdAt: sharedSchemas.createdAt,
-  updatedAt: sharedSchemas.updatedAt,
 });
