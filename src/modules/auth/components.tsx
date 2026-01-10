@@ -1565,48 +1565,53 @@ function ResetPasswordDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <Controller
-          name="email"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <FieldWrapper
-              label="Alamat email"
-              htmlFor={field.name}
-              errors={fieldState.error}
+        <form onSubmit={form.handleSubmit(formHandler)} noValidate>
+          <Controller
+            name="email"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FieldWrapper
+                label="Alamat email"
+                htmlFor={field.name}
+                errors={fieldState.error}
+              >
+                <InputGroup>
+                  <InputGroupInput
+                    type="email"
+                    id={field.name}
+                    aria-invalid={!!fieldState.error}
+                    placeholder="Masukan email anda"
+                    required
+                    {...field}
+                  />
+                  <InputGroupAddon>
+                    <MailIcon />
+                  </InputGroupAddon>
+                </InputGroup>
+              </FieldWrapper>
+            )}
+          />
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="reset" variant="secondary">
+                {messages.actions.cancel}
+              </Button>
+            </DialogClose>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              onClick={form.handleSubmit(formHandler)}
             >
-              <InputGroup>
-                <InputGroupInput
-                  type="email"
-                  id={field.name}
-                  aria-invalid={!!fieldState.error}
-                  placeholder="Masukan email anda"
-                  required
-                  {...field}
-                />
-                <InputGroupAddon>
-                  <MailIcon />
-                </InputGroupAddon>
-              </InputGroup>
-            </FieldWrapper>
-          )}
-        />
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              {messages.actions.cancel}
+              <LoadingSpinner
+                loading={isLoading}
+                icon={{ base: <SendIcon /> }}
+              />
+              Atur ulang kata sandi
             </Button>
-          </DialogClose>
-
-          <Button
-            type="button"
-            disabled={isLoading}
-            onClick={form.handleSubmit(formHandler)}
-          >
-            <LoadingSpinner loading={isLoading} icon={{ base: <SendIcon /> }} />
-            Atur ulang kata sandi
-          </Button>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
