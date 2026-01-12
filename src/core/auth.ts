@@ -1,10 +1,10 @@
 import { adminClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { toast } from "sonner";
-import { appConfig } from "./constants";
+import { apiConfig } from "./constants";
 
 export const authClient = createAuthClient({
-  baseURL: appConfig.authBaseUrl,
+  baseURL: apiConfig.authBaseUrl,
   plugins: [adminClient()],
   fetchOptions: {
     onError({ error }) {
