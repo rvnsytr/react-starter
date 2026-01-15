@@ -2,6 +2,8 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
+import z from "zod";
+import { id } from "zod/locales";
 import {
   AppErrorFallback,
   AppLoadingFallback,
@@ -9,6 +11,8 @@ import {
 import { ThemeProvider } from "./core/providers";
 import { useSession } from "./modules/auth";
 import { routeTree } from "./routeTree.gen";
+
+z.config(id());
 
 const router = createRouter({
   routeTree,

@@ -1,5 +1,5 @@
 import { dashboardfooterMenu, routesMeta } from "@/core/constants";
-import { getActiveRoute, getMenuByRole, toKebab } from "@/core/utils";
+import { getActiveRoute, getMenuByRole, toCase } from "@/core/utils";
 import {
   SignOutButton,
   StopImpersonateUserMenuItem,
@@ -160,7 +160,7 @@ export function SidebarMain() {
                                     <Link
                                       to={
                                         itm.href ??
-                                        (`${route}/#${toKebab(itm.displayName)}` as string)
+                                        (`${route}/#${toCase(itm.displayName, "slug")}` as string)
                                       }
                                       className="line-clamp-1"
                                     >
