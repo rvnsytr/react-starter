@@ -1,4 +1,4 @@
-import { R } from "@/core/components/ui/motion";
+import { R } from "@/core/components/ui/r";
 import { ThemeToggle } from "@/core/components/ui/theme";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 

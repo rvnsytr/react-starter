@@ -245,24 +245,6 @@ export const apiResponseSchema = z.object({
 
 // #endregion
 
-export const storageSchema = z.object({
-  id: z.uuidv4(),
-
-  fileName: sharedSchemas.string("Nama file", { min: 1, max: 255 }),
-  category: z.enum(["image"]),
-  filePath: sharedSchemas.string("File path", { min: 1, max: 500 }),
-  mimeType: sharedSchemas.string("Tipe file", { max: 100 }),
-  fileSize: sharedSchemas.number("Ukuran file"),
-  fileUrl: sharedSchemas.string("File URL", { min: 1 }).optional(),
-
-  deletedAt: sharedSchemas.date("deletedAt").nullable().default(null),
-  deletedBy: sharedSchemas.string("deletedBy").nullable().default(null),
-  updatedAt: sharedSchemas.date("updatedAt").nullable().default(null),
-  updatedBy: sharedSchemas.string("updatedBy").nullable().default(null),
-  createdAt: sharedSchemas.date("createdAt"),
-  createdBy: sharedSchemas.string("createdBy"),
-});
-
 export const passwordSchema = z.object({
   password: sharedSchemas.string("Kata sandi", { min: 1 }),
   newPassword: sharedSchemas.password,
@@ -284,4 +266,22 @@ export const userSchema = betterAuthUserSchema.extend({
 
 export const sessionSchema = betterAuthSessionSchema.extend({
   impersonatedBy: z.string().nullable().optional(),
+});
+
+export const storageSchema = z.object({
+  id: z.uuidv4(),
+
+  fileName: sharedSchemas.string("Nama file", { min: 1, max: 255 }),
+  category: z.enum(["image"]),
+  filePath: sharedSchemas.string("File path", { min: 1, max: 500 }),
+  mimeType: sharedSchemas.string("Tipe file", { max: 100 }),
+  fileSize: sharedSchemas.number("Ukuran file"),
+  fileUrl: sharedSchemas.string("File URL", { min: 1 }).optional(),
+
+  deletedAt: sharedSchemas.date("deletedAt").nullable().default(null),
+  deletedBy: sharedSchemas.string("deletedBy").nullable().default(null),
+  updatedAt: sharedSchemas.date("updatedAt").nullable().default(null),
+  updatedBy: sharedSchemas.string("updatedBy").nullable().default(null),
+  createdAt: sharedSchemas.date("createdAt"),
+  createdBy: sharedSchemas.string("createdBy"),
 });

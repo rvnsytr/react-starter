@@ -1,5 +1,3 @@
-"use client";
-
 import { FrameIcon, LucideIcon, MinimizeIcon, ScanIcon } from "lucide-react";
 import {
   createContext,

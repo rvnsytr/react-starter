@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/core/hooks";
 import { LayoutMode, layoutModeMeta, useLayout } from "@/core/providers";
 import { cn } from "@/core/utils";
 import { ComponentProps, useEffect, useEffectEvent } from "react";
@@ -17,6 +18,7 @@ export function LayoutToggle({
   ...props
 }: Omit<ButtonProps, "children"> &
   Pick<ComponentProps<typeof TooltipContent>, "align">) {
+  const isMobile = useIsMobile();
   const { layout, setLayout } = useLayout();
 
   const { icon: Icon } = layoutModeMeta[layout];
@@ -37,23 +39,27 @@ export function LayoutToggle({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  const element = (
+    <Button
+      size={size}
+      variant={variant}
+      onClick={(e) => {
+        onClick?.(e);
+        toggleLayout();
+      }}
+      className={cn("hidden md:inline-flex", className)}
+      disabled={disabled ?? layout === "unset"}
+      {...props}
+    >
+      <Icon />
+    </Button>
+  );
+
+  if (isMobile) return element;
+
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size={size}
-          variant={variant}
-          onClick={(e) => {
-            onClick?.(e);
-            toggleLayout();
-          }}
-          className={cn("hidden md:inline-flex", className)}
-          disabled={disabled ?? layout === "unset"}
-          {...props}
-        >
-          <Icon />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger asChild>{element}</TooltipTrigger>
       <TooltipContent
         align={align}
         className="flex flex-col items-center gap-2"

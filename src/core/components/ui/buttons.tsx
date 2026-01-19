@@ -1,7 +1,13 @@
 import { messages, Route } from "@/core/constants";
 import { cn, delay } from "@/core/utils";
 import { Link, useRouter } from "@tanstack/react-router";
-import { ArrowUp, Check, Copy, RefreshCcw, RotateCcw } from "lucide-react";
+import {
+  ArrowUpIcon,
+  CheckIcon,
+  CopyIcon,
+  RefreshCcwIcon,
+  RotateCcwIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { Button, ButtonProps } from "./button";
 import { LoadingSpinner } from "./spinner";
@@ -16,7 +22,7 @@ export function ResetButton({
 }: Omit<ButtonProps, "children">) {
   return (
     <Button type={type} size={size} variant={variant} {...props}>
-      <RotateCcw /> {messages.actions.reset}
+      <RotateCcwIcon /> {messages.actions.reset}
     </Button>
   );
 }
@@ -80,8 +86,10 @@ export function CopyButton({
       {...props}
     >
       <span className="sr-only">{copied ? "Copied" : "Copy"}</span>
-      <Copy className={cn("transition", copied ? "scale-0" : "scale-100")} />
-      <Check
+      <CopyIcon
+        className={cn("transition", copied ? "scale-0" : "scale-100")}
+      />
+      <CheckIcon
         className={cn("absolute transition", copied ? "scale-100" : "scale-0")}
       />
     </Button>
@@ -113,7 +121,7 @@ export function RefreshButton({
         variant="refresh"
         loading={refreshing}
         className="animate-reverse"
-        icon={{ base: <RefreshCcw /> }}
+        icon={{ base: <RefreshCcwIcon /> }}
       />
       {text}
     </Button>
@@ -139,7 +147,7 @@ export function ScrollToTopButton({
       }}
       {...props}
     >
-      <ArrowUp className="size-5" />
+      <ArrowUpIcon className="size-5" />
     </Button>
   );
 }

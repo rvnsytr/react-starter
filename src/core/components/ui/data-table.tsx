@@ -283,8 +283,6 @@ export function DataTable<TData>({
   const isServer = mode === "server";
   const prefix = id ? `${id}-` : "";
 
-  const isMobile = useIsMobile();
-
   const [columnVisibility, setColumnVisibility] = useQueryState(
     `${prefix}col-vis`,
     getRecordQSParser(false),
@@ -403,12 +401,7 @@ export function DataTable<TData>({
 
   return (
     <div className={cn("flex flex-col gap-y-4", className)}>
-      <ToolBox
-        table={table}
-        isMobile={isMobile}
-        className={classNames?.toolbox}
-        {...props}
-      />
+      <ToolBox table={table} className={classNames?.toolbox} {...props} />
 
       {table.getState().columnFilters.length > 0 && (
         <ActiveFiltersMobileContainer className={classNames?.filterContainer}>
@@ -442,9 +435,8 @@ export function DataTable<TData>({
                       //   right: column.getAfter("right"),
                       // }}
                     >
-                      {isPlaceholder
-                        ? null
-                        : flexRender(column.columnDef.header, getContext())}
+                      {!isPlaceholder &&
+                        flexRender(column.columnDef.header, getContext())}
                     </TableHead>
                   );
                 },
@@ -509,11 +501,7 @@ export function DataTable<TData>({
           classNames?.footer,
         )}
       >
-        <RowsPerPage
-          table={table}
-          isMobile={isMobile}
-          className="order-4 shrink-0 lg:order-1"
-        />
+        <RowsPerPage table={table} className="order-4 shrink-0 lg:order-1" />
 
         <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
           {formatNumber(table.getFilteredSelectedRowModel().rows.length)} dari{" "}
@@ -532,11 +520,7 @@ export function DataTable<TData>({
           dari {isLoading ? "?" : formatNumber(pageCount > 0 ? pageCount : 1)}
         </small>
 
-        <Pagination
-          table={table}
-          isMobile={isMobile}
-          className="order-3 shrink-0 lg:order-5"
-        />
+        <Pagination table={table} className="order-3 shrink-0 lg:order-5" />
       </div>
     </div>
   );
@@ -544,16 +528,16 @@ export function DataTable<TData>({
 
 function ToolBox<TData>({
   table,
-  isMobile,
   className,
   searchPlaceholder = "Cari...",
   withRefresh = false,
   renderRowSelection,
 }: ToolBoxProps<TData> & {
   table: DataTableType<TData>;
-  isMobile: boolean;
   className?: string;
 }) {
+  const isMobile = useIsMobile();
+
   const selectedRows = table.getFilteredSelectedRowModel().rows;
   const isSelected = selectedRows.length > 0;
 
@@ -567,7 +551,7 @@ function ToolBox<TData>({
       <div className={cn("flex flex-col gap-2 lg:flex-row lg:items-center")}>
         <ButtonGroup className="w-full lg:w-fit [&_button]:grow">
           <FilterSelector table={table} />
-          <View table={table} isMobile={isMobile} withRefresh={withRefresh} />
+          <View table={table} withRefresh={withRefresh} />
           {withRefresh && <RefreshButton variant="outline" />}
         </ButtonGroup>
 
@@ -592,13 +576,13 @@ function ToolBox<TData>({
 
 function View<TData>({
   table,
-  isMobile,
   withRefresh,
 }: {
   table: DataTableType<TData>;
-  isMobile: boolean;
   withRefresh: boolean;
 }) {
+  const isMobile = useIsMobile();
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -739,13 +723,13 @@ function Search<TData>({
 
 function Pagination<TData>({
   table,
-  isMobile,
   className,
 }: {
   table: DataTableType<TData>;
-  isMobile: boolean;
   className?: string;
 }) {
+  const isMobile = useIsMobile();
+
   const size = isMobile ? "icon" : "icon-sm";
   const variant = "outline";
   return (
@@ -791,13 +775,13 @@ function Pagination<TData>({
 
 function RowsPerPage<TData>({
   table,
-  isMobile,
   className,
 }: {
   table: DataTableType<TData>;
-  isMobile: boolean;
   className?: string;
 }) {
+  const isMobile = useIsMobile();
+
   return (
     <div className={cn("flex items-center gap-x-2", className)}>
       <Label>Baris per halaman</Label>

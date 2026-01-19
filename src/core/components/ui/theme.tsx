@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/core/hooks";
 import { nextTheme, Theme, themeMeta, useTheme } from "@/core/providers/theme";
 import { ComponentProps } from "react";
 import { Button, ButtonProps } from "./button";
@@ -14,28 +15,33 @@ export function ThemeToggle({
   ...props
 }: Omit<ButtonProps, "children"> &
   Pick<ComponentProps<typeof TooltipContent>, "align">) {
+  const isMobile = useIsMobile();
   const { theme, setTheme } = useTheme();
 
   const currentTheme = (theme ?? "system") as Theme;
   const { icon: Icon } = themeMeta[currentTheme];
 
+  const element = (
+    <Button
+      size={size}
+      variant={variant}
+      onClick={(e) => {
+        onClick?.(e);
+        const t = nextTheme(theme);
+        setTheme(t);
+      }}
+      {...props}
+    >
+      <Icon />
+      <span className="sr-only">Toggle Theme</span>
+    </Button>
+  );
+
+  if (isMobile) return element;
+
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size={size}
-          variant={variant}
-          onClick={(e) => {
-            onClick?.(e);
-            const t = nextTheme(theme);
-            setTheme(t);
-          }}
-          {...props}
-        >
-          <Icon />
-          <span className="sr-only">Toggle Theme</span>
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger asChild>{element}</TooltipTrigger>
       <TooltipContent
         align={align}
         className="flex flex-col items-center gap-2"

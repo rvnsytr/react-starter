@@ -96,9 +96,10 @@ import {
 } from "@/core/components/ui/tooltip";
 import { appMeta, fileMeta, messages } from "@/core/constants";
 import { filterFn } from "@/core/filter";
+import { useIsMobile } from "@/core/hooks";
 import { passwordSchema, sharedSchemas, userSchema } from "@/core/schema";
 import { removeFiles, uploadFiles } from "@/core/storage";
-import { cn, formatDate } from "@/core/utils";
+import { capitalize, cn, formatDate } from "@/core/utils";
 import { AuthSession, Role } from "@/modules/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -1181,7 +1182,7 @@ export function UserDetailDialog({
             </TabsContent>
 
             <TabsContent value="sessions">
-              <UserSessionList data={data} />
+              <UserDetailSessionList data={data} />
             </TabsContent>
           </Tabs>
 
@@ -1458,7 +1459,7 @@ function UserRoleDropdown({
           setIsOpen(false);
 
           mutateListUsers();
-          return `Role ${data.name} berhasil diperbarui menjadi ${role}.`;
+          return `Role ${data.name} berhasil diperbarui menjadi ${capitalize(role)}.`;
         },
         error: (e) => {
           setIsLoading(false);
@@ -1880,7 +1881,7 @@ export function SessionList() {
   return <SessionListCollapsible data={data ?? []} />;
 }
 
-function UserSessionList({
+function UserDetailSessionList({
   data: userData,
 }: {
   data: Pick<AuthSession["user"], "id" | "name">;
@@ -1899,6 +1900,7 @@ function SessionListCollapsible({
   data: AuthSession["session"][];
 }) {
   const { session } = useAuth();
+  const isMobile = useIsMobile();
   const [revokingSession, setRevokingSession] = useState<string | null>();
 
   if (!data.length)
@@ -1981,7 +1983,7 @@ function SessionListCollapsible({
 
           return (
             <Collapsible key={s.id} className="rounded-lg border p-2 shadow-xs">
-              <div className="flex items-center justify-between gap-x-4">
+              <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div className="flex items-center gap-x-3">
                   <div className="size-fit rounded-full border p-3">
                     <DeviceIcon className="size-5 shrink-0" />
@@ -1989,16 +1991,18 @@ function SessionListCollapsible({
 
                   <div className="grid gap-y-1 font-medium">
                     <div className="flex items-center gap-x-2">
-                      <small>{`${osName} - ${browserName}`}</small>
+                      <small className="line-clamp-1">{`${osName} - ${browserName}`}</small>
                       <ImpersonateUserBadge
                         impersonating={!!s.impersonatedBy}
                       />
                     </div>
 
                     {isCurrentSession ? (
-                      <small className="text-success">Sesi saat ini</small>
+                      <small className="text-success line-clamp-1">
+                        Sesi saat ini
+                      </small>
                     ) : (
-                      <small className="text-muted-foreground">
+                      <small className="text-muted-foreground line-clamp-1">
                         {messages.thingAgo("Terakhir terlihat", s.updatedAt)}
                       </small>
                     )}
@@ -2013,6 +2017,7 @@ function SessionListCollapsible({
                           size="icon-sm"
                           variant="outline"
                           disabled={isLoading}
+                          className="grow lg:grow-0"
                         >
                           <LoadingSpinner
                             loading={isLoading}
@@ -2044,7 +2049,11 @@ function SessionListCollapsible({
                   )}
 
                   <CollapsibleTrigger asChild>
-                    <Button size="icon-sm" variant="ghost">
+                    <Button
+                      size="icon-sm"
+                      variant={isMobile ? "outline" : "ghost"}
+                      className="grow lg:grow-0"
+                    >
                       <ChevronsUpDownIcon />
                     </Button>
                   </CollapsibleTrigger>
@@ -2104,7 +2113,7 @@ export function RevokeOtherSessionsButton() {
             loading={isLoading}
             icon={{ base: <MonitorOffIcon /> }}
           />
-          Akhiri Semua Sesi di Perangkat Lain
+          Akhiri Semua Sesi Lain
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

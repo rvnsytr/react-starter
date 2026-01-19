@@ -1,5 +1,5 @@
 import { DashboardMain } from "@/core/components/layout";
-import { R } from "@/core/components/ui/motion";
+import { R } from "@/core/components/ui/r";
 import { useAuth } from "@/modules/auth";
 import { createFileRoute } from "@tanstack/react-router";
 
