@@ -388,7 +388,7 @@ export function DataTable<TData>({
 
     // * Pagination
     manualPagination: isServer,
-    rowCount: data?.success ? (data.count?.total ?? 0) : 0,
+    rowCount: data?.count?.total ?? 0,
     onPaginationChange: setPagination,
     getPaginationRowModel: !isServer ? getPaginationRowModel() : undefined,
   });
@@ -398,6 +398,11 @@ export function DataTable<TData>({
     return <ErrorFallback error={data.error} />;
 
   const pageCount = table.getPageCount();
+  const selectedRowsCount =
+    Object.keys(rowSelection).length ??
+    table.getFilteredSelectedRowModel().rows.length;
+  const rowsCount =
+    data?.count?.total ?? table.getFilteredRowModel().rows.length;
 
   return (
     <div className={cn("flex flex-col gap-y-4", className)}>
@@ -504,11 +509,8 @@ export function DataTable<TData>({
         <RowsPerPage table={table} className="order-4 shrink-0 lg:order-1" />
 
         <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
-          {formatNumber(table.getFilteredSelectedRowModel().rows.length)} dari{" "}
-          {isLoading
-            ? "?"
-            : formatNumber(table.getFilteredRowModel().rows.length)}{" "}
-          baris dipilih
+          {formatNumber(selectedRowsCount)} dari{" "}
+          {isLoading ? "?" : formatNumber(rowsCount)} baris dipilih
         </small>
 
         <small className="text-muted-foreground order-1 mx-auto text-sm lg:order-3">

@@ -665,11 +665,10 @@ export function ProfileForm() {
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = userSchema.pick({ name: true, email: true });
-  const defaultValues = user;
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: user,
   });
 
   const formHandler = ({ name: newName }: FormSchema) => {
@@ -763,7 +762,7 @@ export function ProfileForm() {
           {messages.actions.update}
         </Button>
 
-        <ResetButton onClick={() => form.reset(defaultValues)} />
+        <ResetButton onClick={() => form.reset(user)} />
       </CardFooter>
     </form>
   );
