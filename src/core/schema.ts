@@ -260,6 +260,7 @@ export const userSchema = betterAuthUserSchema.extend({
   banned: z.boolean().optional().nullable(),
   banReason: z.string().optional().nullable(),
   banExpires: z.date().optional().nullable(),
+
   createdAt: sharedSchemas.date("createdAt"),
   updatedAt: sharedSchemas.date("updatedAt"),
 });

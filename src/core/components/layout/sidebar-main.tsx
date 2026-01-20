@@ -160,7 +160,7 @@ export function SidebarMain() {
                                     <Link
                                       to={
                                         itm.href ??
-                                        (`${route}/#${toCase(itm.displayName, "slug")}` as string)
+                                        (`${route}/#${toCase(itm.displayName, "kebab")}` as string)
                                       }
                                       className="line-clamp-1"
                                     >
