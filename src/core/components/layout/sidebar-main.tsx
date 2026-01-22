@@ -16,7 +16,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { RefreshButton } from "../ui/buttons";
 import {
   Collapsible,
   CollapsibleContent,
@@ -185,16 +184,6 @@ export function SidebarMain() {
       {/* Footer */}
       <SidebarFooter>
         <SidebarMenu className="gap-2">
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Refresh Page" asChild>
-              <RefreshButton
-                size="xs"
-                variant="ghost"
-                className="justify-start text-xs"
-              />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
           {dashboardfooterMenu.map(
             ({ route, displayName, icon: Icon, disabled }) => {
               const iconElement = Icon && <Icon />;

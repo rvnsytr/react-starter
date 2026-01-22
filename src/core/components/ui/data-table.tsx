@@ -374,8 +374,8 @@ export function DataTable<TData>({
   });
 
   if (error) return <ErrorFallback error={error} />;
-  if (!isLoading && data && !data.success)
-    return <ErrorFallback error={data.error} />;
+  if (!isLoading && !data?.success)
+    return <ErrorFallback error={data?.error} />;
 
   const pageCount = table.getPageCount();
   const selectedRowsCount =
@@ -762,8 +762,6 @@ function RowsPerPage<TData>({
   table: DataTableType<TData>;
   className?: string;
 }) {
-  const isMobile = useIsMobile();
-
   return (
     <div className={cn("flex items-center gap-x-2", className)}>
       <Label>Baris per halaman</Label>
@@ -771,7 +769,7 @@ function RowsPerPage<TData>({
         value={String(table.getState().pagination.pageSize ?? defaultPageSize)}
         onValueChange={(value) => table.setPageSize(Number(value))}
       >
-        <SelectTrigger size={isMobile ? "default" : "sm"}>
+        <SelectTrigger size="sm">
           <SelectValue />
         </SelectTrigger>
 

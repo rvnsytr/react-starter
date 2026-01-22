@@ -16,7 +16,11 @@ import {
   AvatarImage,
 } from "@/core/components/ui/avatar";
 import { Badge } from "@/core/components/ui/badge";
-import { Button, buttonVariants } from "@/core/components/ui/button";
+import {
+  Button,
+  ButtonProps,
+  buttonVariants,
+} from "@/core/components/ui/button";
 import { ResetButton } from "@/core/components/ui/buttons";
 import { CardContent, CardFooter } from "@/core/components/ui/card";
 import { Checkbox } from "@/core/components/ui/checkbox";
@@ -851,11 +855,11 @@ export function UserVerifiedBadge({
       <TooltipTrigger className={className} asChild>
         {noText ? (
           <BadgeCheckIcon
-            className={cn("text-rvns size-4 shrink-0", classNames?.icon)}
+            className={cn("text-success size-4 shrink-0", classNames?.icon)}
           />
         ) : (
           <Badge
-            variant="outline_rvns"
+            variant="success"
             className={cn("capitalize", classNames?.badge)}
           >
             <BadgeCheckIcon className={classNames?.icon} /> Terverifikasi
@@ -1093,7 +1097,7 @@ export function UserDetailDialog({
         </DialogTrigger>
       </div>
 
-      <DialogContent className="sm:max-w-2xl" hideCloseButton>
+      <DialogContent className="sm:max-w-2xl" showCloseButton={false}>
         <DialogHeader className="flex-row justify-between gap-x-4">
           <div className="flex items-center gap-x-3">
             <UserAvatar data={data} className="size-12" />
@@ -1187,16 +1191,18 @@ export function UserDetailDialog({
 
           <Separator />
 
-          <DialogFooter>
-            <DialogClose>{messages.actions.back}</DialogClose>
-          </DialogFooter>
+          <DialogFooter showCloseButton closeButtonText="back" />
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-export function CreateUserDialog() {
+export function CreateUserDialog({
+  size,
+  variant,
+  className,
+}: Pick<ButtonProps, "size" | "variant" | "className">) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   type FormSchema = z.infer<typeof formSchema>;
@@ -1253,7 +1259,11 @@ export function CreateUserDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full">
+        <Button
+          size={size}
+          variant={variant}
+          className={cn("w-full", className)}
+        >
           <UserRoundPlusIcon /> Tambah Pengguna
         </Button>
       </DialogTrigger>
@@ -1365,7 +1375,7 @@ export function CreateUserDialog() {
             control={form.control}
             render={({ field, fieldState }) => (
               <FieldWrapper
-                label="Ubah role"
+                label="Role"
                 htmlFor={field.name}
                 errors={fieldState.error}
               >
@@ -1414,8 +1424,7 @@ export function CreateUserDialog() {
 
           <Separator />
 
-          <DialogFooter>
-            <DialogClose>{messages.actions.cancel}</DialogClose>
+          <DialogFooter showCloseButton>
             <Button type="submit" disabled={isLoading}>
               <LoadingSpinner
                 loading={isLoading}
@@ -2532,8 +2541,7 @@ function BanUserDialog({
             )}
           />
 
-          <DialogFooter>
-            <DialogClose>{messages.actions.cancel}</DialogClose>
+          <DialogFooter showCloseButton>
             <ResetButton onClick={() => form.reset()} />
             <Button type="submit" variant="destructive" disabled={isLoading}>
               <LoadingSpinner
@@ -2713,8 +2721,7 @@ function RemoveUserDialog({
             )}
           />
 
-          <DialogFooter>
-            <DialogClose>{messages.actions.cancel}</DialogClose>
+          <DialogFooter showCloseButton>
             <Button
               type="submit"
               variant="destructive"
@@ -2831,8 +2838,7 @@ function ActionRemoveUsersDialog({
             )}
           />
 
-          <DialogFooter>
-            <DialogClose>{messages.actions.cancel}</DialogClose>
+          <DialogFooter showCloseButton>
             <Button
               type="submit"
               variant="destructive"
