@@ -33,7 +33,7 @@ function RootLayout() {
     <NuqsAdapter>
       <HeadContent />
 
-      <GridPattern className="stroke-muted dark:stroke-muted/60 -z-1 min-h-dvh" />
+      <GridPattern className="stroke-muted dark:stroke-muted/60 -z-10 min-h-dvh" />
 
       <Outlet />
 
