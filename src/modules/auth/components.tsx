@@ -1259,11 +1259,7 @@ export function CreateUserDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          size={size}
-          variant={variant}
-          className={cn("w-full", className)}
-        >
+        <Button size={size} variant={variant} className={className}>
           <UserRoundPlusIcon /> Tambah Pengguna
         </Button>
       </DialogTrigger>
