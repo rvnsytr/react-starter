@@ -1,3 +1,4 @@
+import { Route } from "@/core/constants";
 import { Link } from "@tanstack/react-router";
 import {
   Empty,
@@ -7,7 +8,7 @@ import {
   EmptyTitle,
 } from "../ui/empty";
 
-export function NotFound() {
+export function NotFound({ to = "/" }: { to?: Route }) {
   return (
     <Empty className="min-h-dvh">
       <EmptyHeader>
@@ -17,7 +18,7 @@ export function NotFound() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Link to="/" className="link">
+        <Link to={to} className="link">
           Take me Home
         </Link>
       </EmptyContent>

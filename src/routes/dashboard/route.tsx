@@ -1,26 +1,40 @@
-import { FooterNote, SidebarMain } from "@/core/components/layout";
+import { FooterNote, NotFound, SidebarMain } from "@/core/components/layout";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
 import { LayoutProvider } from "@/core/providers";
-import { getRouteTitle } from "@/core/utils";
-import { AuthProvider } from "@/modules/auth";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/utils";
+import { AuthProvider, useSession } from "@/modules/auth";
+import {
+  createFileRoute,
+  notFound,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: (c) => {
-    if (!c.context.session) throw redirect({ to: "/sign-in" });
     const { session, ...rest } = c.context;
-    return { session, ...rest };
+    if (!session) throw redirect({ to: "/sign-in" });
+
+    const pathname = normalizeRoute(c.location.pathname);
+    const isAuthorized = authorizedRoute(pathname, session.user.role);
+
+    return { isAuthorized, session, ...rest };
   },
-  loader: (c) => c.context,
+  loader: (c) => {
+    if (!c.context.isAuthorized) throw notFound();
+    return c.context;
+  },
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard") }] }),
   component: DashboardLayout,
+  notFoundComponent: () => <NotFound to="/dashboard" />,
 });
 
 function DashboardLayout() {
-  const { session } = Route.useLoaderData();
+  const loader = Route.useLoaderData();
+  const { data: session } = useSession({ fallbackData: loader.session });
 
   return (
-    <AuthProvider session={session}>
+    <AuthProvider session={session ?? loader.session}>
       <SidebarProvider>
         <SidebarMain />
 
