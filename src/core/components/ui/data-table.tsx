@@ -1,11 +1,11 @@
 import { ApiResponse } from "@/core/api";
 import { messages } from "@/core/constants";
-import { allFilterOperators } from "@/core/filter";
 import { useDebounce, useIsMobile } from "@/core/hooks";
 import { cn, formatNumber } from "@/core/utils";
 import {
   ColumnDef,
   ColumnFiltersState,
+  ColumnPinningState,
   Table as DataTableType,
   flexRender,
   getCoreRowModel,
@@ -16,11 +16,12 @@ import {
   getSortedRowModel,
   PaginationState,
   Row,
+  RowSelectionState,
   SortingState,
   TableOptions,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { isValid } from "date-fns";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -30,18 +31,8 @@ import {
   SearchIcon,
   ViewIcon,
 } from "lucide-react";
-import {
-  createParser,
-  parseAsArrayOf,
-  parseAsIndex,
-  parseAsInteger,
-  parseAsString,
-  useQueryState,
-  useQueryStates,
-} from "nuqs";
-import { ReactNode, useEffect, useMemo, useRef } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import useSWR, { mutate, SWRConfiguration } from "swr";
-import z from "zod";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
 import { RefreshButton } from "./buttons";
@@ -84,7 +75,7 @@ import {
 
 export type DataTableState = {
   globalFilter: string;
-  columnFilters: z.infer<typeof columnFiltersSchema>[];
+  columnFilters: ColumnFiltersState;
   sorting: SortingState;
   pagination: PaginationState;
 };
@@ -113,7 +104,7 @@ type ToolBoxProps<TData> = {
 };
 
 export type DataTableProps<TData> = ToolBoxProps<TData> & {
-  id?: string;
+  // id?: string;
   caption?: string;
   placeholder?: string;
   className?: string;
@@ -129,115 +120,115 @@ export type DataTableProps<TData> = ToolBoxProps<TData> & {
 const pageSizes = [5, 10, 20, 30, 40, 50, 100];
 const defaultPageSize = pageSizes[1];
 
-export const columnFiltersSchema = z.object({
-  id: z.string(),
-  value: z.object({
-    operator: z.enum(allFilterOperators),
-    values: z.union([z.string(), z.number(), z.coerce.date()]).array(),
-  }),
-});
+// const columnFiltersSchema = z.object({
+//   id: z.string(),
+//   value: z.object({
+//     operator: z.enum(allFilterOperators),
+//     values: z.union([z.string(), z.number(), z.coerce.date()]).array(),
+//   }),
+// });
 
-const arrayQSParser = parseAsArrayOf(parseAsString).withDefault([]);
+// const arrayQSParser = parseAsArrayOf(parseAsString).withDefault([]);
 
-const getRecordQSParser = (parseValue: boolean) =>
-  createParser<Record<string, boolean>>({
-    parse: (value) => {
-      if (!value) return {};
-      return Object.fromEntries(value.split(",").map((v) => [v, parseValue]));
-    },
-    serialize: (value) => {
-      const entries = Object.entries(value);
-      // Nuqs TS bug? it should returned `string | null`
-      if (!entries?.length) return null as unknown as string;
-      return entries
-        .map(([k, v]) => (v === parseValue ? k : null))
-        .filter((v) => !!v)
-        .join(",");
-    },
-  }).withDefault({});
+// const getRecordQSParser = (parseValue: boolean) =>
+//   createParser<Record<string, boolean>>({
+//     parse: (value) => {
+//       if (!value) return {};
+//       return Object.fromEntries(value.split(",").map((v) => [v, parseValue]));
+//     },
+//     serialize: (value) => {
+//       const entries = Object.entries(value);
+//       // Nuqs TS bug? it should returned `string | null`
+//       if (!entries?.length) return null as unknown as string;
+//       return entries
+//         .map(([k, v]) => (v === parseValue ? k : null))
+//         .filter((v) => !!v)
+//         .join(",");
+//     },
+//   }).withDefault({});
 
-const sortingParser = createParser<SortingState>({
-  parse: (value) => {
-    if (!value) return [];
-    return value
-      .split(";")
-      .map((part) => {
-        const [id, rawDir] = part.split(":");
-        const parsed = z.enum(["asc", "desc"]).safeParse(rawDir);
-        if (!id || !parsed.success) return null;
-        return { id, desc: parsed.data === "desc" };
-      })
-      .filter((v) => !!v);
-  },
-  serialize: (value) => {
-    // Nuqs TS bug? it should returned `string | null`
-    if (!value?.length) return null as unknown as string;
-    return value.map((s) => `${s.id}:${s.desc ? "desc" : "asc"}`).join(";");
-  },
-}).withDefault([]);
+// const sortingParser = createParser<SortingState>({
+//   parse: (value) => {
+//     if (!value) return [];
+//     return value
+//       .split(";")
+//       .map((part) => {
+//         const [id, rawDir] = part.split(":");
+//         const parsed = z.enum(["asc", "desc"]).safeParse(rawDir);
+//         if (!id || !parsed.success) return null;
+//         return { id, desc: parsed.data === "desc" };
+//       })
+//       .filter((v) => !!v);
+//   },
+//   serialize: (value) => {
+//     // Nuqs TS bug? it should returned `string | null`
+//     if (!value?.length) return null as unknown as string;
+//     return value.map((s) => `${s.id}:${s.desc ? "desc" : "asc"}`).join(";");
+//   },
+// }).withDefault([]);
 
-export function columnFiltersParser<TData>(
-  getColumns: () => DataTableColumnDef<TData>,
-) {
-  return createParser<ColumnFiltersState>({
-    parse: (value) => {
-      if (!value) return [];
-      return value
-        .split(";")
-        .map((part) => {
-          const [id, operator, rawValues = ""] = part.split(":");
-          if (!id || !operator || !rawValues) return null;
+// function columnFiltersParser<TData>(
+//   getColumns: () => DataTableColumnDef<TData>,
+// ) {
+//   return createParser<ColumnFiltersState>({
+//     parse: (value) => {
+//       if (!value) return [];
+//       return value
+//         .split(";")
+//         .map((part) => {
+//           const [id, operator, rawValues = ""] = part.split(":");
+//           if (!id || !operator || !rawValues) return null;
 
-          const col = getColumns().find((c) => c.id === id);
-          if (!col) return null;
+//           const col = getColumns().find((c) => c.id === id);
+//           if (!col) return null;
 
-          const values = rawValues
-            ? rawValues
-                .split(",")
-                .map((v) => {
-                  if (col.meta?.type === "date") {
-                    const d = new Date(Number(v));
-                    if (isValid(d)) return d;
-                    else return null;
-                  }
+//           const values = rawValues
+//             ? rawValues
+//                 .split(",")
+//                 .map((v) => {
+//                   if (col.meta?.type === "date") {
+//                     const d = new Date(Number(v));
+//                     if (isValid(d)) return d;
+//                     else return null;
+//                   }
 
-                  if (col.meta?.type === "number") {
-                    const n = Number(v);
-                    if (!Number.isNaN(n)) return n;
-                    else return null;
-                  }
+//                   if (col.meta?.type === "number") {
+//                     const n = Number(v);
+//                     if (!Number.isNaN(n)) return n;
+//                     else return null;
+//                   }
 
-                  return v;
-                })
-                .filter((v) => !!v)
-            : [];
+//                   return v;
+//                 })
+//                 .filter((v) => !!v)
+//             : [];
 
-          if (!values.length) return null;
-          return { id, value: { operator, values } };
-        })
-        .filter((v) => !!v);
-    },
-    serialize: (value) => {
-      // Nuqs TS bug? it should returned `string | null`
-      if (!value?.length) return null as unknown as string;
+//           if (!values.length) return null;
+//           return { id, value: { operator, values } };
+//         })
+//         .filter((v) => !!v);
+//     },
+//     serialize: (value) => {
+//       // Nuqs TS bug? it should returned `string | null`
+//       if (!value?.length) return null as unknown as string;
 
-      return value
-        .map(({ id, value: rawValue }) => {
-          const parsed = columnFiltersSchema.shape.value.safeParse(rawValue);
-          if (!parsed.success) return null;
+//       return value
+//         .map(({ id, value: rawValue }) => {
+//           const parsed = columnFiltersSchema.shape.value.safeParse(rawValue);
+//           if (!parsed.success) return null;
 
-          const { operator, values } = parsed.data;
-          const serializedValues = values.map((v) =>
-            v instanceof Date ? v.getTime() : String(v),
-          );
+//           const { operator, values } = parsed.data;
+//           const serializedValues = values.map((v) =>
+//             v instanceof Date ? v.getTime() : String(v),
+//           );
 
-          return `${id}:${operator}:${serializedValues.join(",")}`;
-        })
-        .filter((v) => !!v)
-        .join(";");
-    },
-  }).withDefault([]);
-}
+//           return `${id}:${operator}:${serializedValues.join(",")}`;
+//         })
+//         .filter((v) => !!v)
+//         .join(";");
+//     },
+//   }).withDefault([]);
+// }
 
 export const mutateDataTable = (key: string) =>
   mutate((a) => !!a && typeof a === "object" && "key" in a && a.key === key);
@@ -247,7 +238,7 @@ export function DataTable<TData>({
   swr,
   getColumns,
 
-  id,
+  // id,
   caption,
   placeholder,
   className,
@@ -261,54 +252,36 @@ export function DataTable<TData>({
   DataTableProps<TData> &
   Pick<TableOptions<TData>, "getRowId" | "enableRowSelection">) {
   const isServer = mode === "server";
-  const prefix = id ? `${id}-` : "";
+  // const prefix = id ? `${id}-` : "";
 
-  const [columnVisibility, setColumnVisibility] = useQueryState(
-    `${prefix}col-vis`,
-    getRecordQSParser(false),
-  );
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  });
 
-  const [columnPinning, setColumnPinning] = useQueryStates(
-    { left: arrayQSParser, right: arrayQSParser },
-    { urlKeys: { left: `${prefix}pin-l`, right: `${prefix}pin-r` } },
-  );
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [globalFilter, setGlobalFilter] = useState<string>("");
 
-  const [rowSelection, setRowSelection] = useQueryState(
-    `${prefix}row-selected`,
-    getRecordQSParser(true),
-  );
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
-  const [globalFilter, setGlobalFilter] = useQueryState(
-    `${prefix}global-filter`,
-    parseAsString.withDefault(""),
-  );
-
-  const [columnFilters, setColumnFilters] = useQueryState(
-    `${prefix}filter`,
-    columnFiltersParser(getColumns),
-  );
-
-  const [sorting, setSorting] = useQueryState(`${prefix}sort`, sortingParser);
-
-  const [pagination, setPagination] = useQueryStates(
-    {
-      pageIndex: parseAsIndex.withDefault(0),
-      pageSize: parseAsInteger.withDefault(defaultPageSize),
-    },
-    { urlKeys: { pageIndex: `${prefix}page`, pageSize: `${prefix}size` } },
-  );
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: defaultPageSize,
+  });
 
   const debouncedGlobalFilter = useDebounce(globalFilter);
 
-  const allStates: DataTableState = useMemo(() => {
-    const parsed = columnFiltersSchema.array().safeParse(columnFilters);
-    return {
+  const allStates: DataTableState = useMemo(
+    () => ({
       globalFilter: debouncedGlobalFilter,
-      columnFilters: parsed.data ?? [],
+      columnFilters,
       sorting,
       pagination,
-    };
-  }, [debouncedGlobalFilter, columnFilters, sorting, pagination]);
+    }),
+    [debouncedGlobalFilter, columnFilters, sorting, pagination],
+  );
 
   const baseArgument = { key: swr.key };
   const { data, isLoading, error } = useSWR(
