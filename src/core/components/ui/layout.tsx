@@ -1,6 +1,6 @@
-import { useIsMobile } from "@/core/hooks";
-import { LayoutMode, layoutModeMeta, useLayout } from "@/core/providers";
-import { cn } from "@/core/utils";
+import { useIsMobile } from "@/core/hooks/use-is-mobile";
+import { LayoutMode, layoutModeMeta, useLayout } from "@/core/providers/layout";
+import { cn } from "@/core/utils/helpers";
 import { ComponentProps, useEffect, useEffectEvent } from "react";
 import { Button, ButtonProps } from "./button";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";

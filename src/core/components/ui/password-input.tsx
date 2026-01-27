@@ -1,5 +1,5 @@
-import { messages } from "@/core/constants";
-import { cn } from "@/core/utils";
+import { messages } from "@/core/constants/messages";
+import { cn } from "@/core/utils/helpers";
 import {
   CheckIcon,
   EyeIcon,

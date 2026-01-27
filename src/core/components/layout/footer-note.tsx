@@ -1,4 +1,4 @@
-import { cn } from "@/core/utils";
+import { cn } from "@/core/utils/helpers";
 import { Link } from "@tanstack/react-router";
 
 export function FooterNote({ className }: { className?: string }) {

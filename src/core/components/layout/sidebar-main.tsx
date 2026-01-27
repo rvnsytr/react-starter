@@ -1,12 +1,13 @@
-import { dashboardfooterMenu, routesMeta } from "@/core/constants";
-import { getActiveRoute, getMenuByRole, toCase } from "@/core/utils";
+import { dashboardfooterMenu } from "@/core/constants/menu";
+import { getActiveRoute, getMenuByRole, routesMeta } from "@/core/route";
+import { toCase } from "@/core/utils/formaters";
 import {
   SignOutButton,
   StopImpersonateUserMenuItem,
-  useAuth,
   UserAvatar,
   UserVerifiedBadge,
-} from "@/modules/auth";
+} from "@/modules/auth/components";
+import { useAuth } from "@/modules/auth/provider.auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import {

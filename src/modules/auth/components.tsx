@@ -98,13 +98,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/core/components/ui/tooltip";
-import { appMeta, fileMeta, messages } from "@/core/constants";
+import { appMeta } from "@/core/constants/app";
+import { fileMeta } from "@/core/constants/file";
+import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/filter";
-import { useIsMobile } from "@/core/hooks";
+import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { passwordSchema, sharedSchemas, userSchema } from "@/core/schema";
 import { removeFiles, uploadFiles } from "@/core/storage";
-import { capitalize, cn, formatDate } from "@/core/utils";
-import { AuthSession, Role } from "@/modules/auth";
+import { formatDate } from "@/core/utils/date";
+import { capitalize } from "@/core/utils/formaters";
+import { cn } from "@/core/utils/helpers";
+import { AuthSession, Role } from "@/modules/auth/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";

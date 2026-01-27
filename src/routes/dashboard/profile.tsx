@@ -1,4 +1,4 @@
-import { DashboardMain } from "@/core/components/layout";
+import { DashboardMain } from "@/core/components/layout/dashboard";
 import {
   Card,
   CardAction,
@@ -6,15 +6,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
-import { appMeta } from "@/core/constants";
-import { getRouteTitle } from "@/core/utils";
+import { appMeta } from "@/core/constants/app";
+import { getRouteTitle } from "@/core/route";
 import {
   ProfileForm,
-  Role,
-  useAuth,
   UserRoleBadge,
   UserVerifiedBadge,
-} from "@/modules/auth";
+} from "@/modules/auth/components";
+import { useAuth } from "@/modules/auth/provider.auth";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/profile")({
@@ -34,7 +33,7 @@ function RouteComponent() {
             Perbarui dan kelola informasi profil {appMeta.name} Anda.
           </CardDescription>
           <CardAction className="flex flex-col items-end gap-2 md:flex-row-reverse">
-            <UserRoleBadge value={user.role as Role} />
+            <UserRoleBadge value={user.role} />
             {user.emailVerified && <UserVerifiedBadge />}
           </CardAction>
         </CardHeader>

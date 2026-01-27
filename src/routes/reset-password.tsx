@@ -4,9 +4,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
-import { appMeta } from "@/core/constants";
-import { getRouteTitle } from "@/core/utils";
-import { ResetPasswordForm } from "@/modules/auth";
+import { appMeta } from "@/core/constants/app";
+import { getRouteTitle } from "@/core/route";
+import { ResetPasswordForm } from "@/modules/auth/components";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/reset-password")({

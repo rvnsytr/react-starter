@@ -1,11 +1,13 @@
-import { allRoles } from "@/modules/auth";
+import { allRoles } from "@/modules/auth/constants";
 import {
   sessionSchema as betterAuthSessionSchema,
   userSchema as betterAuthUserSchema,
 } from "better-auth";
 import z from "zod";
-import { allGenders, fileMeta, FileType, messages } from "./constants";
-import { toMegabytes } from "./utils";
+import { fileMeta, FileType } from "./constants/file";
+import { messages } from "./constants/messages";
+import { allGenders } from "./constants/metadata";
+import { toMegabytes } from "./utils/formaters";
 
 // #region CORE
 
@@ -30,7 +32,7 @@ export const sharedSchemas = {
     let schema = z.string({ error: invalid(field) }).trim();
 
     if (sanitize)
-      schema = schema.regex(/^$|[A-Za-z0-9]/, { message: required(field) });
+      schema = schema.regex(/^$|[A-Za-z0-9]/, { message: invalid(field) });
 
     if (min) {
       const message = min <= 1 && withRequired ? required : tooShort;

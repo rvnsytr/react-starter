@@ -1,4 +1,4 @@
-import { Route } from "@/core/constants";
+import { Route } from "@/core/route";
 import { Link } from "@tanstack/react-router";
 import {
   Empty,

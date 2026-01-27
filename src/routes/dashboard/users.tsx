@@ -1,4 +1,4 @@
-import { DashboardMain } from "@/core/components/layout";
+import { DashboardMain } from "@/core/components/layout/dashboard";
 import { Button } from "@/core/components/ui/button";
 import {
   CardAction,
@@ -12,9 +12,9 @@ import {
   PopoverTrigger,
 } from "@/core/components/ui/popover";
 import { Separator } from "@/core/components/ui/separator";
+import { getRouteTitle } from "@/core/route";
 import { dataTableQueryStateSchema } from "@/core/schema";
-import { getRouteTitle } from "@/core/utils";
-import { CreateUserDialog, UserDataTable } from "@/modules/auth";
+import { CreateUserDialog, UserDataTable } from "@/modules/auth/components";
 import { createFileRoute } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";
 

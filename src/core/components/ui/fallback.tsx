@@ -1,4 +1,4 @@
-import { cn } from "@/core/utils";
+import { cn } from "@/core/utils/helpers";
 import { LoaderIcon, TriangleAlertIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Spinner } from "./spinner";

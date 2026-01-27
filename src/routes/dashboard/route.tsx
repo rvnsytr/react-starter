@@ -1,8 +1,11 @@
-import { FooterNote, NotFound, SidebarMain } from "@/core/components/layout";
+import { FooterNote } from "@/core/components/layout/footer-note";
+import { NotFound } from "@/core/components/layout/not-found";
+import { SidebarMain } from "@/core/components/layout/sidebar-main";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
-import { LayoutProvider } from "@/core/providers";
-import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/utils";
-import { AuthProvider, useSession } from "@/modules/auth";
+import { LayoutProvider } from "@/core/providers/layout";
+import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/route";
+import { useSession } from "@/modules/auth/hooks";
+import { AuthProvider } from "@/modules/auth/provider.auth";
 import {
   createFileRoute,
   notFound,

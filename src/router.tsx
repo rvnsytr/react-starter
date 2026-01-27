@@ -8,8 +8,8 @@ import {
   AppErrorFallback,
   AppLoadingFallback,
 } from "./core/components/ui/fallback";
-import { ThemeProvider } from "./core/providers";
-import { useSession } from "./modules/auth";
+import { ThemeProvider } from "./core/providers/theme";
+import { useSession } from "./modules/auth/hooks";
 import { routeTree } from "./routeTree.gen";
 
 z.config(id());

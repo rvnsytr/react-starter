@@ -1,4 +1,4 @@
-import { useIsMobile } from "@/core/hooks";
+import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { nextTheme, Theme, themeMeta, useTheme } from "@/core/providers/theme";
 import { ComponentProps } from "react";
 import { Button, ButtonProps } from "./button";

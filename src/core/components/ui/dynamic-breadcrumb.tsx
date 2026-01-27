@@ -1,6 +1,5 @@
-import { Route, routesMeta } from "@/core/constants";
-import { useIsMobile } from "@/core/hooks";
-import { normalizeRoute } from "@/core/utils";
+import { useIsMobile } from "@/core/hooks/use-is-mobile";
+import { normalizeRoute, Route, routesMeta } from "@/core/route";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {

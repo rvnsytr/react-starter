@@ -1,4 +1,4 @@
-import { cn } from "@/core/utils";
+import { cn } from "@/core/utils/helpers";
 import { Switch as SwitchPrimitive } from "radix-ui";
 
 export function Switch({

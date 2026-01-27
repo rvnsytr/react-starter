@@ -1,9 +1,9 @@
-import { NotFound } from "@/core/components/layout";
+import { NotFound } from "@/core/components/layout/not-found";
 import { GridPattern } from "@/core/components/ui/grid-pattern";
-import { appMeta } from "@/core/constants";
+import { appMeta } from "@/core/constants/app";
 import { GlobalShortcuts } from "@/core/providers/global-shortcuts";
-import { getRouteTitle } from "@/core/utils";
-import { AuthSession } from "@/modules/auth";
+import { getRouteTitle } from "@/core/route";
+import { AuthSession } from "@/modules/auth/constants";
 import {
   createRootRouteWithContext,
   HeadContent,

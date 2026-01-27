@@ -8,7 +8,7 @@ import {
   UserRoundIcon,
   UsersRoundIcon,
 } from "lucide-react";
-import { Route, RouteRole } from "./routes";
+import { Route, RouteRole } from "../route";
 
 type MenuContent = {
   route: Route;

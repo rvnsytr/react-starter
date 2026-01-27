@@ -1,5 +1,6 @@
-import { messages, Route } from "@/core/constants";
-import { cn, delay } from "@/core/utils";
+import { messages } from "@/core/constants/messages";
+import { Route } from "@/core/route";
+import { cn, delay } from "@/core/utils/helpers";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   ArrowUpIcon,

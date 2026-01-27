@@ -7,8 +7,11 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/core/components/ui/command";
-import { Menu, messages, routesMeta } from "@/core/constants";
-import { cn, toCase } from "@/core/utils";
+import { Menu } from "@/core/constants/menu";
+import { messages } from "@/core/constants/messages";
+import { routesMeta } from "@/core/route";
+import { toCase } from "@/core/utils/formaters";
+import { cn } from "@/core/utils/helpers";
 import { useNavigate } from "@tanstack/react-router";
 import { DotIcon, SearchIcon } from "lucide-react";
 import {

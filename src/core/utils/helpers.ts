@@ -1,22 +1,6 @@
-import { Role } from "@/modules/auth";
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import {
-  appMeta,
-  dashboardMenu,
-  Menu,
-  Route,
-  RouteRole,
-  routesMeta,
-} from "../constants";
-
-export function authorizedRoute(route: Route | null, role?: Role) {
-  if (!route || !role) return false;
-  const meta = routesMeta[route];
-  if (!meta) return false;
-  if (!meta.role) return true;
-  return meta.role && (meta.role === "all" || meta.role.includes(role));
-}
+import { sharedSchemas } from "../schema";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,19 +12,6 @@ export function delay(seconds: number) {
 
 export function clamp(num: number, min: number, max: number) {
   return Math.min(Math.max(num, min), max);
-}
-
-export function normalizeRoute(route?: string | null): Route {
-  if (!route) return "/";
-  return (route.split("?")[0].replace(/\/+$/, "") as Route) || "/";
-}
-
-export function setRouteTitle(title: string) {
-  return `${title} | ${appMeta.name}`;
-}
-
-export function getRouteTitle(route: Route) {
-  return setRouteTitle(routesMeta[route].displayName);
 }
 
 export function getRandomString(length: number) {
@@ -61,52 +32,67 @@ export function getRandomColor(withHash?: boolean) {
   return color;
 }
 
-export function getMenuByRole(
-  currentRole: Role,
-  menu: Menu[] = dashboardMenu,
-): Menu[] {
-  const checkRole = (role?: RouteRole) => {
-    if (!role) return true;
-    return role === "all" || role?.includes(currentRole);
-  };
+export function getExcelColumnKey(columnNumber: number): string {
+  if (columnNumber < 0 || !Number.isInteger(columnNumber)) return "-";
 
-  const filteredMenu = menu.map(({ section, content }) => {
-    const filteredContent = content
-      .filter(({ route }) => {
-        const meta = routesMeta[route];
-        if (!("role" in meta)) return true;
-        return checkRole(meta.role);
-      })
-      .map((item) => {
-        if (!item.subMenu) return item;
-        const filteredSubMenu = item.subMenu.filter((sm) => checkRole(sm.role));
-        if (filteredSubMenu.length <= 0) return null;
-        else return { ...item, subMenu: filteredSubMenu };
-      });
+  let result = "";
+  let n = columnNumber;
 
-    if (filteredContent.length <= 0) return null;
-    else return { section, content: filteredContent } as Menu;
-  });
+  while (n > 0) {
+    n--;
+    result = String.fromCharCode((n % 26) + 65) + result;
+    n = Math.floor(n / 26);
+  }
 
-  return filteredMenu.filter((item) => item !== null);
+  return !!result ? result : "-";
 }
 
-export function getActiveRoute(pathname: string) {
-  const allRoutes = Object.keys(routesMeta) as Route[];
-  const allMenuRoutes = dashboardMenu.flatMap((m) =>
-    m.content.map((c) => c.route),
-  );
+export type ParseCsvRangeOptions = {
+  sort?: "asc" | "desc";
+  distinct?: boolean;
+  exclude?: number[];
+};
 
-  const parts = pathname.split("/").filter(Boolean);
-  const paths: string[] = [];
+export function parseCsvRanges(
+  input: string,
+  options: ParseCsvRangeOptions = {},
+): number[] {
+  const { sort, distinct = false, exclude = [] } = options;
 
-  for (let i = parts.length; i > 0; i--)
-    paths.push("/" + parts.slice(0, i).join("/"));
+  const schema = sharedSchemas.number("Baris").int().positive();
+  const excludeSet = new Set(exclude);
 
-  paths.push("/");
+  const result: number[] = [];
+  const tokens = input.split(",");
 
-  for (const path of paths) {
-    const p = path as Route;
-    if (allMenuRoutes.includes(p) && allRoutes.includes(p)) return p;
+  for (const token of tokens) {
+    const trimmed = token.trim();
+
+    if (trimmed.includes("-")) {
+      const [startStr, endStr] = trimmed.split("-");
+
+      const start = Number(startStr);
+      const end = Number(endStr);
+
+      if (
+        schema.safeParse(start).success &&
+        schema.safeParse(end).success &&
+        start <= end
+      ) {
+        for (let i = start; i <= end; i++)
+          if (!excludeSet.has(i)) result.push(i);
+      }
+
+      continue;
+    }
+
+    const value = Number(trimmed);
+    if (schema.safeParse(value).success && !excludeSet.has(value))
+      result.push(value);
   }
+
+  const finalResult = distinct ? Array.from(new Set(result)) : result;
+  if (sort) finalResult.sort((a, b) => (sort === "asc" ? a - b : b - a));
+
+  return finalResult;
 }

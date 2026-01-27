@@ -1,4 +1,4 @@
-import { FooterNote } from "@/core/components/layout";
+import { FooterNote } from "@/core/components/layout/footer-note";
 import {
   Card,
   CardContent,
@@ -13,9 +13,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/core/components/ui/tabs";
-import { appMeta } from "@/core/constants";
-import { getRouteTitle } from "@/core/utils";
-import { SignInForm, SignUpForm } from "@/modules/auth";
+import { appMeta } from "@/core/constants/app";
+import { getRouteTitle } from "@/core/route";
+import { SignInForm, SignUpForm } from "@/modules/auth/components";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/sign-in")({

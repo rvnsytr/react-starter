@@ -1,8 +1,8 @@
 import { authClient } from "@/core/auth";
 import { AppLoadingFallback } from "@/core/components/ui/fallback";
-import { messages } from "@/core/constants";
-import { getRouteTitle } from "@/core/utils";
-import { mutateListUsers } from "@/modules/auth";
+import { messages } from "@/core/constants/messages";
+import { getRouteTitle } from "@/core/route";
+import { mutateListUsers } from "@/modules/auth/hooks";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { useEffect, useEffectEvent, useState } from "react";
