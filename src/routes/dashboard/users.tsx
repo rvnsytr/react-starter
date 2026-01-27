@@ -18,7 +18,12 @@ import { CreateUserDialog, UserDataTable } from "@/modules/auth";
 import { createFileRoute } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";
 
+// const t2Prefix = "t2-";
+
 export const Route = createFileRoute("/dashboard/users")({
+  // validateSearch: dataTableQueryStateSchema.extend(
+  //   withSchemaPrefix(t2Prefix, dataTableQueryStateSchema).shape,
+  // ),
   validateSearch: dataTableQueryStateSchema,
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/users") }] }),
   component: RouteComponent,
@@ -63,8 +68,32 @@ function RouteComponent() {
 
       <UserDataTable
         defaultState={searchParam}
-        onStateChange={(search) => navigate({ search, replace: true })}
+        onStateChange={(search) =>
+          navigate({
+            search: (prev) => ({ ...prev, ...search }),
+            replace: true,
+          })
+        }
       />
+
+      {/* <OtherDataTable
+        defaultState={Object.fromEntries(
+          Object.entries(searchParam)
+            .filter(([k]) => k.startsWith(t2Prefix))
+            .map(([k, v]) => [k.replace(t2Prefix, ""), v]),
+        )}
+        onStateChange={(state) =>
+          navigate({
+            search: (prev) => ({
+              ...prev,
+              ...Object.fromEntries(
+                Object.entries(state).map(([k, v]) => [`t2-${k}`, v]),
+              ),
+            }),
+            replace: true,
+          })
+        }
+      /> */}
     </DashboardMain>
   );
 }

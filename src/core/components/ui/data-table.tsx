@@ -115,7 +115,6 @@ export type DataTableProps = {
 
   defaultState?: DataTableQueryState;
   onStateChange?: (state: DataTableQueryState) => void;
-  debounced?: boolean;
 
   className?: string;
   classNames?: {
@@ -263,7 +262,6 @@ export function DataTable<TData>({
 
   defaultState,
   onStateChange,
-  debounced = false,
 
   // id,
   caption,
@@ -323,11 +321,6 @@ export function DataTable<TData>({
     [debouncedGlobalFilter, columnFilters, sorting, pagination],
   );
 
-  const searchValue = useMemo(
-    () => (debounced ? debouncedGlobalFilter : globalFilter),
-    [debounced, debouncedGlobalFilter, globalFilter],
-  );
-
   useEffect(() => {
     onStateChange?.({
       hidden: getRecordParser(false).serialize(columnVisibility),
@@ -337,7 +330,7 @@ export function DataTable<TData>({
 
       selected: getRecordParser(true).serialize(rowSelection),
 
-      search: !!searchValue ? searchValue : undefined,
+      search: !!debouncedGlobalFilter ? debouncedGlobalFilter : undefined,
       columnFilters: columnFiltersParser().serialize(columnFilters),
       sorting: sortingParser.serialize(sorting),
 
@@ -352,7 +345,7 @@ export function DataTable<TData>({
     columnVisibility,
     columnPinning,
     rowSelection,
-    searchValue,
+    debouncedGlobalFilter,
     columnFilters,
     sorting,
     pagination,

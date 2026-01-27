@@ -1011,7 +1011,7 @@ const getUserColumns = (
 
 export function UserDataTable({
   ...props
-}: Pick<DataTableProps, "defaultState" | "onStateChange" | "debounced">) {
+}: Pick<DataTableProps, "defaultState" | "onStateChange">) {
   const { user } = useAuth();
   return (
     <DataTable

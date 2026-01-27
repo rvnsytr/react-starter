@@ -266,8 +266,8 @@ export const dataTableQueryStateSchema = z.object({
   columnFilters: z.string().optional().catch(""),
   sorting: z.string().optional().catch(""),
 
-  page: z.coerce.number().optional().catch(0),
-  size: z.coerce.number().optional().catch(0),
+  page: z.coerce.number().min(1).optional().catch(0),
+  size: z.coerce.number().min(1).optional().catch(10),
 });
 
 // #endregion
