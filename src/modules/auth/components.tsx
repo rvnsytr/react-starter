@@ -532,7 +532,7 @@ export function SignOutButton() {
 export function ProfilePicture({
   data,
 }: {
-  data: Pick<AuthSession["user"], "id" | "name" | "image" | "imageId">;
+  data: Pick<AuthSession["user"], "id" | "name" | "image">;
 }) {
   const inputAvatarRef = useRef<HTMLInputElement>(null);
   const [isChange, setIsChange] = useState<boolean>(false);

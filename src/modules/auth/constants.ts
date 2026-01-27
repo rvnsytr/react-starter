@@ -10,7 +10,7 @@ import z from "zod";
 
 export type AuthSession = {
   session: z.infer<typeof sessionSchema>;
-  user: z.infer<typeof userSchema> & { imageId: string };
+  user: z.infer<typeof userSchema>;
 };
 
 export type Role = (typeof allRoles)[number];

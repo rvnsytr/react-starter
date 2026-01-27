@@ -3,6 +3,7 @@ import { authClient } from "@/core/auth";
 import { DataTableState } from "@/core/components/ui/data-table";
 import { userSchema } from "@/core/schema";
 import { removeFiles } from "@/core/storage";
+import z from "zod";
 import { AuthSession } from "./constants";
 
 export async function getSession() {
@@ -16,7 +17,7 @@ export async function listUsers(
 ): Promise<ApiResponse<AuthSession["user"][]>> {
   const { data, ...rest } = await apiFetcher(
     "/auth/admin/list-users",
-    userSchema.array(),
+    z.array(userSchema),
     {
       method: "POST",
       body: JSON.stringify(state),
