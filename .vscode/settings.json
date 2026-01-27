@@ -5,8 +5,9 @@
   },
 
   "files.readonlyExclude": {
+    "**/core/constants/app.ts": true,
     "**/core/constants/menu.ts": true,
-    "**/core/constants/routes.ts": true,
+    "**/core/routes.ts": true,
     "**/core/schema.ts": true
   },
 
