@@ -12,17 +12,22 @@ import {
   PopoverTrigger,
 } from "@/core/components/ui/popover";
 import { Separator } from "@/core/components/ui/separator";
+import { dataTableQueryStateSchema } from "@/core/schema";
 import { getRouteTitle } from "@/core/utils";
 import { CreateUserDialog, UserDataTable } from "@/modules/auth";
 import { createFileRoute } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/users")({
+  validateSearch: dataTableQueryStateSchema,
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/users") }] }),
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const searchParam = Route.useSearch();
+  const navigate = Route.useNavigate();
+
   return (
     <DashboardMain>
       <CardHeader className="px-0">
@@ -56,7 +61,10 @@ function RouteComponent() {
 
       <Separator />
 
-      <UserDataTable />
+      <UserDataTable
+        defaultState={searchParam}
+        onStateChange={(search) => navigate({ search, replace: true })}
+      />
     </DashboardMain>
   );
 }

@@ -1,6 +1,8 @@
 import { ApiResponse } from "@/core/api";
 import { messages } from "@/core/constants";
+import { allFilterOperators } from "@/core/filter";
 import { useDebounce, useIsMobile } from "@/core/hooks";
+import { dataTableQueryStateSchema } from "@/core/schema";
 import { cn, formatNumber } from "@/core/utils";
 import {
   ColumnDef,
@@ -22,6 +24,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+import { isValid } from "date-fns";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -33,6 +36,7 @@ import {
 } from "lucide-react";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import useSWR, { mutate, SWRConfiguration } from "swr";
+import z from "zod";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
 import { RefreshButton } from "./buttons";
@@ -80,17 +84,19 @@ export type DataTableState = {
   pagination: PaginationState;
 };
 
+export type DataTableQueryState = z.infer<typeof dataTableQueryStateSchema>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DataTableColumnDef<TData> = ColumnDef<TData, any>[];
 
 type CoreDataTableProps<TData> = {
-  mode: "client" | "server";
+  mode?: "auto" | "manual";
   swr: {
     key: string;
     fetcher: (state: DataTableState) => Promise<ApiResponse<TData[]>>;
     config?: SWRConfiguration;
   };
-  getColumns: (res?: ApiResponse<TData[]>) => DataTableColumnDef<TData>;
+  getColumns: (response?: ApiResponse<TData[]>) => DataTableColumnDef<TData>;
 };
 
 type ToolBoxProps<TData> = {
@@ -103,10 +109,14 @@ type ToolBoxProps<TData> = {
   }) => ReactNode;
 };
 
-export type DataTableProps<TData> = ToolBoxProps<TData> & {
-  // id?: string;
+export type DataTableProps = {
   caption?: string;
   placeholder?: string;
+
+  defaultState?: DataTableQueryState;
+  onStateChange?: (state: DataTableQueryState) => void;
+  debounced?: boolean;
+
   className?: string;
   classNames?: {
     toolbox?: string;
@@ -120,123 +130,140 @@ export type DataTableProps<TData> = ToolBoxProps<TData> & {
 const pageSizes = [5, 10, 20, 30, 40, 50, 100];
 const defaultPageSize = pageSizes[1];
 
-// const columnFiltersSchema = z.object({
-//   id: z.string(),
-//   value: z.object({
-//     operator: z.enum(allFilterOperators),
-//     values: z.union([z.string(), z.number(), z.coerce.date()]).array(),
-//   }),
-// });
+const arrayParser = {
+  parse: (value?: string) => {
+    if (!value) return [];
+    return decodeURIComponent(value).split(",");
+  },
+  serialize: (value?: string[]) => {
+    if (!value?.length) return undefined;
+    return encodeURIComponent(value.join(","));
+  },
+};
 
-// const arrayQSParser = parseAsArrayOf(parseAsString).withDefault([]);
+const getRecordParser = (parseValue: boolean) => ({
+  parse: (value?: string) => {
+    if (!value) return {};
+    const entries = decodeURIComponent(value)
+      .split(",")
+      .map((v) => [v, parseValue]);
+    return Object.fromEntries(entries);
+  },
+  serialize: (value: Record<string, boolean>) => {
+    const entries = Object.entries(value);
+    if (!entries.length) return undefined;
+    const str = entries
+      .map(([k, v]) => (v === parseValue ? k : null))
+      .filter((v) => !!v)
+      .join(",");
+    return encodeURIComponent(str);
+  },
+});
 
-// const getRecordQSParser = (parseValue: boolean) =>
-//   createParser<Record<string, boolean>>({
-//     parse: (value) => {
-//       if (!value) return {};
-//       return Object.fromEntries(value.split(",").map((v) => [v, parseValue]));
-//     },
-//     serialize: (value) => {
-//       const entries = Object.entries(value);
-//       // Nuqs TS bug? it should returned `string | null`
-//       if (!entries?.length) return null as unknown as string;
-//       return entries
-//         .map(([k, v]) => (v === parseValue ? k : null))
-//         .filter((v) => !!v)
-//         .join(",");
-//     },
-//   }).withDefault({});
+const sortingParser = {
+  parse: (value?: string) => {
+    if (!value) return [];
+    return decodeURIComponent(value)
+      .split(";")
+      .map((part) => {
+        const [id, rawDir] = part.split(":");
+        const parsed = z.enum(["asc", "desc"]).safeParse(rawDir);
+        if (!id || !parsed.success) return null;
+        return { id, desc: parsed.data === "desc" };
+      })
+      .filter((v) => !!v);
+  },
+  serialize: (value: SortingState) => {
+    if (!value.length) return undefined;
+    const str = value
+      .map((v) => `${v.id}:${v.desc ? "desc" : "asc"}`)
+      .join(";");
+    return encodeURIComponent(str);
+  },
+};
 
-// const sortingParser = createParser<SortingState>({
-//   parse: (value) => {
-//     if (!value) return [];
-//     return value
-//       .split(";")
-//       .map((part) => {
-//         const [id, rawDir] = part.split(":");
-//         const parsed = z.enum(["asc", "desc"]).safeParse(rawDir);
-//         if (!id || !parsed.success) return null;
-//         return { id, desc: parsed.data === "desc" };
-//       })
-//       .filter((v) => !!v);
-//   },
-//   serialize: (value) => {
-//     // Nuqs TS bug? it should returned `string | null`
-//     if (!value?.length) return null as unknown as string;
-//     return value.map((s) => `${s.id}:${s.desc ? "desc" : "asc"}`).join(";");
-//   },
-// }).withDefault([]);
+export const columnFiltersSchema = z.object({
+  id: z.string(),
+  value: z.object({
+    operator: z.enum(allFilterOperators),
+    values: z.union([z.string(), z.number(), z.coerce.date()]).array(),
+  }),
+});
 
-// function columnFiltersParser<TData>(
-//   getColumns: () => DataTableColumnDef<TData>,
-// ) {
-//   return createParser<ColumnFiltersState>({
-//     parse: (value) => {
-//       if (!value) return [];
-//       return value
-//         .split(";")
-//         .map((part) => {
-//           const [id, operator, rawValues = ""] = part.split(":");
-//           if (!id || !operator || !rawValues) return null;
+function columnFiltersParser<TData>() {
+  return {
+    parse: (getColumns: () => DataTableColumnDef<TData>, value?: string) => {
+      // here
+      if (!value) return [];
+      return decodeURIComponent(value)
+        .split(";")
+        .map((part) => {
+          const [id, operator, rawValues = ""] = part.split(":");
+          if (!id || !operator || !rawValues) return null;
 
-//           const col = getColumns().find((c) => c.id === id);
-//           if (!col) return null;
+          const col = getColumns().find((c) => c.id === id);
+          if (!col) return null;
 
-//           const values = rawValues
-//             ? rawValues
-//                 .split(",")
-//                 .map((v) => {
-//                   if (col.meta?.type === "date") {
-//                     const d = new Date(Number(v));
-//                     if (isValid(d)) return d;
-//                     else return null;
-//                   }
+          const values = rawValues
+            ? rawValues
+                .split(",")
+                .map((v) => {
+                  if (col.meta?.type === "date") {
+                    const d = new Date(Number(v));
+                    if (isValid(d)) return d;
+                    else return null;
+                  }
 
-//                   if (col.meta?.type === "number") {
-//                     const n = Number(v);
-//                     if (!Number.isNaN(n)) return n;
-//                     else return null;
-//                   }
+                  if (col.meta?.type === "number") {
+                    const n = Number(v);
+                    if (!Number.isNaN(n)) return n;
+                    else return null;
+                  }
 
-//                   return v;
-//                 })
-//                 .filter((v) => !!v)
-//             : [];
+                  return v;
+                })
+                .filter((v) => !!v)
+            : [];
 
-//           if (!values.length) return null;
-//           return { id, value: { operator, values } };
-//         })
-//         .filter((v) => !!v);
-//     },
-//     serialize: (value) => {
-//       // Nuqs TS bug? it should returned `string | null`
-//       if (!value?.length) return null as unknown as string;
+          if (!values.length) return null;
+          return { id, value: { operator, values } };
+        })
+        .filter((v) => !!v);
+    },
+    serialize: (value: ColumnFiltersState) => {
+      if (!value?.length) return undefined;
 
-//       return value
-//         .map(({ id, value: rawValue }) => {
-//           const parsed = columnFiltersSchema.shape.value.safeParse(rawValue);
-//           if (!parsed.success) return null;
+      const str = value
+        .map(({ id, value: rawValue }) => {
+          const parsed = columnFiltersSchema.shape.value.safeParse(rawValue);
+          if (!parsed.success) return null;
 
-//           const { operator, values } = parsed.data;
-//           const serializedValues = values.map((v) =>
-//             v instanceof Date ? v.getTime() : String(v),
-//           );
+          const { operator, values } = parsed.data;
+          const serializedValues = values.map((v) =>
+            v instanceof Date ? v.getTime() : String(v),
+          );
 
-//           return `${id}:${operator}:${serializedValues.join(",")}`;
-//         })
-//         .filter((v) => !!v)
-//         .join(";");
-//     },
-//   }).withDefault([]);
-// }
+          return `${id}:${operator}:${serializedValues.join(",")}`;
+        })
+        .filter((v) => !!v)
+        .join(";");
+
+      return encodeURIComponent(str);
+    },
+  };
+}
 
 export const mutateDataTable = (key: string) =>
   mutate((a) => !!a && typeof a === "object" && "key" in a && a.key === key);
 
 export function DataTable<TData>({
-  mode,
+  mode = "auto",
   swr,
   getColumns,
+
+  defaultState,
+  onStateChange,
+  debounced = false,
 
   // id,
   caption,
@@ -249,31 +276,44 @@ export function DataTable<TData>({
 
   ...props
 }: CoreDataTableProps<TData> &
-  DataTableProps<TData> &
+  DataTableProps &
+  ToolBoxProps<TData> &
   Pick<TableOptions<TData>, "getRowId" | "enableRowSelection">) {
-  const isServer = mode === "server";
-  // const prefix = id ? `${id}-` : "";
+  const isManual = mode === "manual";
 
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    getRecordParser(false).parse(defaultState?.hidden),
+  );
+
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    left: arrayParser.parse(defaultState?.left),
+    right: arrayParser.parse(defaultState?.right),
   });
 
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>(
+    getRecordParser(true).parse(defaultState?.selected),
+  );
 
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState<string>(
+    defaultState?.search ?? "",
+  );
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+    columnFiltersParser<TData>().parse(getColumns, defaultState?.columnFilters),
+  );
+
+  const [sorting, setSorting] = useState<SortingState>(
+    sortingParser.parse(defaultState?.sorting),
+  );
 
   const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: defaultPageSize,
+    pageIndex: defaultState?.page ? defaultState.page - 1 : 0,
+    pageSize: defaultState?.size ?? defaultPageSize,
   });
 
   const debouncedGlobalFilter = useDebounce(globalFilter);
 
-  const allStates: DataTableState = useMemo(
+  const dataTableState: DataTableState = useMemo(
     () => ({
       globalFilter: debouncedGlobalFilter,
       columnFilters,
@@ -283,10 +323,45 @@ export function DataTable<TData>({
     [debouncedGlobalFilter, columnFilters, sorting, pagination],
   );
 
+  const searchValue = useMemo(
+    () => (debounced ? debouncedGlobalFilter : globalFilter),
+    [debounced, debouncedGlobalFilter, globalFilter],
+  );
+
+  useEffect(() => {
+    onStateChange?.({
+      hidden: getRecordParser(false).serialize(columnVisibility),
+
+      left: arrayParser.serialize(columnPinning.left),
+      right: arrayParser.serialize(columnPinning.right),
+
+      selected: getRecordParser(true).serialize(rowSelection),
+
+      search: !!searchValue ? searchValue : undefined,
+      columnFilters: columnFiltersParser().serialize(columnFilters),
+      sorting: sortingParser.serialize(sorting),
+
+      page: pagination.pageIndex > 0 ? pagination.pageIndex + 1 : undefined,
+      size:
+        pagination.pageSize !== defaultPageSize
+          ? pagination.pageSize
+          : undefined,
+    } satisfies DataTableQueryState);
+  }, [
+    onStateChange,
+    columnVisibility,
+    columnPinning,
+    rowSelection,
+    searchValue,
+    columnFilters,
+    sorting,
+    pagination,
+  ]);
+
   const baseArgument = { key: swr.key };
   const { data, isLoading, error } = useSWR(
-    isServer ? { ...baseArgument, ...allStates } : baseArgument,
-    async () => await swr.fetcher(allStates),
+    isManual ? { ...baseArgument, ...dataTableState } : baseArgument,
+    async () => await swr.fetcher(dataTableState),
     swr.config,
   );
 
@@ -326,24 +401,24 @@ export function DataTable<TData>({
     onRowSelectionChange: setRowSelection,
 
     // * Global Searching
-    manualFiltering: isServer,
+    manualFiltering: isManual,
     globalFilterFn: "includesString",
     onGlobalFilterChange: setGlobalFilter,
 
     // * Column Filtering
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: !isServer ? getFilteredRowModel() : undefined,
+    getFilteredRowModel: !isManual ? getFilteredRowModel() : undefined,
 
     // * Column Sorting
-    manualSorting: isServer,
+    manualSorting: isManual,
     onSortingChange: setSorting,
-    getSortedRowModel: !isServer ? getSortedRowModel() : undefined,
+    getSortedRowModel: !isManual ? getSortedRowModel() : undefined,
 
     // * Pagination
-    manualPagination: isServer,
+    manualPagination: isManual,
     rowCount: data?.count?.total ?? 0,
     onPaginationChange: setPagination,
-    getPaginationRowModel: !isServer ? getPaginationRowModel() : undefined,
+    getPaginationRowModel: !isManual ? getPaginationRowModel() : undefined,
   });
 
   if (error) return <ErrorFallback error={error} />;

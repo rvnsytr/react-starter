@@ -29,6 +29,7 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/consistent-type-definitions": "off",
       "react-refresh/only-export-components": "off",
+      "no-extra-boolean-cast": "off",
     },
   },
 ]);

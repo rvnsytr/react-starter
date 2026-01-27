@@ -244,6 +244,32 @@ export const apiResponseSchema = z.object({
     .optional(),
 });
 
+export function withSchemaPrefix<P extends string, S extends z.ZodRawShape>(
+  prefix: P,
+  schema: z.ZodObject<S>,
+) {
+  const prefixedShape = Object.fromEntries(
+    Object.entries(schema.shape).map(([k, v]) => [`${prefix}${k}`, v]),
+  ) as { [K in keyof S as `${P}${string & K}`]: S[K] };
+  return z.object(prefixedShape);
+}
+
+export const dataTableQueryStateSchema = z.object({
+  hidden: z.string().optional().catch(""),
+
+  left: z.string().optional().catch(""),
+  right: z.string().optional().catch(""),
+
+  selected: z.string().optional().catch(""),
+
+  search: z.string().optional().catch(""),
+  columnFilters: z.string().optional().catch(""),
+  sorting: z.string().optional().catch(""),
+
+  page: z.coerce.number().optional().catch(0),
+  size: z.coerce.number().optional().catch(0),
+});
+
 // #endregion
 
 export const passwordSchema = z.object({
