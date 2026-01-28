@@ -259,7 +259,7 @@ export const userSchema = betterAuthUserSchema.extend({
   email: sharedSchemas.email,
   name: sharedSchemas.string("Nama", { min: 1 }),
   image: z.string().optional().nullable(),
-  role: z.lazy(() => z.enum(allRoles)),
+  role: z.enum(allRoles),
   banned: z.boolean().optional().nullable(),
   banReason: z.string().optional().nullable(),
   banExpires: z.date().optional().nullable(),
