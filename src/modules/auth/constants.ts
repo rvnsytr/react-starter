@@ -20,18 +20,19 @@ export const defaultRole: Role = "user";
 
 export const rolesMeta: Record<
   Role,
-  { displayName: string; desc: string; icon: LucideIcon; color: string }
+  { displayName: string; description: string; icon: LucideIcon; color: string }
 > = {
   user: {
     displayName: "Pengguna",
     icon: UserRoundIcon,
-    desc: "Pengguna standar dengan akses dan izin dasar.",
+    description: "Pengguna standar dengan akses dan izin dasar.",
     color: "var(--primary)",
   },
   admin: {
     displayName: "Admin",
     icon: ShieldUserIcon,
-    desc: "Administrator dengan akses penuh dan kontrol pengelolaan sistem.",
+    description:
+      "Administrator dengan akses penuh dan kontrol pengelolaan sistem.",
     color: "var(--color-cyan-500)",
   },
 };
@@ -41,17 +42,17 @@ export const allUserStatus = ["active", "banned"] as const;
 
 export const userStatusMeta: Record<
   UserStatus,
-  { displayName: string; desc: string; icon: LucideIcon; color: string }
+  { displayName: string; description: string; icon: LucideIcon; color: string }
 > = {
   active: {
     displayName: "Aktif",
-    desc: "Pengguna aktif dan dapat diakses",
+    description: "Pengguna aktif dan dapat diakses",
     icon: CircleDotIcon,
     color: "var(--success)",
   },
   banned: {
     displayName: "Nonaktif",
-    desc: "Pengguna diblokir dan tidak dapat mengakses sistem",
+    description: "Pengguna diblokir dan tidak dapat mengakses sistem",
     icon: BanIcon,
     color: "var(--destructive)",
   },

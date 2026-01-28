@@ -3,7 +3,6 @@ import { messages } from "@/core/constants/messages";
 import { allFilterOperators } from "@/core/filter";
 import { useDebounce } from "@/core/hooks/use-debounce";
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
-import { dataTableQueryStateSchema } from "@/core/schema";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
 import {
@@ -189,6 +188,22 @@ export const columnFiltersSchema = z.object({
     operator: z.enum(allFilterOperators),
     values: z.union([z.string(), z.number(), z.coerce.date()]).array(),
   }),
+});
+
+export const dataTableQueryStateSchema = z.object({
+  hidden: z.string().optional().catch(""),
+
+  left: z.string().optional().catch(""),
+  right: z.string().optional().catch(""),
+
+  selected: z.string().optional().catch(""),
+
+  search: z.string().optional().catch(""),
+  columnFilters: z.string().optional().catch(""),
+  sorting: z.string().optional().catch(""),
+
+  page: z.coerce.number().min(1).optional().catch(0),
+  size: z.coerce.number().min(1).optional().catch(10),
 });
 
 function columnFiltersParser<TData>() {

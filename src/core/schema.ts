@@ -204,6 +204,8 @@ export const sharedSchemas = {
       .string()
       .transform((v) => {
         if (typeof v === "string") {
+          if (!v) return undefined;
+
           try {
             return JSON.parse(v);
           } catch {
@@ -234,18 +236,6 @@ export const sharedSchemas = {
   gender: z.enum(allGenders),
 };
 
-export const apiResponseSchema = z.object({
-  code: z.number(),
-  success: z.boolean(),
-  message: z.string(),
-  count: z
-    .intersection(
-      z.object({ total: z.number() }),
-      z.record(z.string(), z.number()),
-    )
-    .optional(),
-});
-
 export function withSchemaPrefix<P extends string, S extends z.ZodRawShape>(
   prefix: P,
   schema: z.ZodObject<S>,
@@ -255,22 +245,6 @@ export function withSchemaPrefix<P extends string, S extends z.ZodRawShape>(
   ) as { [K in keyof S as `${P}${string & K}`]: S[K] };
   return z.object(prefixedShape);
 }
-
-export const dataTableQueryStateSchema = z.object({
-  hidden: z.string().optional().catch(""),
-
-  left: z.string().optional().catch(""),
-  right: z.string().optional().catch(""),
-
-  selected: z.string().optional().catch(""),
-
-  search: z.string().optional().catch(""),
-  columnFilters: z.string().optional().catch(""),
-  sorting: z.string().optional().catch(""),
-
-  page: z.coerce.number().min(1).optional().catch(0),
-  size: z.coerce.number().min(1).optional().catch(10),
-});
 
 // #endregion
 

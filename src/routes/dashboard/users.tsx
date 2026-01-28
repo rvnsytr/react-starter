@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
+import { dataTableQueryStateSchema } from "@/core/components/ui/data-table";
 import {
   Popover,
   PopoverContent,
@@ -13,7 +14,6 @@ import {
 } from "@/core/components/ui/popover";
 import { Separator } from "@/core/components/ui/separator";
 import { getRouteTitle } from "@/core/route";
-import { dataTableQueryStateSchema } from "@/core/schema";
 import { CreateUserDialog, UserDataTable } from "@/modules/auth/components";
 import { createFileRoute } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";

@@ -53,13 +53,14 @@ export type ParseCsvRangeOptions = {
   exclude?: number[];
 };
 
+const parseCsvRangesSchema = sharedSchemas.number("Baris").int().positive();
+
 export function parseCsvRanges(
   input: string,
   options: ParseCsvRangeOptions = {},
 ): number[] {
   const { sort, distinct = false, exclude = [] } = options;
 
-  const schema = sharedSchemas.number("Baris").int().positive();
   const excludeSet = new Set(exclude);
 
   const result: number[] = [];
@@ -75,8 +76,8 @@ export function parseCsvRanges(
       const end = Number(endStr);
 
       if (
-        schema.safeParse(start).success &&
-        schema.safeParse(end).success &&
+        parseCsvRangesSchema.safeParse(start).success &&
+        parseCsvRangesSchema.safeParse(end).success &&
         start <= end
       ) {
         for (let i = start; i <= end; i++)
@@ -87,7 +88,7 @@ export function parseCsvRanges(
     }
 
     const value = Number(trimmed);
-    if (schema.safeParse(value).success && !excludeSet.has(value))
+    if (parseCsvRangesSchema.safeParse(value).success && !excludeSet.has(value))
       result.push(value);
   }
 

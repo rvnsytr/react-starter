@@ -787,7 +787,7 @@ export function UserStatusBadge({
   value: UserStatus;
   className?: string;
 }) {
-  const { displayName, desc, icon: Icon, color } = userStatusMeta[value];
+  const { displayName, description, icon: Icon, color } = userStatusMeta[value];
   return (
     <Tooltip>
       <TooltipTrigger className={className} asChild>
@@ -806,7 +806,7 @@ export function UserStatusBadge({
         className="bg-(--tooltip-color)"
         arrowClassName="bg-(--tooltip-color) fill-(--tooltip-color)"
       >
-        {desc}
+        {description}
       </TooltipContent>
     </Tooltip>
   );
@@ -819,7 +819,7 @@ export function UserRoleBadge({
   value: Role;
   className?: string;
 }) {
-  const { displayName, desc, icon: Icon, color } = rolesMeta[value];
+  const { displayName, description, icon: Icon, color } = rolesMeta[value];
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -839,7 +839,7 @@ export function UserRoleBadge({
         className="bg-(--tooltip-color)"
         arrowClassName="bg-(--tooltip-color) fill-(--tooltip-color)"
       >
-        {desc}
+        {description}
       </TooltipContent>
     </Tooltip>
   );
@@ -1407,7 +1407,7 @@ export function CreateUserDialog({
                               <Icon /> {meta.displayName}
                             </FieldTitle>
                             <FieldDescription className="text-(--field-color)/80">
-                              {meta.desc}
+                              {meta.description}
                             </FieldDescription>
                           </FieldContent>
                           <RadioGroupItem
