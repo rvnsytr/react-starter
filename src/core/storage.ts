@@ -8,10 +8,9 @@ export async function uploadFiles(
 ) {
   const basePath = "/storage";
   const optionsQuery = options
-    ? "?" +
-      Object.entries(options)
-        .map(([key, value]) => `${key}=${String(value)}`)
-        .join("&")
+    ? `?${Object.entries(options)
+        .map(([k, v]) => `${k}=${String(v)}`)
+        .join("&")}`
     : "";
 
   const url = `${basePath}${optionsQuery}`;
