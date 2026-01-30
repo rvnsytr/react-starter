@@ -19,6 +19,12 @@ import {
   SessionList,
 } from "@/modules/auth/components";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  FrameIcon,
+  LockKeyholeIcon,
+  ShieldIcon,
+  SunMoonIcon,
+} from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/settings")({
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/settings") }] }),
@@ -30,7 +36,9 @@ function RouteComponent() {
     <DashboardMain className="items-center" noLayoutLoader>
       <Card id="tema" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
-          <CardTitle>Tema</CardTitle>
+          <CardTitle className="flex items-center gap-x-2">
+            <SunMoonIcon /> Tema
+          </CardTitle>
           <CardDescription>
             Sesuaikan tampilan dan nuansa{" "}
             <span className="text-foreground font-medium">{appMeta.name}</span>{" "}
@@ -53,7 +61,9 @@ function RouteComponent() {
 
       <Card id="layout" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
-          <CardTitle>Layout</CardTitle>
+          <CardTitle className="flex items-center gap-x-2">
+            <FrameIcon /> Layout
+          </CardTitle>
           <CardDescription>
             Atur tata letak antarmuka{" "}
             <span className="text-foreground font-medium">{appMeta.name}</span>{" "}
@@ -75,7 +85,9 @@ function RouteComponent() {
 
       <Card id="sesi-aktif" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
-          <CardTitle>Sesi Aktif</CardTitle>
+          <CardTitle className="flex items-center gap-x-2">
+            <ShieldIcon /> Sesi Aktif
+          </CardTitle>
           <CardDescription>
             Tinjau dan kelola sesi yang saat ini sedang masuk ke akun Anda.
           </CardDescription>
@@ -92,7 +104,9 @@ function RouteComponent() {
 
       <Card id="ubah-kata-sandi" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
-          <CardTitle>Ubah Kata Sandi</CardTitle>
+          <CardTitle className="flex items-center gap-x-2">
+            <LockKeyholeIcon /> Ubah Kata Sandi
+          </CardTitle>
           <CardDescription>
             Gunakan kata sandi yang kuat untuk menjaga keamanan akun Anda.
           </CardDescription>

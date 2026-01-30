@@ -15,6 +15,7 @@ import {
 } from "@/modules/auth/components";
 import { useAuth } from "@/modules/auth/provider.auth";
 import { createFileRoute } from "@tanstack/react-router";
+import { UserRoundIcon } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/profile")({
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/profile") }] }),
@@ -28,7 +29,9 @@ function RouteComponent() {
     <DashboardMain className="items-center" noLayoutLoader>
       <Card id="informasi-pribadi" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader className="border-b">
-          <CardTitle>Informasi Pribadi</CardTitle>
+          <CardTitle className="flex items-center gap-x-2">
+            <UserRoundIcon /> Informasi Pribadi
+          </CardTitle>
           <CardDescription>
             Perbarui dan kelola informasi profil {appMeta.name} Anda.
           </CardDescription>
