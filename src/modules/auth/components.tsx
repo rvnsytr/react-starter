@@ -638,7 +638,9 @@ export function ProfilePicture({
 
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Hapus Foto Profil</AlertDialogTitle>
+                <AlertDialogTitle className="flex items-center gap-x-2">
+                  <InfoIcon /> Hapus Foto Profil
+                </AlertDialogTitle>
                 <AlertDialogDescription>
                   Aksi ini akan menghapus foto profil Anda saat ini. Yakin ingin
                   melanjutkan?
