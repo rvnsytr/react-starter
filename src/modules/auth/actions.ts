@@ -8,7 +8,7 @@ import { AuthSession } from "./constants";
 
 export async function getSession() {
   const { data, error } = await authClient.getSession();
-  if (error) throw new Error(error.message);
+  if (error) throw error;
   return data as AuthSession | null;
 }
 

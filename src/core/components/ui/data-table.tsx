@@ -156,6 +156,7 @@ const getRecordParser = (parseValue: boolean) => ({
       .map(([k, v]) => (v === parseValue ? k : null))
       .filter((v) => !!v)
       .join(",");
+    if (!str) return undefined;
     return encodeURIComponent(str);
   },
 });

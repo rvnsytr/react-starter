@@ -1,8 +1,8 @@
 import { LucideIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 
-export const allThemes = ["light", "system", "dark"] as const;
 export type Theme = (typeof allThemes)[number];
+export const allThemes = ["light", "system", "dark"] as const;
 
 export const themeMeta: Record<Theme, { icon: LucideIcon }> = {
   light: { icon: SunIcon },

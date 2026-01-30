@@ -14,10 +14,8 @@ export type AuthSession = {
 };
 
 export type Role = (typeof allRoles)[number];
-
 export const allRoles = ["user", "admin"] as const;
 export const defaultRole: Role = "user";
-
 export const rolesMeta: Record<
   Role,
   { displayName: string; description: string; icon: LucideIcon; color: string }
@@ -39,7 +37,6 @@ export const rolesMeta: Record<
 
 export type UserStatus = (typeof allUserStatus)[number];
 export const allUserStatus = ["active", "banned"] as const;
-
 export const userStatusMeta: Record<
   UserStatus,
   { displayName: string; description: string; icon: LucideIcon; color: string }

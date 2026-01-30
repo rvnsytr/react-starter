@@ -11,8 +11,8 @@ import {
 } from "react";
 import z from "zod";
 
-export const allLayoutMode = ["fullwidth", "centered", "unset"] as const;
 export type LayoutMode = (typeof allLayoutMode)[number];
+export const allLayoutMode = ["fullwidth", "centered", "unset"] as const;
 
 export const defaultLayout: LayoutMode = "centered";
 
