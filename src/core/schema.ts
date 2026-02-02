@@ -262,7 +262,7 @@ export const userSchema = betterAuthUserSchema.extend({
   role: z.enum(allRoles),
   banned: z.boolean().optional().nullable(),
   banReason: z.string().optional().nullable(),
-  banExpires: z.date().optional().nullable(),
+  banExpires: z.coerce.date().optional().nullable(),
 
   createdAt: sharedSchemas.date("createdAt"),
   updatedAt: sharedSchemas.date("updatedAt"),

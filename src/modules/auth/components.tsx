@@ -197,9 +197,9 @@ export function SignInForm() {
   });
 
   const formHandler = (formData: FormSchema) => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.signIn.email({
           ...formData,
           callbackURL: "/dashboard",
@@ -330,9 +330,9 @@ export function SignUpForm() {
   });
 
   const formHandler = ({ newPassword: password, ...rest }: FormSchema) => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.signUp.email({ password, ...rest });
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -490,9 +490,9 @@ export function SignOutButton() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const clickHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.signOut();
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -682,9 +682,9 @@ export function ProfileForm() {
     if (newName === user.name)
       return toast.info(messages.noChanges("profil Anda"));
 
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.updateUser({ name: newName });
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -933,14 +933,12 @@ const getUserColumns = (
     header: ({ column }) => (
       <ColumnHeader column={column}>Alamat Email</ColumnHeader>
     ),
-    cell: ({ row, cell }) => {
-      return (
-        <div className="flex items-center gap-x-2">
-          <span>{cell.getValue()}</span>
-          {row.original.emailVerified && <UserVerifiedBadge noText />}
-        </div>
-      );
-    },
+    cell: ({ row, cell }) => (
+      <div className="flex items-center gap-x-2">
+        <span>{cell.getValue()}</span>
+        {row.original.emailVerified && <UserVerifiedBadge noText />}
+      </div>
+    ),
     filterFn: filterFn("text"),
     meta: { displayName: "Alamat Email", type: "text", icon: MailIcon },
   }),
@@ -1235,9 +1233,9 @@ export function CreateUserDialog({
   });
 
   const formHandler = ({ newPassword, role: newRole, ...rest }: FormSchema) => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.admin.createUser({
           password: newPassword,
           role: newRole ?? defaultRole,
@@ -1456,9 +1454,9 @@ function UserRoleDropdown({
     if (role === data.role)
       return toast.info(messages.noChanges(`role ${data.name}`));
 
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.admin.setRole({ userId: data.id, role });
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -1538,10 +1536,8 @@ function ResetPasswordDialog() {
 
   const formHandler = async ({ email }: FormSchema) => {
     setIsLoading(true);
-
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.requestPasswordReset({ email });
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -1649,7 +1645,6 @@ export function ResetPasswordForm({ token }: { token?: string }) {
     setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.resetPassword({ token, newPassword });
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -1762,9 +1757,9 @@ export function ChangePasswordForm() {
   });
 
   const formHandler = (formData: FormSchema) => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.changePassword(formData);
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -2097,9 +2092,9 @@ export function RevokeOtherSessionsButton() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const clickHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.revokeOtherSessions();
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -2158,9 +2153,9 @@ function RevokeUserSessionsDialog({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const clickHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const userId = data.id;
         const res = await authClient.admin.revokeUserSessions({ userId });
         if (res.error) throw new Error(res.error.message);
@@ -2311,11 +2306,10 @@ function ImpersonateUserDialog({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const clickHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
-        const userId = data.id;
-        const res = await authClient.admin.impersonateUser({ userId });
+        const res = await authClient.admin.impersonateUser({ userId: data.id });
         if (res.error) throw new Error(res.error.message);
         return res;
       },
@@ -2388,9 +2382,9 @@ export function StopImpersonateUserMenuItem() {
   if (!session.impersonatedBy) return;
 
   const clickHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const res = await authClient.admin.stopImpersonating();
         if (res.error) throw new Error(res.error.message);
         return res;
@@ -2453,10 +2447,9 @@ function BanUserDialog({
   const formHandler = (formData: FormSchema) => {
     const { banReason, banExpiresDate } = formData;
 
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
-
         const res = await authClient.admin.banUser({
           userId: data.id,
           banReason,
@@ -2572,9 +2565,9 @@ function UnbanUserDialog({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const clickHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         const userId = data.id;
         const res = await authClient.admin.unbanUser({ userId });
         if (res.error) throw new Error(res.error.message);
@@ -2655,9 +2648,9 @@ function RemoveUserDialog({
   });
 
   const formHandler = () => {
+    setIsLoading(true);
     toast.promise(
       async () => {
-        setIsLoading(true);
         if (data.image) removeFiles([data.image]);
         const res = await authClient.admin.removeUser({ userId: data.id });
         if (res.error) throw new Error(res.error.message);
