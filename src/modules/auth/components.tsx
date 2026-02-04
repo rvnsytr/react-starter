@@ -529,7 +529,7 @@ export function SignOutButton() {
 
 // #region PROFILE
 
-export function ProfilePicture({
+function ProfilePicture({
   data,
 }: {
   data: Pick<AuthSession["user"], "id" | "name" | "image">;
