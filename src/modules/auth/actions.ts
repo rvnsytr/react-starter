@@ -1,10 +1,10 @@
 import { apiFetcher, ApiResponse } from "@/core/api";
 import { authClient } from "@/core/auth";
 import { DataTableState } from "@/core/components/ui/data-table";
-import { userSchema } from "@/core/schema";
 import { removeFiles } from "@/core/storage";
 import z from "zod";
 import { AuthSession } from "./constants";
+import { userSchema } from "./schema";
 
 export async function getSession() {
   const { data, error } = await authClient.getSession();

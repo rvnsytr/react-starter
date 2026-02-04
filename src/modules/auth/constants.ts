@@ -1,4 +1,3 @@
-import { sessionSchema, userSchema } from "@/core/schema";
 import {
   BanIcon,
   CircleDotIcon,
@@ -7,6 +6,7 @@ import {
   UserRoundIcon,
 } from "lucide-react";
 import z from "zod";
+import { sessionSchema, userSchema } from "./schema";
 
 export type AuthSession = {
   session: z.infer<typeof sessionSchema>;

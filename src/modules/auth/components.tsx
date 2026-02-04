@@ -99,7 +99,7 @@ import { fileMeta } from "@/core/constants/file";
 import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/filter";
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
-import { passwordSchema, sharedSchemas, userSchema } from "@/core/schema";
+import { sharedSchemas } from "@/core/schema";
 import { removeFiles, uploadFiles } from "@/core/storage";
 import { formatDate } from "@/core/utils/date";
 import { capitalize } from "@/core/utils/formaters";
@@ -169,6 +169,7 @@ import {
   useListUserSessions,
 } from "./hooks";
 import { useAuth } from "./provider.auth";
+import { passwordSchema, userSchema } from "./schema";
 
 const sharedText = {
   signIn: (name?: string) =>

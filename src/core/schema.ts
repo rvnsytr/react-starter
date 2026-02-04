@@ -1,15 +1,8 @@
-import { allRoles } from "@/modules/auth/constants";
-import {
-  sessionSchema as betterAuthSessionSchema,
-  userSchema as betterAuthUserSchema,
-} from "better-auth";
 import z from "zod";
 import { fileMeta, FileType } from "./constants/file";
 import { messages } from "./constants/messages";
 import { allGenders } from "./constants/metadata";
 import { toMegabytes } from "./utils/formaters";
-
-// #region CORE
 
 export const sharedSchemas = {
   string: (
@@ -245,47 +238,3 @@ export function withSchemaPrefix<P extends string, S extends z.ZodRawShape>(
   ) as { [K in keyof S as `${P}${string & K}`]: S[K] };
   return z.object(prefixedShape);
 }
-
-// #endregion
-
-export const passwordSchema = z.object({
-  password: sharedSchemas.string("Kata sandi", { min: 1 }),
-  newPassword: sharedSchemas.password,
-  confirmPassword: sharedSchemas.string("Konfirmasi kata sandi", { min: 1 }),
-  currentPassword: sharedSchemas.string("Kata sandi saat ini", { min: 1 }),
-});
-
-export const userSchema = betterAuthUserSchema.extend({
-  email: sharedSchemas.email,
-  name: sharedSchemas.string("Nama", { min: 1 }),
-  image: z.string().optional().nullable(),
-  role: z.enum(allRoles),
-  banned: z.boolean().optional().nullable(),
-  banReason: z.string().optional().nullable(),
-  banExpires: z.coerce.date().optional().nullable(),
-
-  createdAt: sharedSchemas.date("createdAt"),
-  updatedAt: sharedSchemas.date("updatedAt"),
-});
-
-export const sessionSchema = betterAuthSessionSchema.extend({
-  impersonatedBy: z.string().nullable().optional(),
-});
-
-export const storageSchema = z.object({
-  id: z.uuidv4(),
-
-  fileName: sharedSchemas.string("Nama file", { min: 1, max: 255 }),
-  category: z.enum(["image"]),
-  filePath: sharedSchemas.string("File path", { min: 1, max: 500 }),
-  mimeType: sharedSchemas.string("Tipe file", { max: 100 }),
-  fileSize: sharedSchemas.number("Ukuran file"),
-  fileUrl: sharedSchemas.string("File URL", { min: 1 }).optional(),
-
-  deletedAt: sharedSchemas.date("deletedAt").nullable().default(null),
-  deletedBy: sharedSchemas.string("deletedBy").nullable().default(null),
-  updatedAt: sharedSchemas.date("updatedAt").nullable().default(null),
-  updatedBy: sharedSchemas.string("updatedBy").nullable().default(null),
-  createdAt: sharedSchemas.date("createdAt"),
-  createdBy: sharedSchemas.string("createdBy"),
-});
