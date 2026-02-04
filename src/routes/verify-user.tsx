@@ -25,7 +25,11 @@ function RouteComponent() {
     if (token) {
       setIsverifying(true);
       toast.promise(
-        authClient.verifyEmail({ query: { token, callbackURL: "/sign-in" } }),
+        async () => {
+          const res = await authClient.verifyEmail({ query: { token } });
+          if (res.error) throw res.error;
+          return res;
+        },
         {
           loading: messages.loading,
           success: () => {
