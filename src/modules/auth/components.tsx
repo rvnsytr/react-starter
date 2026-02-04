@@ -205,7 +205,7 @@ export function SignInForm() {
           callbackURL: "/dashboard",
         });
 
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -334,7 +334,7 @@ export function SignUpForm() {
     toast.promise(
       async () => {
         const res = await authClient.signUp.email({ password, ...rest });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -494,7 +494,7 @@ export function SignOutButton() {
     toast.promise(
       async () => {
         const res = await authClient.signOut();
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -556,7 +556,7 @@ export function ProfilePicture({
         const image = uploadRes.data[0].id;
         const res = await authClient.updateUser({ image });
 
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return uploadRes;
       },
       {
@@ -578,7 +578,7 @@ export function ProfilePicture({
       async () => {
         setIsRemoved(true);
         const res = await authClient.updateUser({ image: null });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -686,7 +686,7 @@ export function ProfileForm() {
     toast.promise(
       async () => {
         const res = await authClient.updateUser({ name: newName });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -1242,7 +1242,7 @@ export function CreateUserDialog({
           ...rest,
         });
 
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -1458,7 +1458,7 @@ function UserRoleDropdown({
     toast.promise(
       async () => {
         const res = await authClient.admin.setRole({ userId: data.id, role });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -1539,7 +1539,7 @@ function ResetPasswordDialog() {
     toast.promise(
       async () => {
         const res = await authClient.requestPasswordReset({ email });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -1646,7 +1646,7 @@ export function ResetPasswordForm({ token }: { token?: string }) {
     toast.promise(
       async () => {
         const res = await authClient.resetPassword({ token, newPassword });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -1761,7 +1761,7 @@ export function ChangePasswordForm() {
     toast.promise(
       async () => {
         const res = await authClient.changePassword(formData);
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2096,7 +2096,7 @@ export function RevokeOtherSessionsButton() {
     toast.promise(
       async () => {
         const res = await authClient.revokeOtherSessions();
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2158,7 +2158,7 @@ function RevokeUserSessionsDialog({
       async () => {
         const userId = data.id;
         const res = await authClient.admin.revokeUserSessions({ userId });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2310,7 +2310,7 @@ function ImpersonateUserDialog({
     toast.promise(
       async () => {
         const res = await authClient.admin.impersonateUser({ userId: data.id });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2386,7 +2386,7 @@ export function StopImpersonateUserMenuItem() {
     toast.promise(
       async () => {
         const res = await authClient.admin.stopImpersonating();
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2458,7 +2458,7 @@ function BanUserDialog({
             : undefined,
         });
 
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2570,7 +2570,7 @@ function UnbanUserDialog({
       async () => {
         const userId = data.id;
         const res = await authClient.admin.unbanUser({ userId });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
@@ -2653,7 +2653,7 @@ function RemoveUserDialog({
       async () => {
         if (data.image) removeFiles([data.image]);
         const res = await authClient.admin.removeUser({ userId: data.id });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) throw res.error;
         return res;
       },
       {
