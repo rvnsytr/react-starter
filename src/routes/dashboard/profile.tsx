@@ -26,7 +26,7 @@ function RouteComponent() {
   const { user } = useAuth();
 
   return (
-    <DashboardMain className="items-center" noLayoutLoader>
+    <DashboardMain className="items-center" withLayoutLoader={false}>
       <Card id="informasi-pribadi" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-x-2">

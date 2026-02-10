@@ -1558,7 +1558,7 @@ function ResetPasswordDialog() {
 
   return (
     <Dialog>
-      <DialogTrigger className="link shrink-0" asChild>
+      <DialogTrigger className="link shrink-0">
         <Label>Lupa kata sandi ?</Label>
       </DialogTrigger>
 

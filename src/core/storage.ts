@@ -20,9 +20,15 @@ export const storageSchema = z.object({
   createdBy: sharedSchemas.string("createdBy"),
 });
 
+type UploadFilesOptions = {
+  url?: boolean;
+  fileName?: string;
+  withExtension?: boolean;
+};
+
 export async function uploadFiles(
   body: FormData,
-  options?: { url?: boolean; fileName?: string },
+  options?: UploadFilesOptions,
 ) {
   const basePath = "/storage";
   const optionsQuery = options

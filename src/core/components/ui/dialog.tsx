@@ -45,9 +45,9 @@ function DialogOverlay({
 }
 
 function DialogContent({
+  showCloseButton = true,
   className,
   children,
-  showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
@@ -93,9 +93,9 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function DialogFooter({
-  className,
   showCloseButton = false,
   closeButtonText = "cancel",
+  className,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
