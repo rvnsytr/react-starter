@@ -21,8 +21,8 @@ export type ElementType<T> = T extends (infer U)[] ? U : T;
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
-    /* The display name of the column. */
-    displayName: string;
+    /* The label of the column. */
+    label: string;
 
     /* The column icon. */
     icon: LucideIcon;

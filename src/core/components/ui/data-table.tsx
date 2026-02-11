@@ -78,6 +78,16 @@ import {
   TableRow,
 } from "./table";
 
+type CoreDataTableProps<TData> = {
+  mode?: "auto" | "manual";
+  swr: {
+    key: string;
+    fetcher: (state: DataTableState) => Promise<ApiResponse<TData[]>>;
+    config?: SWRConfiguration;
+  };
+  getColumns: (response?: ApiResponse<TData[]>) => DataTableColumnDef<TData>;
+};
+
 export type DataTableState = {
   globalFilter: string;
   columnFilters: ColumnFiltersState;
@@ -89,26 +99,6 @@ export type DataTableQueryState = z.infer<typeof dataTableQueryStateSchema>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DataTableColumnDef<TData> = ColumnDef<TData, any>[];
-
-type CoreDataTableProps<TData> = {
-  mode?: "auto" | "manual";
-  swr: {
-    key: string;
-    fetcher: (state: DataTableState) => Promise<ApiResponse<TData[]>>;
-    config?: SWRConfiguration;
-  };
-  getColumns: (response?: ApiResponse<TData[]>) => DataTableColumnDef<TData>;
-};
-
-type ToolBoxProps<TData> = {
-  searchPlaceholder?: string;
-  withRefresh?: boolean;
-
-  renderRowSelection?: (props: {
-    rows: Row<TData>[];
-    table: DataTableType<TData>;
-  }) => ReactNode;
-};
 
 export type DataTableProps = {
   caption?: string;
@@ -125,6 +115,16 @@ export type DataTableProps = {
     table?: string;
     footer?: string;
   };
+};
+
+type ToolBoxProps<TData> = {
+  searchPlaceholder?: string;
+  withRefresh?: boolean;
+
+  renderRowSelection?: (props: {
+    rows: Row<TData>[];
+    table: DataTableType<TData>;
+  }) => ReactNode;
 };
 
 const pageSizes = [5, 10, 20, 30, 40, 50, 100];
@@ -376,10 +376,10 @@ export function DataTable<TData>({
     swr.config,
   );
 
-  const columns = useMemo(() => {
-    if (data?.success) return getColumns(data);
-    return getColumns();
-  }, [data, getColumns]);
+  const columns = useMemo(
+    () => (data?.success ? getColumns(data) : getColumns()),
+    [data, getColumns],
+  );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -657,7 +657,7 @@ function View<TData>({
                         )}
 
                         <small className="font-medium">
-                          {column.columnDef.meta?.displayName ?? column.id}
+                          {column.columnDef.meta?.label ?? column.id}
                         </small>
                       </div>
 

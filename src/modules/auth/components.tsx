@@ -932,7 +932,7 @@ const getUserColumns = (
       />
     ),
     filterFn: filterFn("text"),
-    meta: { displayName: "Nama", type: "text", icon: UserRoundIcon },
+    meta: { label: "Nama", type: "text", icon: UserRoundIcon },
   }),
   createUserColumn.accessor((ac) => ac.email, {
     id: "email",
@@ -944,7 +944,7 @@ const getUserColumns = (
       </div>
     ),
     filterFn: filterFn("text"),
-    meta: { displayName: "Alamat Email", type: "text", icon: MailIcon },
+    meta: { label: "Alamat Email", type: "text", icon: MailIcon },
   }),
   createUserColumn.accessor((ac) => getUserStatus(ac), {
     id: "status",
@@ -952,7 +952,7 @@ const getUserColumns = (
     cell: (c) => <UserStatusBadge value={c.cell.getValue()} />,
     filterFn: filterFn("option"),
     meta: {
-      displayName: "Status",
+      label: "Status",
       type: "option",
       icon: CircleDotIcon,
       options: allUserStatus.map((value) => {
@@ -972,7 +972,7 @@ const getUserColumns = (
     ),
     filterFn: filterFn("option"),
     meta: {
-      displayName: "Role",
+      label: "Role",
       type: "option",
       icon: ShieldUserIcon,
       options: allRoles.map((value) => {
@@ -989,7 +989,7 @@ const getUserColumns = (
     cell: (c) => formatDate(c.cell.getValue(), "PPPp"),
     filterFn: filterFn("date"),
     meta: {
-      displayName: "Terakhir Diperbarui",
+      label: "Terakhir Diperbarui",
       type: "date",
       icon: CalendarSyncIcon,
     },
@@ -1000,7 +1000,7 @@ const getUserColumns = (
     cell: (c) => formatDate(c.cell.getValue(), "PPPp"),
     filterFn: filterFn("date"),
     meta: {
-      displayName: "Waktu Dibuat",
+      label: "Waktu Dibuat",
       type: "date",
       icon: CalendarCheck2Icon,
     },

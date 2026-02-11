@@ -276,7 +276,7 @@ export function FilterableColumn<TData>({
       <div className="flex w-full items-center justify-between">
         <div className="inline-flex items-center gap-1.5">
           {Icon && <Icon />}
-          <span>{column.columnDef.meta?.displayName}</span>
+          <span>{column.columnDef.meta?.label}</span>
         </div>
         <ArrowRightIcon className="opacity-0 group-aria-selected:opacity-100" />
       </div>
@@ -386,7 +386,7 @@ export function FilterSubject<TData>({
       className="flex items-center gap-1.5 px-2 font-medium whitespace-nowrap select-none"
     >
       {hasIcon && <meta.icon />}
-      <span>{meta.displayName}</span>
+      <span>{meta.label}</span>
     </Button>
   );
 }
@@ -801,7 +801,7 @@ export function FilterValueOptionDisplay<TData, TValue>({
     );
   }
 
-  const name = columnMeta.displayName.toLowerCase();
+  const name = columnMeta.label.toLowerCase();
   const pluralName = name.endsWith("s") ? `${name}es` : `${name}s`;
   const hasOptionIcons = !options?.some((o) => !o.icon);
 
@@ -867,7 +867,7 @@ export function FilterValueMultiOptionDisplay<TData, TValue>({
     );
   }
 
-  const name = columnMeta.displayName.toLowerCase();
+  const name = columnMeta.label.toLowerCase();
   const hasOptionIcons = !columnMeta.options?.some((o) => !o.icon);
 
   return (
@@ -1132,10 +1132,7 @@ export function FilterValueOptionController<TData, TValue>({
 
   return (
     <Command loop>
-      <CommandInput
-        autoFocus
-        placeholder={`Cari ${columnMeta.displayName}...`}
-      />
+      <CommandInput autoFocus placeholder={`Cari ${columnMeta.label}...`} />
       <CommandEmpty>{messages.empty}</CommandEmpty>
       <CommandList className="max-h-fit">
         <CommandGroup>
@@ -1290,10 +1287,7 @@ export function FilterValueMultiOptionController<
 
   return (
     <Command loop>
-      <CommandInput
-        autoFocus
-        placeholder={`Cari ${columnMeta.displayName}...`}
-      />
+      <CommandInput autoFocus placeholder={`Cari ${columnMeta.label}...`} />
       <CommandEmpty>{messages.empty}</CommandEmpty>
       <CommandList>
         <CommandGroup>
@@ -1385,7 +1379,7 @@ export function FilterValueDateController<TData, TValue>({
 
   return (
     <Command>
-      {/* <CommandInput placeholder={`Cari ${columnMeta.displayName}...`} /> */}
+      {/* <CommandInput placeholder={`Cari ${columnMeta.label}...`} /> */}
       {/* <CommandEmpty>{messages.empty}</CommandEmpty> */}
       <CommandList className="max-h-fit">
         <CommandGroup>
@@ -1434,7 +1428,7 @@ export function FilterValueTextController<TData, TValue>({
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder={`Cari ${columnMeta.displayName}...`}
+              placeholder={`Cari ${columnMeta.label}...`}
               autoFocus
             />
           </CommandItem>
