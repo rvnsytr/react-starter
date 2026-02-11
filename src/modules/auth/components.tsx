@@ -37,7 +37,6 @@ import { DatePicker } from "@/core/components/ui/date-picker";
 import { DetailList, DetailListData } from "@/core/components/ui/detail-list";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -293,7 +292,6 @@ export function SignInForm() {
             </Field>
           )}
         />
-
         <ResetPasswordDialog />
       </div>
 
@@ -1579,7 +1577,9 @@ function ResetPasswordDialog() {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Atur ulang kata sandi</DialogTitle>
+          <DialogTitle className="flex items-center gap-x-2">
+            <LockKeyholeOpenIcon /> Atur ulang kata sandi
+          </DialogTitle>
           <DialogDescription>
             Masukan alamat email yang terdaftar pada akun Anda, dan kami akan
             mengirimkan tautan untuk mengatur ulang kata sandi Anda.
@@ -1613,13 +1613,8 @@ function ResetPasswordDialog() {
             )}
           />
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="reset" variant="secondary">
-                {messages.actions.cancel}
-              </Button>
-            </DialogClose>
-
+          <DialogFooter showCloseButton>
+            <ResetButton onClick={() => form.reset()} />
             <Button
               type="submit"
               disabled={isLoading}
@@ -1730,7 +1725,6 @@ export function ResetPasswordForm({ token }: { token?: string }) {
 
         <div className="flex flex-col gap-2 md:flex-row">
           <ResetButton onClick={() => form.reset()} />
-
           <Button type="submit" disabled={isLoading}>
             <LoadingSpinner
               loading={isLoading}
@@ -1882,7 +1876,6 @@ export function ChangePasswordForm() {
           <LoadingSpinner loading={isLoading} icon={{ base: <SaveIcon /> }} />
           {messages.actions.update}
         </Button>
-
         <ResetButton onClick={() => form.reset()} />
       </CardFooter>
     </form>

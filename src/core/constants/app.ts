@@ -20,8 +20,4 @@ export const apiConfig = {
   get baseUrl() {
     return `${this.host}${this.basePath}`;
   },
-
-  get authBaseUrl() {
-    return `${this.baseUrl}/auth`;
-  },
 };

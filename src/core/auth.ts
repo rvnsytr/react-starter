@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { apiConfig } from "./constants/app";
 
 export const authClient = createAuthClient({
-  baseURL: apiConfig.authBaseUrl,
+  baseURL: `${apiConfig.baseUrl}/auth`,
   plugins: [adminClient()],
   fetchOptions: {
     onError({ error }) {
