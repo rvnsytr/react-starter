@@ -1,3 +1,4 @@
+import { apiFetcher } from "@/core/api";
 import { authClient } from "@/core/auth";
 import {
   AlertDialog,
@@ -151,7 +152,6 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UAParser, UAParserProps } from "ua-parser-js";
 import { z } from "zod";
-import { listUsers, removeUsers, revokeUserSessions } from "./actions";
 import {
   allRoles,
   allUserStatus,
@@ -1017,7 +1017,22 @@ export function UserDataTable({
     <DataTable
       mode="manual"
       searchPlaceholder="Cari Pengguna..."
-      swr={{ key: "/auth/list-users", fetcher: listUsers }}
+      swr={{
+        key: "/auth/list-users",
+        fetcher: async (state) => {
+          const { data, ...rest } = await apiFetcher(
+            "/auth/admin/list-users",
+            z.array(userSchema),
+            {
+              method: "POST",
+              body: JSON.stringify(state),
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+
+          return { ...rest, data: data as AuthSession["user"][] };
+        },
+      }}
       getColumns={(res) => getUserColumns(user.id, res?.count)}
       getRowId={(row) => row.id}
       enableRowSelection={(row) => row.original.id !== user.id}
@@ -2220,18 +2235,27 @@ function ActionRevokeUserSessionsDialog({
 
   const clickHandler = () => {
     setIsLoading(true);
-    toast.promise(revokeUserSessions(userIds), {
-      loading: messages.loading,
-      success: (res) => {
-        onSuccess();
-        const successLength = res.filter(({ data }) => data?.success).length;
-        return `${successLength} dari ${userIds.length} sesi pengguna berhasil diakhiri.`;
+    toast.promise(
+      async () =>
+        Promise.all(
+          userIds.map(
+            async (id) =>
+              await authClient.admin.revokeUserSessions({ userId: id }),
+          ),
+        ),
+      {
+        loading: messages.loading,
+        success: (res) => {
+          onSuccess();
+          const successLength = res.filter(({ data }) => data?.success).length;
+          return `${successLength} dari ${userIds.length} sesi pengguna berhasil diakhiri.`;
+        },
+        error: (e) => {
+          setIsLoading(false);
+          return e.message;
+        },
       },
-      error: (e) => {
-        setIsLoading(false);
-        return e.message;
-      },
-    });
+    );
   };
 
   return (
@@ -2768,23 +2792,32 @@ function ActionRemoveUsersDialog({
 
   const formHandler = () => {
     setIsLoading(true);
-    toast.promise(removeUsers(data), {
-      loading: messages.loading,
-      success: (res) => {
-        setIsLoading(false);
-        setIsOpen(false);
+    toast.promise(
+      async () =>
+        Promise.all(
+          data.map(async ({ id, image }) => {
+            if (image) await removeFiles([image]);
+            return await authClient.admin.removeUser({ userId: id });
+          }),
+        ),
+      {
+        loading: messages.loading,
+        success: (res) => {
+          setIsLoading(false);
+          setIsOpen(false);
 
-        onSuccess();
-        mutateListUsers();
+          onSuccess();
+          mutateListUsers();
 
-        const successLength = res.filter(({ data }) => data?.success).length;
-        return `${successLength} dari ${data.length} akun pengguna berhasil dihapus.`;
+          const successLength = res.filter(({ data }) => data?.success).length;
+          return `${successLength} dari ${data.length} akun pengguna berhasil dihapus.`;
+        },
+        error: (e) => {
+          setIsLoading(false);
+          return e.message;
+        },
       },
-      error: (e) => {
-        setIsLoading(false);
-        return e.message;
-      },
-    });
+    );
   };
 
   return (
