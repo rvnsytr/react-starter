@@ -32,7 +32,8 @@ import {
   ColumnHeader,
   ColumnHeaderCheckbox,
 } from "@/core/components/ui/column";
-import { DataTable, DataTableProps } from "@/core/components/ui/data-table";
+import { DataQueryStateProps } from "@/core/components/ui/data-controller";
+import { DataTable } from "@/core/components/ui/data-table";
 import { DatePicker } from "@/core/components/ui/date-picker";
 import { DetailList, DetailListData } from "@/core/components/ui/detail-list";
 import {
@@ -1007,14 +1008,11 @@ const getUserColumns = (
   }),
 ];
 
-export function UserDataTable({
-  ...props
-}: Pick<DataTableProps, "defaultState" | "onStateChange">) {
+export function UserDataTable({ ...props }: DataQueryStateProps) {
   const { user } = useAuth();
   return (
     <DataTable
       mode="manual"
-      searchPlaceholder="Cari Pengguna..."
       swr={{
         key: "/auth/list-users",
         fetcher: async (state) => {
@@ -1034,6 +1032,7 @@ export function UserDataTable({
       getColumns={(res) => getUserColumns(user.id, res?.count)}
       getRowId={(row) => row.id}
       enableRowSelection={(row) => row.original.id !== user.id}
+      placeholder={{ search: "Cari Pengguna..." }}
       renderRowSelection={({ rows, table }) => {
         const data = rows.map((row) => row.original);
         return (

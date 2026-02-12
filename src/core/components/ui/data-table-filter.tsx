@@ -125,9 +125,7 @@ export function ActiveFiltersMobileContainer({
     if (scrollContainerRef.current) {
       const resizeObserver = new ResizeObserver(() => checkScroll());
       resizeObserver.observe(scrollContainerRef.current);
-      return () => {
-        resizeObserver.disconnect();
-      };
+      return () => resizeObserver.disconnect();
     }
   }, []);
 

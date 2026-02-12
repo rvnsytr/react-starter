@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
-import { dataTableQueryStateSchema } from "@/core/components/ui/data-table";
+import { dataQueryStateSchema } from "@/core/components/ui/data-controller";
 import {
   Popover,
   PopoverContent,
@@ -21,10 +21,10 @@ import { EllipsisIcon } from "lucide-react";
 // const t2Prefix = "t2-";
 
 export const Route = createFileRoute("/dashboard/users")({
-  // validateSearch: dataTableQueryStateSchema.extend(
-  //   withSchemaPrefix(t2Prefix, dataTableQueryStateSchema).shape,
+  // validateSearch: dataQueryStateSchema.extend(
+  //   withSchemaPrefix(t2Prefix, dataQueryStateSchema).shape,
   // ),
-  validateSearch: dataTableQueryStateSchema,
+  validateSearch: dataQueryStateSchema,
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/users") }] }),
   component: RouteComponent,
 });

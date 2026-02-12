@@ -1,5 +1,5 @@
 import { authClient } from "@/core/auth";
-import { mutateDataTable } from "@/core/components/ui/data-table";
+import { mutateData } from "@/core/components/ui/data-controller";
 import useSWR, { mutate, SWRConfiguration } from "swr";
 import { AuthSession } from "./constants";
 
@@ -48,4 +48,4 @@ export const mutateListSessions = () => mutate("/auth/list-sessions");
 export const mutateListUserSessions = (userId: string) =>
   mutate(`/auth/list-user-sessions?id=${userId}`);
 
-export const mutateListUsers = () => mutateDataTable("/auth/list-users");
+export const mutateListUsers = () => mutateData("/auth/list-users");

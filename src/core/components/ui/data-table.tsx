@@ -1,72 +1,21 @@
-import { ApiResponse } from "@/core/api";
 import { messages } from "@/core/constants/messages";
-import { allFilterOperators } from "@/core/filter";
-import { useDebounce } from "@/core/hooks/use-debounce";
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  ColumnPinningState,
-  Table as DataTableType,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  PaginationState,
-  Row,
-  RowSelectionState,
-  SortingState,
-  TableOptions,
-  useReactTable,
-  VisibilityState,
-} from "@tanstack/react-table";
-import { isValid } from "date-fns";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
-  RotateCcwSquareIcon,
-  SearchIcon,
-  ViewIcon,
-} from "lucide-react";
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import useSWR, { mutate, SWRConfiguration } from "swr";
-import z from "zod";
-import { Button } from "./button";
+import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
 import { ButtonGroup } from "./button-group";
-import { RefreshButton } from "./buttons";
-import { Checkbox } from "./checkbox";
 import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./command";
+  DataController,
+  DataControllerProps,
+  dataSizes,
+  defaultDataSize,
+} from "./data-controller";
 import {
   ActiveFilters,
   ActiveFiltersMobileContainer,
   FilterActions,
   FilterSelector,
 } from "./data-table-filter";
-import { ErrorFallback } from "./fallback";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
-import { Kbd } from "./kbd";
-import { Label } from "./label";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
 import { Separator } from "./separator";
 import { Skeleton } from "./skeleton";
 import {
@@ -78,34 +27,43 @@ import {
   TableRow,
 } from "./table";
 
-type CoreDataTableProps<TData> = {
-  mode?: "auto" | "manual";
-  swr: {
-    key: string;
-    fetcher: (state: DataTableState) => Promise<ApiResponse<TData[]>>;
-    config?: SWRConfiguration;
-  };
-  getColumns: (response?: ApiResponse<TData[]>) => DataTableColumnDef<TData>;
-};
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+  RotateCcwSquareIcon,
+  SearchIcon,
+  ViewIcon,
+} from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Button } from "./button";
+import { Checkbox } from "./checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./command";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
+import { Kbd } from "./kbd";
+import { Label } from "./label";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
-export type DataTableState = {
-  globalFilter: string;
-  columnFilters: ColumnFiltersState;
-  sorting: SortingState;
-  pagination: PaginationState;
-};
-
-export type DataTableQueryState = z.infer<typeof dataTableQueryStateSchema>;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DataTableColumnDef<TData> = ColumnDef<TData, any>[];
-
-export type DataTableProps = {
+export type DataTableProps<TData> = {
   caption?: string;
-  placeholder?: string;
-
-  defaultState?: DataTableQueryState;
-  onStateChange?: (state: DataTableQueryState) => void;
+  placeholder?: {
+    table?: string;
+    search?: string;
+  };
 
   className?: string;
   classNames?: {
@@ -115,513 +73,217 @@ export type DataTableProps = {
     table?: string;
     footer?: string;
   };
-};
-
-type ToolBoxProps<TData> = {
-  searchPlaceholder?: string;
-  withRefresh?: boolean;
 
   renderRowSelection?: (props: {
     rows: Row<TData>[];
-    table: DataTableType<TData>;
-  }) => ReactNode;
+    table: TableType<TData>;
+  }) => React.ReactNode;
 };
-
-const pageSizes = [5, 10, 20, 30, 40, 50, 100];
-const defaultPageSize = pageSizes[1];
-
-const arrayParser = {
-  parse: (value?: string) => {
-    if (!value) return [];
-    return decodeURIComponent(value).split(",");
-  },
-  serialize: (value?: string[]) => {
-    if (!value?.length) return undefined;
-    return encodeURIComponent(value.join(","));
-  },
-};
-
-const getRecordParser = (parseValue: boolean) => ({
-  parse: (value?: string) => {
-    if (!value) return {};
-    const entries = decodeURIComponent(value)
-      .split(",")
-      .map((v) => [v, parseValue]);
-    return Object.fromEntries(entries);
-  },
-  serialize: (value: Record<string, boolean>) => {
-    const entries = Object.entries(value);
-    if (!entries.length) return undefined;
-    const str = entries
-      .map(([k, v]) => (v === parseValue ? k : null))
-      .filter((v) => !!v)
-      .join(",");
-    if (!str) return undefined;
-    return encodeURIComponent(str);
-  },
-});
-
-const sortingParser = {
-  parse: (value?: string) => {
-    if (!value) return [];
-    return decodeURIComponent(value)
-      .split(";")
-      .map((part) => {
-        const [id, rawDir] = part.split(":");
-        const parsed = z.enum(["asc", "desc"]).safeParse(rawDir);
-        if (!id || !parsed.success) return null;
-        return { id, desc: parsed.data === "desc" };
-      })
-      .filter((v) => !!v);
-  },
-  serialize: (value: SortingState) => {
-    if (!value.length) return undefined;
-    const str = value
-      .map((v) => `${v.id}:${v.desc ? "desc" : "asc"}`)
-      .join(";");
-    return encodeURIComponent(str);
-  },
-};
-
-export const columnFiltersSchema = z.object({
-  id: z.string(),
-  value: z.object({
-    operator: z.enum(allFilterOperators),
-    values: z.union([z.string(), z.number(), z.coerce.date()]).array(),
-  }),
-});
-
-export const dataTableQueryStateSchema = z.object({
-  hidden: z.string().optional().catch(""),
-
-  left: z.string().optional().catch(""),
-  right: z.string().optional().catch(""),
-
-  selected: z.string().optional().catch(""),
-
-  search: z.string().optional().catch(""),
-  columnFilters: z.string().optional().catch(""),
-  sorting: z.string().optional().catch(""),
-
-  page: z.coerce.number().min(1).optional().catch(0),
-  size: z.coerce.number().min(1).optional().catch(10),
-});
-
-function columnFiltersParser<TData>() {
-  return {
-    parse: (getColumns: () => DataTableColumnDef<TData>, value?: string) => {
-      // here
-      if (!value) return [];
-      return decodeURIComponent(value)
-        .split(";")
-        .map((part) => {
-          const [id, operator, rawValues = ""] = part.split(":");
-          if (!id || !operator || !rawValues) return null;
-
-          const col = getColumns().find((c) => c.id === id);
-          if (!col) return null;
-
-          const values = rawValues
-            ? rawValues
-                .split(",")
-                .map((v) => {
-                  if (col.meta?.type === "date") {
-                    const d = new Date(Number(v));
-                    if (isValid(d)) return d;
-                    else return null;
-                  }
-
-                  if (col.meta?.type === "number") {
-                    const n = Number(v);
-                    if (!Number.isNaN(n)) return n;
-                    else return null;
-                  }
-
-                  return v;
-                })
-                .filter((v) => !!v)
-            : [];
-
-          if (!values.length) return null;
-          return { id, value: { operator, values } };
-        })
-        .filter((v) => !!v);
-    },
-    serialize: (value: ColumnFiltersState) => {
-      if (!value?.length) return undefined;
-
-      const str = value
-        .map(({ id, value: rawValue }) => {
-          const parsed = columnFiltersSchema.shape.value.safeParse(rawValue);
-          if (!parsed.success) return null;
-
-          const { operator, values } = parsed.data;
-          const serializedValues = values.map((v) =>
-            v instanceof Date ? v.getTime() : String(v),
-          );
-
-          return `${id}:${operator}:${serializedValues.join(",")}`;
-        })
-        .filter((v) => !!v)
-        .join(";");
-
-      return encodeURIComponent(str);
-    },
-  };
-}
-
-export const mutateDataTable = (key: string) =>
-  mutate((a) => !!a && typeof a === "object" && "key" in a && a.key === key);
 
 export function DataTable<TData>({
-  mode = "auto",
-  swr,
-  getColumns,
-
-  defaultState,
-  onStateChange,
-
-  // id,
   caption,
   placeholder,
+
   className,
   classNames,
 
-  getRowId,
-  enableRowSelection,
-
-  ...props
-}: CoreDataTableProps<TData> &
-  DataTableProps &
-  ToolBoxProps<TData> &
-  Pick<TableOptions<TData>, "getRowId" | "enableRowSelection">) {
-  const isManual = mode === "manual";
-
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    getRecordParser(false).parse(defaultState?.hidden),
-  );
-
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: arrayParser.parse(defaultState?.left),
-    right: arrayParser.parse(defaultState?.right),
-  });
-
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>(
-    getRecordParser(true).parse(defaultState?.selected),
-  );
-
-  const [globalFilter, setGlobalFilter] = useState<string>(
-    defaultState?.search ?? "",
-  );
-
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-    columnFiltersParser<TData>().parse(getColumns, defaultState?.columnFilters),
-  );
-
-  const [sorting, setSorting] = useState<SortingState>(
-    sortingParser.parse(defaultState?.sorting),
-  );
-
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: defaultState?.page ? defaultState.page - 1 : 0,
-    pageSize: defaultState?.size ?? defaultPageSize,
-  });
-
-  const debouncedGlobalFilter = useDebounce(globalFilter);
-
-  const dataTableState: DataTableState = useMemo(
-    () => ({
-      globalFilter: debouncedGlobalFilter,
-      columnFilters,
-      sorting,
-      pagination,
-    }),
-    [debouncedGlobalFilter, columnFilters, sorting, pagination],
-  );
-
-  useEffect(() => {
-    onStateChange?.({
-      hidden: getRecordParser(false).serialize(columnVisibility),
-
-      left: arrayParser.serialize(columnPinning.left),
-      right: arrayParser.serialize(columnPinning.right),
-
-      selected: getRecordParser(true).serialize(rowSelection),
-
-      search: !!debouncedGlobalFilter ? debouncedGlobalFilter : undefined,
-      columnFilters: columnFiltersParser().serialize(columnFilters),
-      sorting: sortingParser.serialize(sorting),
-
-      page: pagination.pageIndex > 0 ? pagination.pageIndex + 1 : undefined,
-      size:
-        pagination.pageSize !== defaultPageSize
-          ? pagination.pageSize
-          : undefined,
-    } satisfies DataTableQueryState);
-  }, [
-    onStateChange,
-    columnVisibility,
-    columnPinning,
-    rowSelection,
-    debouncedGlobalFilter,
-    columnFilters,
-    sorting,
-    pagination,
-  ]);
-
-  const baseArgument = { key: swr.key };
-  const { data, isLoading, error } = useSWR(
-    isManual ? { ...baseArgument, ...dataTableState } : baseArgument,
-    async () => await swr.fetcher(dataTableState),
-    swr.config,
-  );
-
-  const columns = useMemo(
-    () => (data?.success ? getColumns(data) : getColumns()),
-    [data, getColumns],
-  );
-
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
-    columns,
-    data: data?.success ? data.data : [],
-
-    state: {
-      globalFilter,
-      sorting,
-      columnFilters,
-      pagination,
-      columnVisibility,
-      rowSelection,
-      columnPinning,
-    },
-
-    getCoreRowModel: getCoreRowModel(),
-
-    // ? Column Faceting
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-
-    // ? Column Pinning
-    onColumnPinningChange: setColumnPinning,
-    onColumnVisibilityChange: setColumnVisibility,
-
-    // ? Row Selection
-    getRowId,
-    enableRowSelection,
-    onRowSelectionChange: setRowSelection,
-
-    // * Global Searching
-    manualFiltering: isManual,
-    globalFilterFn: "includesString",
-    onGlobalFilterChange: setGlobalFilter,
-
-    // * Column Filtering
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: !isManual ? getFilteredRowModel() : undefined,
-
-    // * Column Sorting
-    manualSorting: isManual,
-    onSortingChange: setSorting,
-    getSortedRowModel: !isManual ? getSortedRowModel() : undefined,
-
-    // * Pagination
-    manualPagination: isManual,
-    rowCount: data?.count?.total ?? 0,
-    onPaginationChange: setPagination,
-    getPaginationRowModel: !isManual ? getPaginationRowModel() : undefined,
-  });
-
-  if (error) return <ErrorFallback error={error} />;
-  if (!isLoading && !data?.success)
-    return <ErrorFallback error={data?.error} />;
-
-  const pageCount = table.getPageCount();
-  const selectedRowsCount =
-    Object.keys(rowSelection).length ??
-    table.getFilteredSelectedRowModel().rows.length;
-  const rowsCount =
-    data?.count?.total ?? table.getFilteredRowModel().rows.length;
-
-  return (
-    <div className={cn("flex flex-col gap-y-4", className)}>
-      <ToolBox table={table} className={classNames?.toolbox} {...props} />
-
-      {table.getState().columnFilters.length > 0 && (
-        <ActiveFiltersMobileContainer className={classNames?.filterContainer}>
-          <FilterActions table={table} />
-          <Separator orientation="vertical" className="h-4" />
-          <ActiveFilters table={table} />
-        </ActiveFiltersMobileContainer>
-      )}
-
-      <Table
-        className={classNames?.table}
-        containerClassName={cn("rounded-lg border", classNames?.tableContainer)}
-      >
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(
-                ({ id, column, isPlaceholder, getContext }) => {
-                  const columnPinned = column.getIsPinned();
-                  return (
-                    <TableHead
-                      key={id}
-                      className={cn(
-                        "z-10 text-center",
-                        columnPinned && "bg-background/90 sticky z-20",
-                        columnPinned === "left" && "left-0",
-                        columnPinned === "right" && "right-0",
-                      )}
-                      // style={{
-                      //   left: column.getStart("left"),
-                      //   right: column.getAfter("right"),
-                      // }}
-                    >
-                      {!isPlaceholder &&
-                        flexRender(column.columnDef.header, getContext())}
-                    </TableHead>
-                  );
-                },
-              )}
-            </TableRow>
-          ))}
-        </TableHeader>
-
-        <TableBody>
-          {isLoading ? (
-            Array.from({ length: pagination.pageSize }).map((_, i) => (
-              <TableRow key={i}>
-                <TableCell colSpan={columns.length}>
-                  <Skeleton className="h-8 w-full" />
-                </TableCell>
-              </TableRow>
-            ))
-          ) : table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map(({ id, column, getContext }) => {
-                  const columnPinned = column.getIsPinned();
-                  return (
-                    <TableCell
-                      key={id}
-                      className={cn(
-                        "z-10",
-                        columnPinned && "bg-background/90 sticky z-20",
-                        columnPinned === "left" && "left-0",
-                        columnPinned === "right" && "right-0",
-                      )}
-                      // style={{
-                      //   left: column.getStart("left"),
-                      //   right: column.getAfter("right"),
-                      // }}
-                    >
-                      {flexRender(column.columnDef.cell, getContext())}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="text-muted-foreground py-4 text-center whitespace-pre-line"
-              >
-                {placeholder ?? messages.empty}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-
-      <div
-        className={cn(
-          "flex w-full flex-col items-center gap-4 text-center lg:flex-row",
-          classNames?.footer,
-        )}
-      >
-        <RowsPerPage table={table} className="order-4 shrink-0 lg:order-1" />
-
-        <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
-          {formatNumber(selectedRowsCount)} dari{" "}
-          {isLoading ? "?" : formatNumber(rowsCount)} baris dipilih
-        </small>
-
-        <small className="text-muted-foreground order-1 mx-auto text-sm lg:order-3">
-          {caption}
-        </small>
-
-        <small className="order-2 shrink-0 tabular-nums lg:order-4">
-          Halaman {isLoading ? "?" : formatNumber(pagination.pageIndex + 1)}{" "}
-          dari {isLoading ? "?" : formatNumber(pageCount > 0 ? pageCount : 1)}
-        </small>
-
-        <Pagination table={table} className="order-3 shrink-0 lg:order-5" />
-      </div>
-    </div>
-  );
-}
-
-function ToolBox<TData>({
-  table,
-  className,
-  searchPlaceholder = "Cari...",
-  withRefresh = false,
   renderRowSelection,
-}: ToolBoxProps<TData> & {
-  table: DataTableType<TData>;
-  className?: string;
-}) {
+  ...props
+}: Omit<DataControllerProps<TData>, "render"> & DataTableProps<TData>) {
   const isMobile = useIsMobile();
-
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-  const isSelected = selectedRows.length > 0;
-
   return (
-    <div
-      className={cn(
-        "flex w-full flex-col gap-2 lg:flex-row lg:justify-between",
-        className,
-      )}
-    >
-      <div className={cn("flex flex-col gap-2 lg:flex-row lg:items-center")}>
-        <ButtonGroup className="w-full lg:w-fit [&_button]:grow">
-          <FilterSelector table={table} />
-          <View table={table} withRefresh={withRefresh} />
-          {withRefresh && <RefreshButton variant="outline" />}
-        </ButtonGroup>
+    <DataController
+      {...props}
+      render={({ table, columns, data, isLoading }) => {
+        const state = table.getState();
 
-        {isSelected && !isMobile && (
-          <Separator orientation="vertical" className="h-4" />
-        )}
+        const pageCount = table.getPageCount();
+        const selectedRowsCount =
+          Object.keys(state.rowSelection).length ??
+          table.getFilteredSelectedRowModel().rows.length;
+        const rowsCount =
+          data?.count?.total ?? table.getFilteredRowModel().rows.length;
 
-        {isSelected && renderRowSelection?.({ table, rows: selectedRows })}
-      </div>
+        const selectedRows = table.getFilteredSelectedRowModel().rows;
+        const isSelected = selectedRows.length > 0;
 
-      <div className="flex gap-x-2 *:grow">
-        <Reset table={table} />
-        <Search
-          table={table}
-          placeholder={searchPlaceholder}
-          className="col-span-2"
-        />
-      </div>
-    </div>
+        return (
+          <div className={cn("flex flex-col gap-y-4", className)}>
+            <div
+              className={cn(
+                "flex w-full flex-col gap-2 lg:flex-row lg:justify-between",
+                className,
+              )}
+            >
+              <div
+                className={cn(
+                  "flex flex-col gap-2 lg:flex-row lg:items-center",
+                )}
+              >
+                <ButtonGroup className="w-full lg:w-fit [&_button]:grow">
+                  <FilterSelector table={table} />
+                  <View table={table} />
+                </ButtonGroup>
+
+                {isSelected && !isMobile && (
+                  <Separator orientation="vertical" className="h-4" />
+                )}
+
+                {isSelected &&
+                  renderRowSelection?.({ table, rows: selectedRows })}
+              </div>
+
+              <div className="flex gap-x-2 *:grow">
+                <Reset table={table} />
+                <Search
+                  table={table}
+                  placeholder={placeholder?.search ?? "Cari..."}
+                  className="col-span-2"
+                />
+              </div>
+            </div>
+
+            {table.getState().columnFilters.length > 0 && (
+              <ActiveFiltersMobileContainer
+                className={classNames?.filterContainer}
+              >
+                <FilterActions table={table} />
+                <Separator orientation="vertical" className="h-4" />
+                <ActiveFilters table={table} />
+              </ActiveFiltersMobileContainer>
+            )}
+
+            <Table
+              className={classNames?.table}
+              containerClassName={cn(
+                "rounded-lg border",
+                classNames?.tableContainer,
+              )}
+            >
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map(
+                      ({ id, column, isPlaceholder, getContext }) => {
+                        const columnPinned = column.getIsPinned();
+                        return (
+                          <TableHead
+                            key={id}
+                            className={cn(
+                              "z-10 text-center",
+                              columnPinned && "bg-background/90 sticky z-20",
+                              columnPinned === "left" && "left-0",
+                              columnPinned === "right" && "right-0",
+                            )}
+                            // style={{
+                            //   left: column.getStart("left"),
+                            //   right: column.getAfter("right"),
+                            // }}
+                          >
+                            {!isPlaceholder &&
+                              flexRender(column.columnDef.header, getContext())}
+                          </TableHead>
+                        );
+                      },
+                    )}
+                  </TableRow>
+                ))}
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: state.pagination.pageSize }).map(
+                    (_, i) => (
+                      <TableRow key={i}>
+                        <TableCell colSpan={columns.length}>
+                          <Skeleton className="h-8 w-full" />
+                        </TableCell>
+                      </TableRow>
+                    ),
+                  )
+                ) : table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row
+                        .getVisibleCells()
+                        .map(({ id, column, getContext }) => {
+                          const columnPinned = column.getIsPinned();
+                          return (
+                            <TableCell
+                              key={id}
+                              className={cn(
+                                "z-10",
+                                columnPinned && "bg-background/90 sticky z-20",
+                                columnPinned === "left" && "left-0",
+                                columnPinned === "right" && "right-0",
+                              )}
+                              // style={{
+                              //   left: column.getStart("left"),
+                              //   right: column.getAfter("right"),
+                              // }}
+                            >
+                              {flexRender(column.columnDef.cell, getContext())}
+                            </TableCell>
+                          );
+                        })}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-muted-foreground py-4 text-center whitespace-pre-line"
+                    >
+                      {placeholder?.table ?? messages.empty}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            <div
+              className={cn(
+                "flex w-full flex-col items-center gap-4 text-center lg:flex-row",
+                classNames?.footer,
+              )}
+            >
+              <RowsPerPage
+                table={table}
+                className="order-4 shrink-0 lg:order-1"
+              />
+
+              <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
+                {formatNumber(selectedRowsCount)} dari{" "}
+                {isLoading ? "?" : formatNumber(rowsCount)} baris dipilih
+              </small>
+
+              <small className="text-muted-foreground order-1 mx-auto text-sm lg:order-3">
+                {caption}
+              </small>
+
+              <small className="order-2 shrink-0 tabular-nums lg:order-4">
+                Halaman{" "}
+                {isLoading ? "?" : formatNumber(state.pagination.pageIndex + 1)}{" "}
+                dari{" "}
+                {isLoading ? "?" : formatNumber(pageCount > 0 ? pageCount : 1)}
+              </small>
+
+              <Pagination
+                table={table}
+                className="order-3 shrink-0 lg:order-5"
+              />
+            </div>
+          </div>
+        );
+      }}
+    />
   );
 }
 
-function View<TData>({
-  table,
-  withRefresh,
-}: {
-  table: DataTableType<TData>;
-  withRefresh: boolean;
-}) {
+function View<TData>({ table }: { table: TableType<TData> }) {
   const isMobile = useIsMobile();
 
   return (
@@ -633,7 +295,7 @@ function View<TData>({
       </PopoverTrigger>
 
       <PopoverContent
-        align={isMobile && !withRefresh ? "end" : "center"}
+        align={isMobile ? "end" : "center"}
         className="flex flex-col gap-y-1 p-0"
       >
         <Command>
@@ -681,7 +343,7 @@ function Reset<TData>({
   table,
   className,
 }: {
-  table: DataTableType<TData>;
+  table: TableType<TData>;
   className?: string;
 }) {
   return (
@@ -723,7 +385,7 @@ function Search<TData>({
   placeholder = "Cari...",
   className,
 }: {
-  table: DataTableType<TData>;
+  table: TableType<TData>;
   placeholder?: string;
   className?: string;
 }) {
@@ -766,7 +428,7 @@ function Pagination<TData>({
   table,
   className,
 }: {
-  table: DataTableType<TData>;
+  table: TableType<TData>;
   className?: string;
 }) {
   const isMobile = useIsMobile();
@@ -818,14 +480,14 @@ function RowsPerPage<TData>({
   table,
   className,
 }: {
-  table: DataTableType<TData>;
+  table: TableType<TData>;
   className?: string;
 }) {
   return (
     <div className={cn("flex items-center gap-x-2", className)}>
       <Label>Baris per halaman</Label>
       <Select
-        value={String(table.getState().pagination.pageSize ?? defaultPageSize)}
+        value={String(table.getState().pagination.pageSize ?? defaultDataSize)}
         onValueChange={(value) => table.setPageSize(Number(value))}
       >
         <SelectTrigger size="sm">
@@ -833,11 +495,11 @@ function RowsPerPage<TData>({
         </SelectTrigger>
 
         <SelectContent>
-          {pageSizes.map((v) => (
+          {dataSizes.map((v) => (
             <SelectItem
               key={v}
               value={String(v)}
-              className={cn(v === defaultPageSize && "font-semibold")}
+              className={cn(v === defaultDataSize && "font-semibold")}
             >
               {formatNumber(v)}
             </SelectItem>
