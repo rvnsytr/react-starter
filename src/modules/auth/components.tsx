@@ -2029,6 +2029,7 @@ function SessionListCollapsible({
                           variant="outline"
                           disabled={isLoading}
                           className="grow lg:grow-0"
+                          autoFocus
                         >
                           <LoadingSpinner
                             loading={isLoading}

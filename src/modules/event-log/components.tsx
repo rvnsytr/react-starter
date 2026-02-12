@@ -26,7 +26,7 @@ export function EventLogTimeline({ data }: { data: EventLog[] }) {
         const meta = eventLogMeta[item.type];
         const {
           displayName,
-          desc,
+          description,
           icon: Icon,
           color,
         } = typeof meta === "function" ? meta(item.data) : meta;
@@ -51,7 +51,7 @@ export function EventLogTimeline({ data }: { data: EventLog[] }) {
                 {displayName}
               </TimelineTitle>
             </TimelineHeader>
-            <TimelineContent>{desc}</TimelineContent>
+            <TimelineContent>{description}</TimelineContent>
           </TimelineItem>
         );
       })}

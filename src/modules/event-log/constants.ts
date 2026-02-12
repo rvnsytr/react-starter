@@ -15,7 +15,7 @@ import { eventLogSchema } from "./schema";
 export type EventLog = z.infer<typeof eventLogSchema>;
 type EventLogMetaData = {
   displayName: string;
-  desc: string;
+  description: string;
   icon: LucideIcon;
   color?: string;
 };
@@ -50,100 +50,101 @@ export const eventLogMeta: Record<
 > = {
   "user-registered": {
     displayName: "Akun Terdaftar",
-    desc: "Akun berhasil terdaftar ke dalam sistem.",
+    description: "Pengguna berhasil mendaftar ke dalam sistem.",
     icon: PlusCircleIcon,
     color: "var(--color-success)",
   },
   "user-created": {
     displayName: "Akun Dibuat",
-    desc: "Akun berhasil dibuat dan ditambahkan ke dalam sistem.",
+    description: "Akun berhasil dibuat dan ditambahkan ke dalam sistem.",
     icon: PlusCircleIcon,
     color: "var(--color-success)",
   },
   "user-verified": {
     displayName: "Akun Diverifikasi",
-    desc: "Akun berhasil diverifikasi dan siap digunakan.",
+    description:
+      "Pengguna memverifikasi akun melalui email dan dapat mengakses sistem.",
     icon: UserRoundCheckIcon,
     color: "var(--color-success)",
   },
   "user-banned": {
     displayName: "Akun Diblokir",
-    desc: "Akun diblokir dan tidak dapat mengakses sistem.",
+    description: "Pengguna diblokir dan tidak dapat mengakses sistem.",
     icon: UserRoundXIcon,
     color: "var(--color-destructive)",
   },
   "user-unbanned": {
     displayName: "Blokir Akun Dicabut",
-    desc: "Blokir pada akun dicabut dan akses telah dipulihkan.",
+    description: "Blokir pada akun dicabut dan akses telah dipulihkan.",
     icon: UserRoundCheckIcon,
     color: "var(--color-foreground)",
   },
   // "user-removed": {
   //   displayName: "Akun Dihapus",
-  //   desc: "Akun dihapus dari sistem.",
+  //   description: "Akun dihapus dari sistem.",
   //   icon: Trash2Icon,
   //   color: "var(--color-destructive)",
   // },
 
   "password-reset": {
     displayName: "Kata Sandi Diatur Ulang",
-    desc: 'Kata sandi diatur ulang melalui fitur "Lupa Kata Sandi".',
+    description: 'Kata sandi diatur ulang melalui fitur "Lupa Kata Sandi".',
     icon: LockKeyholeOpenIcon,
     color: "var(--foreground)",
   },
   "password-changed": {
     displayName: "Kata Sandi Diperbarui",
-    desc: 'Kata sandi diperbarui melalui fitur "Ubah Kata Sandi".',
+    description: 'Kata sandi diperbarui melalui fitur "Ubah Kata Sandi".',
     icon: LockKeyholeOpenIcon,
     color: "var(--foreground)",
   },
 
   "profile-updated": {
     displayName: "Profil Diperbarui",
-    desc: "Pengguna memperbarui informasi profil.",
+    description: "Pengguna memperbarui informasi profil.",
     icon: UserRoundPenIcon,
     color: "var(--foreground)",
   },
   "profile-image-updated": {
     displayName: "Foto Profil Diperbarui",
-    desc: "Pengguna memperbarui foto profil.",
+    description: "Pengguna memperbarui foto profil.",
     icon: UserSquare2Icon,
     color: "var(--foreground)",
   },
 
   "admin-user-create": (name) => ({
     displayName: "Admin Menambahkan Akun",
-    desc: `Admin menambahkan akun atas nama '${name}' ke dalam sistem.`,
+    description: `Admin menambahkan akun atas nama '${name}' ke dalam sistem.`,
     icon: UserRoundPlusIcon,
     color: "var(--color-success)",
   }),
   // "admin-user-import": (total) => ({
   //   displayName: "Mengimpor Akun",
-  //   desc: `Mengimpor ${total} akun Purnakarya ke dalam sistem melalui fitur 'Import User'.`,
+  //   description: `Mengimpor ${total} akun ke dalam sistem melalui fitur 'Import User'.`,
   //   icon: ImportIcon,
   //   color: "var(--color-sky-500)",
   // }),
   "admin-user-update-role": (name) => ({
     displayName: "Admin Mengubah Peran",
-    desc: `Admin mengubah peran akun '${name}'.`,
+    description: `Admin mengubah peran akun '${name}'.`,
     icon: UserRoundCogIcon,
     color: "var(--color-sky-500)",
   }),
   "admin-user-ban": (name) => ({
     displayName: "Admin Memblokir Akun",
-    desc: `Admin memblokir akun atas nama '${name}'.`,
+    description: `Admin memblokir akun atas nama '${name}'.`,
     icon: UserRoundXIcon,
     color: "var(--color-destructive)",
   }),
   "admin-user-unban": (name) => ({
     displayName: "Admin Membuka Blokir Akun",
-    desc: `Admin membuka blokir akun atas nama '${name}'.`,
+    description: `Admin membuka blokir akun atas nama '${name}'.`,
     icon: UserRoundCheckIcon,
     color: "var(--color-foreground)",
   }),
   "admin-user-remove": (name) => ({
     displayName: "Admin Menghapus Akun",
-    desc: `Admin menghapus akun atas nama '${name}' dari sistem.`,
+    description: `Admin menghapus akun atas nama '${name}' dari sistem.`,
     icon: UserRoundXIcon,
     color: "var(--color-destructive)",
   }),
