@@ -8,6 +8,9 @@ import {
   AppErrorFallback,
   AppLoadingFallback,
 } from "./core/components/ui/fallback";
+import { GridPattern } from "./core/components/ui/grid-pattern";
+import { Toaster } from "./core/components/ui/sonner";
+import { GlobalShortcuts } from "./core/providers/global-shortcuts";
 import { ThemeProvider } from "./core/providers/theme";
 import { useSession } from "./modules/auth/hooks";
 import { routeTree } from "./routeTree.gen";
@@ -42,6 +45,10 @@ function App() {
       {!isInitialLoading && (
         <RouterProvider router={router} context={{ session }} />
       )}
+
+      <GridPattern className="stroke-muted dark:stroke-muted/60 -z-10 min-h-dvh" />
+      <Toaster position="top-center" closeButton richColors />
+      <GlobalShortcuts />
     </ThemeProvider>
   );
 }
