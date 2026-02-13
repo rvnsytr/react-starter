@@ -12,6 +12,7 @@ import { GridPattern } from "./core/components/ui/grid-pattern";
 import { Toaster } from "./core/components/ui/sonner";
 import { GlobalShortcuts } from "./core/providers/global-shortcuts";
 import { ThemeProvider } from "./core/providers/theme";
+import { cn } from "./core/utils/helpers";
 import { useSession } from "./modules/auth/hooks";
 import { routeTree } from "./routeTree.gen";
 
@@ -46,8 +47,15 @@ function App() {
         <RouterProvider router={router} context={{ session }} />
       )}
 
-      <GridPattern className="stroke-muted dark:stroke-muted/60 -z-10 min-h-dvh" />
+      <GridPattern
+        className={cn(
+          "stroke-muted dark:stroke-muted/60 -z-10 min-h-dvh",
+          isInitialLoading && "mask-radial-from-60% dark:mask-radial-from-50%",
+        )}
+      />
+
       <Toaster position="top-center" closeButton richColors />
+
       <GlobalShortcuts />
     </ThemeProvider>
   );
