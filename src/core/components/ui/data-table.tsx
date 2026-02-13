@@ -94,7 +94,8 @@ export function DataTable<TData>({
   return (
     <DataController
       {...props}
-      render={({ table, columns, data, isLoading }) => {
+      render={({ result, table, columns }) => {
+        const { data, isLoading } = result;
         const state = table.getState();
 
         const pageCount = table.getPageCount();

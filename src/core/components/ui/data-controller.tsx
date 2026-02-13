@@ -71,19 +71,21 @@ type ColumnDef<TData> = ColumnDefType<TData, any>[];
 export type DataControllerProps<TData> = DataQueryStateProps &
   Pick<TableOptions<TData>, "getRowId" | "enableRowSelection"> & {
     mode?: "auto" | "manual";
-    swr: {
+    query: {
       key: string;
       fetcher: (state: DataState) => Promise<ApiResponse<TData[]>>;
       config?: SWRConfiguration;
     };
-    getColumns: (response?: ApiResponse<TData[]>) => ColumnDef<TData>;
 
-    render: (
-      context: SWRResponse<ApiResponse<TData[]>> & {
-        table: TableType<TData>;
-        columns: ColumnDef<TData>;
-      },
-    ) => ReactNode;
+    columns:
+      | ColumnDef<TData>
+      | ((response?: ApiResponse<TData[]>) => ColumnDef<TData>);
+
+    render: (context: {
+      result: SWRResponse<ApiResponse<TData[]>>;
+      table: TableType<TData>;
+      columns: ColumnDef<TData>;
+    }) => ReactNode;
   };
 
 // #region Query State Parser
@@ -143,7 +145,10 @@ const sortingParser = {
 
 function columnFiltersParser<TData>() {
   return {
-    parse: (getColumns: () => ColumnDef<TData>, value?: string) => {
+    parse: (
+      columns: ColumnDef<TData> | (() => ColumnDef<TData>),
+      value?: string,
+    ) => {
       if (!value) return [];
       return decodeURIComponent(value)
         .split(";")
@@ -151,20 +156,22 @@ function columnFiltersParser<TData>() {
           const [id, operator, rawValues = ""] = part.split(":");
           if (!id || !operator || !rawValues) return null;
 
-          const col = getColumns().find((c) => c.id === id);
-          if (!col) return null;
+          const resolvedColumns =
+            typeof columns === "function" ? columns() : columns;
+          const column = resolvedColumns.find((c) => c.id === id);
+          if (!column) return null;
 
           const values = rawValues
             ? rawValues
                 .split(",")
                 .map((v) => {
-                  if (col.meta?.type === "date") {
+                  if (column.meta?.type === "date") {
                     const d = new Date(Number(v));
                     if (isValid(d)) return d;
                     else return null;
                   }
 
-                  if (col.meta?.type === "number") {
+                  if (column.meta?.type === "number") {
                     const n = Number(v);
                     if (!Number.isNaN(n)) return n;
                     else return null;
@@ -213,8 +220,8 @@ export const mutateData = (key: string) =>
 
 export function DataController<TData>({
   mode = "auto",
-  swr,
-  getColumns,
+  query,
+  columns,
 
   defaultState,
   onStateChange,
@@ -246,7 +253,7 @@ export function DataController<TData>({
   );
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-    columnFiltersParser<TData>().parse(getColumns, defaultState?.columnFilters),
+    columnFiltersParser<TData>().parse(columns, defaultState?.columnFilters),
   );
 
   const [sorting, setSorting] = useState<SortingState>(
@@ -302,21 +309,26 @@ export function DataController<TData>({
 
   // #endregion
 
-  const baseSWRKey = { key: swr.key };
-  const { data, isLoading, error, ...restSWRResponse } = useSWR(
+  const baseSWRKey = { key: query.key };
+  const { data, isLoading, error, ...rest } = useSWR(
     isManual ? { ...baseSWRKey, ...dataState } : baseSWRKey,
-    async () => await swr.fetcher(dataState),
-    swr.config,
+    async () => await query.fetcher(dataState),
+    query.config,
   );
 
-  const columns = useMemo(
-    () => (data?.success ? getColumns(data) : getColumns()),
-    [data, getColumns],
+  const resolvedColumns = useMemo(
+    () =>
+      typeof columns === "function"
+        ? data?.success
+          ? columns(data)
+          : columns()
+        : columns,
+    [data, columns],
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    columns,
+    columns: resolvedColumns,
     data: data?.success ? data.data : [],
 
     state: {
@@ -370,12 +382,8 @@ export function DataController<TData>({
     return <ErrorFallback error={data?.error} />;
 
   return render({
+    result: { data, isLoading, error, ...rest },
     table,
-    columns,
-
-    data,
-    isLoading,
-    error,
-    ...restSWRResponse,
+    columns: resolvedColumns,
   });
 }

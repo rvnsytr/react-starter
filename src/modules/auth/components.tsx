@@ -1013,7 +1013,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
   return (
     <DataTable
       mode="manual"
-      swr={{
+      query={{
         key: "/auth/list-users",
         fetcher: async (state) => {
           const { data, ...rest } = await apiFetcher(
@@ -1029,7 +1029,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
           return { ...rest, data: data as AuthSession["user"][] };
         },
       }}
-      getColumns={(res) => getUserColumns(user.id, res?.count)}
+      columns={(res) => getUserColumns(user.id, res?.count)}
       getRowId={(row) => row.id}
       enableRowSelection={(row) => row.original.id !== user.id}
       placeholder={{ search: "Cari Pengguna..." }}
