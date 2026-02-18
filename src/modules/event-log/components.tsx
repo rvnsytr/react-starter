@@ -1,3 +1,9 @@
+import { dataFetcher } from "@/core/api";
+import { ColumnCellNumber, ColumnHeader } from "@/core/components/ui/column";
+import {
+  DataController,
+  DataQueryStateProps,
+} from "@/core/components/ui/data-controller";
 import {
   Timeline,
   TimelineContent,
@@ -9,52 +15,131 @@ import {
   TimelineTitle,
 } from "@/core/components/ui/timeline";
 import { messages } from "@/core/constants/messages";
+import { filterFn } from "@/core/data-filter";
 import { formatDate } from "@/core/utils/date";
-import { EventLog, eventLogMeta } from "./constants";
+import { createColumnHelper } from "@tanstack/react-table";
+import { CalendarCheck2Icon, RouteIcon } from "lucide-react";
+import { allEventLogType, EventLog, eventLogMeta } from "./constants";
+import { eventLogSchema } from "./schema";
 
-export function EventLogTimeline({ data }: { data: EventLog[] }) {
-  if (!data.length)
-    return (
-      <div className="flex justify-center text-center">
-        <small>{messages.empty}</small>
-      </div>
-    );
+const createEventLogColumn = createColumnHelper<EventLog>();
+const getEventLogColumns = (count?: Record<string, number>) => [
+  // createEventLogColumn.display({
+  //   id: "select",
+  //   header: (c) => <ColumnHeaderCheckbox table={c.table} />,
+  //   cell: (c) => <ColumnCellCheckbox row={c.row} />,
+  //   enableHiding: false,
+  //   enableSorting: false,
+  // }),
+  createEventLogColumn.display({
+    id: "no",
+    header: "No",
+    cell: (c) => <ColumnCellNumber table={c.table} row={c.row} />,
+    enableHiding: false,
+  }),
+  createEventLogColumn.accessor((ac) => ac.type, {
+    id: "type",
+    header: (c) => <ColumnHeader column={c.column}>Tipe Event</ColumnHeader>,
+    // cell: (c) => <UserRoleBadge value={c.cell.getValue()} />,
+    cell: (c) => c.cell.getValue(),
+    filterFn: filterFn("option"),
+    meta: {
+      label: "Tipe Event",
+      type: "option",
+      icon: RouteIcon,
+      options: allEventLogType.map((value) => {
+        const meta = eventLogMeta[value];
+        const { displayName, icon } =
+          typeof meta === "function" ? meta() : meta;
+        return { value, label: displayName, icon, count: count?.[value] };
+      }),
+    },
+  }),
+  createEventLogColumn.accessor((c) => c.createdAt, {
+    id: "createdAt",
+    header: (c) => <ColumnHeader column={c.column}>Waktu Dibuat</ColumnHeader>,
+    cell: (c) => formatDate(c.cell.getValue(), "PPPp"),
+    filterFn: filterFn("date"),
+    meta: {
+      label: "Waktu Dibuat",
+      type: "date",
+      icon: CalendarCheck2Icon,
+    },
+  }),
+];
+
+export function EventLogTimeline({
+  url,
+  userId,
+  ...props
+}: DataQueryStateProps &
+  (
+    | { url: "/event-log" | "/event-log/me"; userId?: never }
+    | { url: "/event-log/:id"; userId: string }
+  )) {
+  const key = url === "/event-log/:id" ? `/event-log/${userId}` : url;
+  const schema = eventLogSchema.array();
 
   return (
-    <Timeline orientation="vertical" className="px-2">
-      {data.map((item, index) => {
-        const meta = eventLogMeta[item.type];
-        const {
-          displayName,
-          description,
-          icon: Icon,
-          color,
-        } = typeof meta === "function" ? meta(item.data) : meta;
+    <>
+      <DataController
+        {...props}
+        query={{
+          key,
+          fetcher: async (state) => await dataFetcher(key, schema, state),
+        }}
+        columns={(res) => getEventLogColumns(res?.count)}
+        render={({ result }) => {
+          const { data: res } = result;
 
-        return (
-          <TimelineItem
-            key={index}
-            step={index}
-            style={{ "--timeline-color": color } as React.CSSProperties}
-            className="has-[+[data-completed]]:**:data-[slot=timeline-separator]:bg-(--timeline-color)/10"
-          >
-            <TimelineHeader>
-              <TimelineSeparator />
+          if (!res?.data.length)
+            return (
+              <div className="flex justify-center text-center">
+                <small>{messages.empty}</small>
+              </div>
+            );
 
-              <TimelineIndicator className="flex size-8 items-center justify-center border-none bg-(--timeline-color)/10 text-(--timeline-color)">
-                <Icon className="size-4" />
-              </TimelineIndicator>
+          return (
+            <Timeline orientation="vertical">
+              {res.data.map((item, index) => {
+                const meta = eventLogMeta[item.type];
+                const {
+                  displayName,
+                  description,
+                  icon: Icon,
+                  color,
+                } = typeof meta === "function" ? meta(item) : meta;
 
-              <TimelineDate>{formatDate(item.createdAt, "PPPp")}</TimelineDate>
+                return (
+                  <TimelineItem
+                    key={index}
+                    step={index}
+                    style={{ "--timeline-color": color } as React.CSSProperties}
+                    className="has-[+[data-completed]]:**:data-[slot=timeline-separator]:bg-(--timeline-color)/10"
+                  >
+                    <TimelineHeader>
+                      <TimelineSeparator />
 
-              <TimelineTitle className="text-(--timeline-color)">
-                {displayName}
-              </TimelineTitle>
-            </TimelineHeader>
-            <TimelineContent>{description}</TimelineContent>
-          </TimelineItem>
-        );
-      })}
-    </Timeline>
+                      <TimelineIndicator className="flex size-8 items-center justify-center border-none bg-(--timeline-color)/10 text-(--timeline-color)">
+                        <Icon className="size-4" />
+                      </TimelineIndicator>
+
+                      <TimelineDate>
+                        {formatDate(item.createdAt, "PPPp")}
+                      </TimelineDate>
+
+                      <TimelineTitle className="text-(--timeline-color)">
+                        {displayName}
+                      </TimelineTitle>
+                    </TimelineHeader>
+                    <TimelineContent>{description}</TimelineContent>
+                  </TimelineItem>
+                );
+              })}
+            </Timeline>
+          );
+        }}
+      />
+    </>
   );
 }
