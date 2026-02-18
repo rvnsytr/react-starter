@@ -1,6 +1,5 @@
 import { cn } from "@/core/utils/helpers";
 import { ImpersonateUserBadge } from "@/modules/auth/components";
-import { ReactNode } from "react";
 import {
   DynamicBreadcrumb,
   DynamicBreadcrumbProps,
@@ -19,7 +18,7 @@ export function DashboardMain({
 }: DynamicBreadcrumbProps & {
   withLayoutLoader?: boolean;
   className?: string;
-  children?: ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <>

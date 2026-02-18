@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, useContext } from "react";
 import { AuthSession } from "./constants";
 
 const AuthContext = createContext<AuthSession | undefined>(undefined);
@@ -8,7 +8,7 @@ export function AuthProvider({
   children,
 }: {
   session: AuthSession;
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   return (
     <AuthContext.Provider value={session}>{children}</AuthContext.Provider>

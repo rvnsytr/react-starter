@@ -1,5 +1,4 @@
 import { cn } from "@/core/utils/helpers";
-import { ReactNode } from "react";
 import {
   Field,
   FieldDescription,
@@ -33,13 +32,13 @@ export function FieldWrapper({
 
   otherProps,
 }: {
-  label?: ReactNode;
+  label?: React.ReactNode;
   htmlFor?: string;
   errors: Pick<FieldErrorProps, "errors">["errors"];
-  description?: ReactNode;
+  description?: React.ReactNode;
 
   className?: string;
-  children: ReactNode;
+  children: React.ReactNode;
 
   // Other optional props
   otherProps?: {

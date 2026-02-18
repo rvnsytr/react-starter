@@ -1,6 +1,5 @@
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { nextTheme, Theme, themeMeta, useTheme } from "@/core/providers/theme";
-import { ComponentProps } from "react";
 import { Button, ButtonProps } from "./button";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";
 import { Kbd, KbdGroup } from "./kbd";
@@ -14,7 +13,7 @@ export function ThemeToggle({
   onClick,
   ...props
 }: Omit<ButtonProps, "children"> &
-  Pick<ComponentProps<typeof TooltipContent>, "align">) {
+  Pick<React.ComponentProps<typeof TooltipContent>, "align">) {
   const isMobile = useIsMobile();
   const { theme, setTheme } = useTheme();
 

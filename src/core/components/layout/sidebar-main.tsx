@@ -10,13 +10,7 @@ import {
 import { useAuth } from "@/modules/auth/provider.auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
-import {
-  ComponentProps,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -224,7 +218,7 @@ export function SidebarMain() {
 function SidebarMainContentCollapsible({
   isActive,
   ...props
-}: ComponentProps<typeof Collapsible> & { isActive: boolean }) {
+}: React.ComponentProps<typeof Collapsible> & { isActive: boolean }) {
   const [isOpen, setIsOpen] = useState(isActive);
 
   const onActiveRoute = useEffectEvent(() => {

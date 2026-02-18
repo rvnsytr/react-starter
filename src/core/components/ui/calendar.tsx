@@ -5,12 +5,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { ComponentProps } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { id } from "react-day-picker/locale";
 import { buttonVariants } from "./button";
 
-export type CalendarProps = ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 export function Calendar({
   showOutsideDays = true,

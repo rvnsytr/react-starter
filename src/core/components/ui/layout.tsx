@@ -1,7 +1,7 @@
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { LayoutMode, layoutModeMeta, useLayout } from "@/core/providers/layout";
 import { cn } from "@/core/utils/helpers";
-import { ComponentProps, useEffect, useEffectEvent } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { Button, ButtonProps } from "./button";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";
 import { Kbd, KbdGroup } from "./kbd";
@@ -17,7 +17,7 @@ export function LayoutToggle({
   disabled,
   ...props
 }: Omit<ButtonProps, "children"> &
-  Pick<ComponentProps<typeof TooltipContent>, "align">) {
+  Pick<React.ComponentProps<typeof TooltipContent>, "align">) {
   const isMobile = useIsMobile();
   const { layout, setLayout } = useLayout();
 

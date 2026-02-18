@@ -3,15 +3,7 @@ import { useDebounce } from "@/core/hooks/use-debounce";
 import { cn } from "@/core/utils/helpers";
 import { Command as CommandPrimitive } from "cmdk";
 import { CheckIcon, LucideIcon, XIcon } from "lucide-react";
-import {
-  ComponentPropsWithoutRef,
-  KeyboardEvent,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "./badge";
 import {
   Command,
@@ -48,9 +40,9 @@ type MultiSelectProps = {
   /** manually controlled options */
   options?: MultiSelectConfig[];
   /** Loading component. */
-  loadingIndicator?: ReactNode;
+  loadingIndicator?: React.ReactNode;
   /** Empty component. */
-  emptyIndicator?: ReactNode;
+  emptyIndicator?: React.ReactNode;
   /**
    * Only work with `onSearch` prop. Trigger search when `onFocus`.
    * For example, when user click on the input, it will trigger the search to get initial options.
@@ -86,9 +78,9 @@ type MultiSelectProps = {
   hideClearAllButton?: boolean;
   /** Props of `Command` and `Input` */
   otherProps?: {
-    command?: ComponentPropsWithoutRef<typeof Command>;
+    command?: React.ComponentPropsWithoutRef<typeof Command>;
     input?: Omit<
-      ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
+      React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
       "value" | "placeholder" | "disabled"
     >;
   };
@@ -219,7 +211,7 @@ export function MultiSelect({
   );
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
       const input = inputRef.current;
       if (input) {
         if (e.key === "Delete" || e.key === "Backspace") {

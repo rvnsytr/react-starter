@@ -1,9 +1,6 @@
 import { FrameIcon, LucideIcon, MinimizeIcon, ScanIcon } from "lucide-react";
 import {
   createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
   useContext,
   useEffect,
   useEffectEvent,
@@ -27,12 +24,12 @@ export const layoutModeMeta: Record<
 
 type LayoutContextType = {
   layout: LayoutMode;
-  setLayout: Dispatch<SetStateAction<LayoutMode>>;
+  setLayout: React.Dispatch<React.SetStateAction<LayoutMode>>;
 };
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
-export function LayoutProvider({ children }: { children: ReactNode }) {
+export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const [layout, setLayout] = useState<LayoutMode>("unset");
 
   const onMount = useEffectEvent(() => {

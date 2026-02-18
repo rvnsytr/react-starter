@@ -15,7 +15,7 @@ import {
   RotateCcwIcon,
   Settings2Icon,
 } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -64,11 +64,11 @@ export type ImportDialogProps<T, K extends string> = {
   onError?: (error: unknown) => string | undefined;
 
   title?: string;
-  description?: ReactNode;
+  description?: React.ReactNode;
   className?: string;
 
-  renderTrigger?: ReactNode;
-  children?: ReactNode;
+  renderTrigger?: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 const importDialogSchema = z.object({

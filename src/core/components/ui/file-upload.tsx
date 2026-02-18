@@ -5,13 +5,7 @@ import { toMegabytes } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRightIcon, DotIcon, XIcon } from "lucide-react";
-import {
-  DragEvent,
-  KeyboardEvent,
-  MouseEvent,
-  useCallback,
-  useRef,
-} from "react";
+import { useCallback, useRef } from "react";
 import { Button } from "./button";
 import {
   Empty,
@@ -77,29 +71,35 @@ export function FileUpload({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resetFiles = useCallback(() => onChange([]), []);
 
-  const handleOnClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+  const handleOnClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     inputRef.current?.click();
   }, []);
 
-  const handleOnKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      inputRef.current?.click();
-    }
-  }, []);
+  const handleOnKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        inputRef.current?.click();
+      }
+    },
+    [],
+  );
 
-  const handleOnDrop = useCallback((e: DragEvent<HTMLElement>) => {
+  const handleOnDrop = useCallback((e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     changeHandler(e.dataTransfer.files);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleDragEnterAndOver = useCallback((e: DragEvent<HTMLElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
+  const handleDragEnterAndOver = useCallback(
+    (e: React.DragEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    [],
+  );
 
   return (
     <div
