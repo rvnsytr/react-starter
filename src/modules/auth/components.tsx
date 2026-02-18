@@ -1,4 +1,4 @@
-import { apiFetcher } from "@/core/api";
+import { dataFetcher } from "@/core/api";
 import { authClient } from "@/core/auth";
 import {
   AlertDialog,
@@ -98,7 +98,7 @@ import {
 import { appMeta } from "@/core/constants/app";
 import { fileMeta } from "@/core/constants/file";
 import { messages } from "@/core/constants/messages";
-import { filterFn } from "@/core/filter";
+import { filterFn } from "@/core/data-filter";
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { sharedSchemas } from "@/core/schema";
 import { removeFiles, uploadFiles } from "@/core/storage";
@@ -1010,22 +1010,15 @@ const getUserColumns = (
 
 export function UserDataTable({ ...props }: DataQueryStateProps) {
   const { user } = useAuth();
+  const key = "/auth/admin/list-users";
   return (
     <DataTable
       mode="manual"
       query={{
-        key: "/auth/list-users",
+        key,
         fetcher: async (state) => {
-          const { data, ...rest } = await apiFetcher(
-            "/auth/admin/list-users",
-            z.array(userSchema),
-            {
-              method: "POST",
-              body: JSON.stringify(state),
-              headers: { "Content-Type": "application/json" },
-            },
-          );
-
+          const schema = userSchema.array();
+          const { data, ...rest } = await dataFetcher(key, schema, state);
           return { ...rest, data: data as AuthSession["user"][] };
         },
       }}

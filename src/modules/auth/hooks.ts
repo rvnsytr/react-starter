@@ -48,4 +48,4 @@ export const mutateListSessions = () => mutate("/auth/list-sessions");
 export const mutateListUserSessions = (userId: string) =>
   mutate(`/auth/list-user-sessions?id=${userId}`);
 
-export const mutateListUsers = () => mutateData("/auth/list-users");
+export const mutateListUsers = () => mutateData("/auth/admin/list-users");

@@ -1,14 +1,6 @@
 import z from "zod";
+import { DataState } from "./components/ui/data-controller";
 import { apiConfig } from "./constants/app";
-
-export type FetcherConfig = RequestInit & { safeFetch?: boolean };
-
-export type ApiResponse<T> = z.infer<typeof apiResponseSchema> & {
-  data: T;
-  error?: unknown;
-};
-
-export type ApiFetcherConfig = Omit<FetcherConfig, "credentials">;
 
 export const apiResponseSchema = z.object({
   code: z.number(),
@@ -21,6 +13,14 @@ export const apiResponseSchema = z.object({
     )
     .optional(),
 });
+
+export type ApiResponse<T> = z.infer<typeof apiResponseSchema> & {
+  data: T;
+  error?: unknown;
+};
+
+export type FetcherConfig = RequestInit & { safeFetch?: boolean };
+export type ApiFetcherConfig = Omit<FetcherConfig, "credentials">;
 
 export async function fetcher<T>(
   url: string,
@@ -49,4 +49,18 @@ export async function apiFetcher<T>(
     apiResponseSchema.extend({ data: schema }),
     { credentials: "include", ...config },
   );
+}
+
+export async function dataFetcher<T>(
+  key: string,
+  schema: z.ZodType<T>,
+  state: DataState,
+  config?: Omit<ApiFetcherConfig, "method" | "body" | "headers">,
+) {
+  return apiFetcher(key, schema, {
+    ...config,
+    method: "POST",
+    body: JSON.stringify(state),
+    headers: { "Content-Type": "application/json" },
+  });
 }
