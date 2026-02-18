@@ -52,13 +52,13 @@ export const userStatusMeta: Record<
     displayName: "Terverifikasi",
     description: "Pengguna terverifikasi dan dapat mengakses sistem.",
     icon: CircleCheckIcon,
-    color: "var(--success)",
+    color: "var(--primary)",
   },
   active: {
     displayName: "Aktif",
     description: "Pengguna telah melakukan aktivasi dan menunggu verifikasi.",
     icon: CircleDotIcon,
-    color: "var(--primary)",
+    color: "var(--success)",
   },
   nonactive: {
     displayName: "Nonaktif",

@@ -1,5 +1,3 @@
-"use client";
-
 import { messages } from "@/core/constants/messages";
 import {
   DataFilterOption,

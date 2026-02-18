@@ -352,8 +352,8 @@ function Reset<TData>({
         table.reset();
 
         table.resetPagination();
-        // table.resetPageIndex();
-        // table.resetPageSize();
+        table.resetPageIndex();
+        table.resetPageSize();
 
         table.resetColumnOrder();
         table.resetColumnSizing();
@@ -364,7 +364,7 @@ function Reset<TData>({
         table.resetRowPinning();
         table.resetRowSelection();
 
-        // table.resetGlobalFilter();
+        table.resetGlobalFilter();
         table.setGlobalFilter("");
 
         table.resetSorting();

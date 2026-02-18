@@ -51,7 +51,7 @@ function Timeline({
       <div
         data-slot="timeline"
         className={cn(
-          "group/timeline flex data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-row data-[orientation=vertical]:flex-col",
+          "group/timeline flex h-fit data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-row data-[orientation=vertical]:flex-col",
           className,
         )}
         data-orientation={orientation}
@@ -68,7 +68,10 @@ function TimelineContent({
   return (
     <div
       data-slot="timeline-content"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn(
+        "text-muted-foreground [&_span]:text-foreground text-sm [&_span]:font-medium",
+        className,
+      )}
       {...props}
     />
   );

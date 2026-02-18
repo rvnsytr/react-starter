@@ -1010,14 +1010,16 @@ const getUserColumns = (
 
 export function UserDataTable({ ...props }: DataQueryStateProps) {
   const { user } = useAuth();
+
   const key = "/auth/admin/list-users";
+  const schema = userSchema.array();
+
   return (
     <DataTable
       mode="manual"
       query={{
         key,
         fetcher: async (state) => {
-          const schema = userSchema.array();
           const { data, ...rest } = await dataFetcher(key, schema, state);
           return { ...rest, data: data as AuthSession["user"][] };
         },

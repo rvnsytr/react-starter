@@ -953,19 +953,15 @@ export function isFilterableColumn<TData>(column: Column<TData>) {
   if (!column.accessorFn || !column.columnDef.meta) return false;
 
   if (!column.accessorFn)
-    warn(`Column "${column.id}" ignored - no accessor function`);
+    console.warn(`Column "${column.id}" ignored - no accessor function`);
 
   if (!column.getCanFilter())
-    warn(`Column "${column.id}" ignored - not filterable`);
+    console.warn(`Column "${column.id}" ignored - not filterable`);
 
   if (!hasFilterFn)
-    warn(
+    console.warn(
       `Column "${column.id}" ignored - no filter function. use the provided filterFn() helper function`,
     );
 
   return false;
-}
-
-function warn(...messages: string[]) {
-  console.warn("[◐] [filters]", ...messages);
 }
