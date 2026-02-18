@@ -2,8 +2,8 @@
 
 import { messages } from "@/core/constants/messages";
 import {
-  ColumnDataType,
-  ColumnOption,
+  DataFilterOption,
+  DataFilterType,
   ElementType,
   FilterModel,
   createNumberRange,
@@ -18,10 +18,9 @@ import {
   numberFilterDetails,
   optionFilterDetails,
   textFilterDetails,
-} from "@/core/filter";
+} from "@/core/data-filter";
 import { useDebounce } from "@/core/hooks/use-debounce";
-import { useIsMobile } from "@/core/hooks/use-is-mobile";
-import { formatDate } from "@/core/utils/date";
+import { formatDate, formatDateRange } from "@/core/utils/date";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
 import { Column, ColumnMeta, RowData, Table } from "@tanstack/react-table";
@@ -60,36 +59,36 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Slider } from "./slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 
-export function DataTableFilter<TData>({ table }: { table: Table<TData> }) {
-  const isMobile = useIsMobile();
+// export function DataTableFilter<TData>({ table }: { table: Table<TData> }) {
+//   const isMobile = useIsMobile();
 
-  if (isMobile) {
-    return (
-      <div className="flex w-full items-start justify-between gap-2">
-        <div className="flex gap-1">
-          <FilterSelector table={table} />
-          <FilterActions table={table} />
-        </div>
-        <ActiveFiltersMobileContainer>
-          <ActiveFilters table={table} />
-        </ActiveFiltersMobileContainer>
-      </div>
-    );
-  }
+//   if (isMobile) {
+//     return (
+//       <div className="flex w-full items-start justify-between gap-2">
+//         <div className="flex gap-1">
+//           <FilterSelector table={table} />
+//           <ClearFilters table={table} />
+//         </div>
+//         <ActiveFiltersContainer>
+//           <ActiveFilters table={table} />
+//         </ActiveFiltersContainer>
+//       </div>
+//     );
+//   }
 
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex w-full flex-1 items-center gap-2 md:flex-wrap">
-        <FilterSelector table={table} />
-        <ActiveFilters table={table} />
-      </div>
+//   return (
+//     <div className="flex items-center gap-2">
+//       <div className="flex w-full flex-1 items-center gap-2 md:flex-wrap">
+//         <FilterSelector table={table} />
+//         <ActiveFilters table={table} />
+//       </div>
 
-      <FilterActions table={table} />
-    </div>
-  );
-}
+//       <ClearFilters table={table} />
+//     </div>
+//   );
+// }
 
-export function ActiveFiltersMobileContainer({
+export function ActiveFiltersContainer({
   className,
   children,
 }: {
@@ -154,7 +153,7 @@ export function ActiveFiltersMobileContainer({
   );
 }
 
-export function FilterActions<TData>({
+export function ClearFilters<TData>({
   table,
   className,
 }: {
@@ -345,7 +344,7 @@ export function ActiveFilters<TData>({ table }: { table: Table<TData> }) {
 }
 
 // Generic render function for a filter with type-safe value
-function renderFilter<TData, T extends ColumnDataType>(
+function renderFilter<TData, T extends DataFilterType>(
   filter: { id: string; value: FilterModel<T, TData> },
   column: Column<TData, unknown>,
   meta: ColumnMeta<TData, unknown> & { type: T },
@@ -394,7 +393,7 @@ export function FilterSubject<TData>({
 // Renders the filter operator display and menu for a given column filter
 // The filter operator display is the label and icon for the filter operator
 // The filter operator menu is the dropdown menu for the filter operator
-export function FilterOperator<TData, T extends ColumnDataType>({
+export function FilterOperator<TData, T extends DataFilterType>({
   column,
   columnMeta,
   filter,
@@ -427,7 +426,7 @@ export function FilterOperator<TData, T extends ColumnDataType>({
   );
 }
 
-export function FilterOperatorDisplay<TData, T extends ColumnDataType>({
+export function FilterOperatorDisplay<TData, T extends DataFilterType>({
   filter,
   filterType,
 }: {
@@ -751,7 +750,7 @@ export function FilterValueOptionDisplay<TData, TValue>({
   columnMeta,
   table,
 }: FilterValueDisplayProps<TData, TValue>) {
-  let options: ColumnOption[];
+  let options: DataFilterOption[];
   const columnVals = table
     .getCoreRowModel()
     .rows.flatMap((r) => r.getValue<TValue>(id))
@@ -770,12 +769,12 @@ export function FilterValueOptionDisplay<TData, TValue>({
     );
   }
 
-  // Make sure the column data conforms to ColumnOption type
+  // Make sure the column data conforms to DataFilterOption type
   else if (isColumnOptionArray(uniqueVals)) options = uniqueVals;
   // Invalid configuration
   else
     throw new Error(
-      `[data-table-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to ColumnOption type`,
+      `[data-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to DataFilterOption type`,
     );
 
   const filter = column.getFilterValue() as FilterModel<"option", TData>;
@@ -823,7 +822,7 @@ export function FilterValueMultiOptionDisplay<TData, TValue>({
   columnMeta,
   table,
 }: FilterValueDisplayProps<TData, TValue>) {
-  let options: ColumnOption[];
+  let options: DataFilterOption[];
   const columnVals = table
     .getCoreRowModel()
     .rows.flatMap((r) => r.getValue<TValue>(id))
@@ -842,12 +841,12 @@ export function FilterValueMultiOptionDisplay<TData, TValue>({
     );
   }
 
-  // Make sure the column data conforms to ColumnOption type
+  // Make sure the column data conforms to DataFilterOption type
   else if (isColumnOptionArray(uniqueVals)) options = uniqueVals;
   // Invalid configuration
   else {
     throw new Error(
-      `[data-table-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to ColumnOption type`,
+      `[data-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to DataFilterOption type`,
     );
   }
 
@@ -887,19 +886,6 @@ export function FilterValueMultiOptionDisplay<TData, TValue>({
       </span>
     </div>
   );
-}
-
-function formatDateRange(start: Date, end: Date) {
-  const sameMonth = start.getMonth() === end.getMonth();
-  const sameYear = start.getFullYear() === end.getFullYear();
-
-  if (sameMonth && sameYear)
-    return `${formatDate(start, "MMM d")} - ${formatDate(end, "d, yyyy")}`;
-
-  if (sameYear)
-    return `${formatDate(start, "MMM d")} - ${formatDate(end, "MMM d, yyyy")}`;
-
-  return `${formatDate(start, "MMM d, yyyy")} - ${formatDate(end, "MMM d, yyyy")}`;
 }
 
 export function FilterValueDateDisplay<TData, TValue>({
@@ -1053,7 +1039,7 @@ export function FilterValueOptionController<TData, TValue>({
     ? (column.getFilterValue() as FilterModel<"option", TData>)
     : undefined;
 
-  let options: ColumnOption[];
+  let options: DataFilterOption[];
   const columnVals = table
     .getCoreRowModel()
     .rows.flatMap((r) => r.getValue<TValue>(id))
@@ -1072,26 +1058,29 @@ export function FilterValueOptionController<TData, TValue>({
     );
   }
 
-  // Make sure the column data conforms to ColumnOption type
+  // Make sure the column data conforms to DataFilterOption type
   else if (isColumnOptionArray(uniqueVals)) options = uniqueVals;
   // Invalid configuration
   else {
     throw new Error(
-      `[data-table-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to ColumnOption type`,
+      `[data-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to DataFilterOption type`,
     );
   }
 
-  const optionsCount: Record<ColumnOption["value"], number> = columnVals.reduce(
-    (acc, curr) => {
-      const { value } = columnMeta.transformOptionFn
-        ? columnMeta.transformOptionFn(curr as ElementType<NonNullable<TValue>>)
-        : { value: curr as string };
+  const optionsCount: Record<DataFilterOption["value"], number> =
+    columnVals.reduce(
+      (acc, curr) => {
+        const { value } = columnMeta.transformOptionFn
+          ? columnMeta.transformOptionFn(
+              curr as ElementType<NonNullable<TValue>>,
+            )
+          : { value: curr as string };
 
-      acc[value] = (acc[value] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<ColumnOption["value"], number>,
-  );
+        acc[value] = (acc[value] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<DataFilterOption["value"], number>,
+    );
 
   const handleOptionSelect = (value: string, check: boolean) => {
     if (check)
@@ -1188,7 +1177,7 @@ export function FilterValueMultiOptionController<
     | FilterModel<"multiOption", TData>
     | undefined;
 
-  let options: ColumnOption[];
+  let options: DataFilterOption[];
   const columnVals = table
     .getCoreRowModel()
     .rows.flatMap((r) => r.getValue<TValue>(id))
@@ -1206,28 +1195,29 @@ export function FilterValueMultiOptionController<
     );
   }
 
-  // Make sure the column data conforms to ColumnOption type
+  // Make sure the column data conforms to DataFilterOption type
   else if (isColumnOptionArray(uniqueVals)) options = uniqueVals;
   // Invalid configuration
   else {
     throw new Error(
-      `[data-table-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to ColumnOption type`,
+      `[data-filter] [${id}] Either provide static options, a transformOptionFn, or ensure the column data conforms to DataFilterOption type`,
     );
   }
 
-  const optionsCount: Record<ColumnOption["value"], number> = columnVals.reduce(
-    (acc, curr) => {
-      const value = columnMeta.options
-        ? (curr as string)
-        : columnMeta.transformOptionFn!(
-            curr as ElementType<NonNullable<TValue>>,
-          ).value;
+  const optionsCount: Record<DataFilterOption["value"], number> =
+    columnVals.reduce(
+      (acc, curr) => {
+        const value = columnMeta.options
+          ? (curr as string)
+          : columnMeta.transformOptionFn!(
+              curr as ElementType<NonNullable<TValue>>,
+            ).value;
 
-      acc[value] = (acc[value] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<ColumnOption["value"], number>,
-  );
+        acc[value] = (acc[value] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<DataFilterOption["value"], number>,
+    );
 
   // Handles the selection/deselection of an option
   const handleOptionSelect = (value: string, check: boolean) => {

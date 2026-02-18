@@ -28,19 +28,19 @@ declare module "@tanstack/react-table" {
     icon: LucideIcon;
 
     /* The data type of the column. */
-    type: ColumnDataType;
+    type: DataFilterType;
 
     /* An optional list of options for the column. */
     /* This is used for columns with type 'option' or 'multiOption'. */
     /* If the options are known ahead of time, they can be defined here. */
     /* Otherwise, they will be dynamically generated based on the data. */
-    options?: ColumnOption[];
+    options?: DataFilterOption[];
 
     /* An optional function to transform columns with type 'option' or 'multiOption'. */
-    /* This is used to convert each raw option into a ColumnOption. */
+    /* This is used to convert each raw option into a DataFilterOption. */
     transformOptionFn?: (
       value: ElementType<NonNullable<TValue>>,
-    ) => ColumnOption;
+    ) => DataFilterOption;
 
     /* An optional "soft" max for the number range slider. */
     /* This is used for columns with type 'number'. */
@@ -66,7 +66,7 @@ export const defineMeta = <
   // : TAccessor extends DeepKeys<TData>
   // ? DeepValue<TData, TAccessor>
   // : never,
-  TType extends ColumnDataType,
+  TType extends DataFilterType,
 >(
   _accessor: TAccessor,
   meta: Omit<ColumnMeta<TData, TVal>, "type"> & { type: TType },
@@ -75,7 +75,7 @@ export const defineMeta = <
 /*
  * Represents a possible value for a column property of type 'option' or 'multiOption'.
  */
-export type ColumnOption = {
+export type DataFilterOption = {
   /* The label to display for the option. */
   label: string;
   /* The internal value of the option. */
@@ -89,7 +89,7 @@ export type ColumnOption = {
 /*
  * Represents the data type of a column.
  */
-export type ColumnDataType =
+export type DataFilterType =
   /* The column value is a string that should be searchable. */
   | "text"
   | "number"
@@ -186,7 +186,7 @@ export type FilterTypes = {
  * - Values: An array of values to be used for the filter.
  *
  */
-export type FilterModel<T extends ColumnDataType, TData> = {
+export type FilterModel<T extends DataFilterType, TData> = {
   operator: FilterOperatorsMap[T];
   values: FilterTypes[T][];
   columnMeta: Column<TData>["columnDef"]["meta"];
@@ -195,11 +195,11 @@ export type FilterModel<T extends ColumnDataType, TData> = {
 /*
  * FilterDetails is a type that represents the details of all the filter operators for a specific column data type.
  */
-export type FilterDetails<T extends ColumnDataType> = {
+export type FilterDetails<T extends DataFilterType> = {
   [key in FilterOperatorsMap[T]]: FilterOperatorDetails<key, T>;
 };
 
-type FilterOperatorDetailsBase<OperatorValue, T extends ColumnDataType> = {
+type FilterOperatorDetailsBase<OperatorValue, T extends DataFilterType> = {
   /* The operator value. Usually the string representation of the operator. */
   value: OperatorValue;
   /* The label for the operator, to show in the UI. */
@@ -228,7 +228,7 @@ type FilterOperatorDetailsBase<OperatorValue, T extends ColumnDataType> = {
  */
 export type FilterOperatorDetails<
   OperatorValue,
-  T extends ColumnDataType,
+  T extends DataFilterType,
 > = FilterOperatorDetailsBase<OperatorValue, T> &
   (
     | { singularOf?: never; pluralOf?: never }
@@ -562,7 +562,7 @@ export const numberFilterDetails = {
 
 /* Maps column data types to their respective filter operator details */
 type FilterTypeOperatorDetails = {
-  [key in ColumnDataType]: FilterDetails<key>;
+  [key in DataFilterType]: FilterDetails<key>;
 };
 
 export const filterTypeOperatorDetails: FilterTypeOperatorDetails = {
@@ -584,7 +584,7 @@ export const filterTypeOperatorDetails: FilterTypeOperatorDetails = {
  * new operator would be 'is any of'.
  *
  */
-export function determineNewOperator<T extends ColumnDataType>(
+export function determineNewOperator<T extends DataFilterType>(
   type: T,
   oldVals: FilterTypes[T][],
   nextVals: FilterTypes[T][],
@@ -630,7 +630,7 @@ export function determineNewOperator<T extends ColumnDataType>(
  * Returns a filter function for a given column data type.
  * This function is used to determine the appropriate filter function to use based on the column data type.
  */
-export function filterFn(dataType: ColumnDataType) {
+export function filterFn(dataType: DataFilterType) {
   switch (dataType) {
     case "option":
       return optionFilterFn;
@@ -685,7 +685,7 @@ export function __optionFilterFn<TData>(
   }
 }
 
-export function isColumnOption(value: unknown): value is ColumnOption {
+export function isColumnOption(value: unknown): value is DataFilterOption {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -694,7 +694,9 @@ export function isColumnOption(value: unknown): value is ColumnOption {
   );
 }
 
-export function isColumnOptionArray(value: unknown): value is ColumnOption[] {
+export function isColumnOptionArray(
+  value: unknown,
+): value is DataFilterOption[] {
   return Array.isArray(value) && value.every(isColumnOption);
 }
 

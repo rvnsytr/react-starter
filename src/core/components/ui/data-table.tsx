@@ -3,30 +3,6 @@ import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
 import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
-import { ButtonGroup } from "./button-group";
-import {
-  DataController,
-  DataControllerProps,
-  dataSizes,
-  defaultDataSize,
-} from "./data-controller";
-import {
-  ActiveFilters,
-  ActiveFiltersMobileContainer,
-  FilterActions,
-  FilterSelector,
-} from "./data-table-filter";
-import { Separator } from "./separator";
-import { Skeleton } from "./skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./table";
-
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -38,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Button } from "./button";
+import { ButtonGroup } from "./button-group";
 import { Checkbox } from "./checkbox";
 import {
   Command,
@@ -46,6 +23,18 @@ import {
   CommandItem,
   CommandList,
 } from "./command";
+import {
+  DataController,
+  DataControllerProps,
+  dataSizes,
+  defaultDataSize,
+} from "./data-controller";
+import {
+  ActiveFilters,
+  ActiveFiltersContainer,
+  ClearFilters,
+  FilterSelector,
+} from "./data-filter";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
 import { Kbd } from "./kbd";
 import { Label } from "./label";
@@ -57,6 +46,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
+import { Separator } from "./separator";
+import { Skeleton } from "./skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
 
 export type DataTableProps<TData> = {
   caption?: string;
@@ -145,13 +144,11 @@ export function DataTable<TData>({
             </div>
 
             {table.getState().columnFilters.length > 0 && (
-              <ActiveFiltersMobileContainer
-                className={classNames?.filterContainer}
-              >
-                <FilterActions table={table} />
+              <ActiveFiltersContainer className={classNames?.filterContainer}>
+                <ClearFilters table={table} />
                 <Separator orientation="vertical" className="h-4" />
                 <ActiveFilters table={table} />
-              </ActiveFiltersMobileContainer>
+              </ActiveFiltersContainer>
             )}
 
             <Table

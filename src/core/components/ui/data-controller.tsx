@@ -1,7 +1,7 @@
 // * Headless state controller for managing tabular data.
 
 import { ApiResponse } from "@/core/api";
-import { allFilterOperators } from "@/core/filter";
+import { allFilterOperators } from "@/core/data-filter";
 import { useDebounce } from "@/core/hooks/use-debounce";
 import {
   ColumnDef as ColumnDefType,
