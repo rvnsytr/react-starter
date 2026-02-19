@@ -915,7 +915,7 @@ export function UserAvatar({
 const createUserColumn = createColumnHelper<AuthSession["user"]>();
 const getUserColumns = (
   currentUserId: string,
-  result?: { isLoading?: boolean; count?: Record<string, number> },
+  result?: { isLoading: boolean; count?: Record<string, number> },
 ) => [
   createUserColumn.display({
     id: "select",

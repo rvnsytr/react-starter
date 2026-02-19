@@ -36,7 +36,10 @@ import { allEventLogType, EventLog, getEventLogMeta } from "./constants";
 import { eventLogSchema } from "./schema";
 
 const createEventLogColumn = createColumnHelper<EventLog>();
-const getEventLogColumns = (count?: Record<string, number>) => [
+const getEventLogColumns = (result?: {
+  isLoading: boolean;
+  count?: Record<string, number>;
+}) => [
   // createEventLogColumn.display({
   //   id: "select",
   //   header: (c) => <ColumnHeaderCheckbox table={c.table} />,
@@ -52,7 +55,11 @@ const getEventLogColumns = (count?: Record<string, number>) => [
   }),
   createEventLogColumn.accessor((ac) => ac.type, {
     id: "type",
-    header: (c) => <ColumnHeader column={c.column}>Tipe Event</ColumnHeader>,
+    header: (c) => (
+      <ColumnHeader column={c.column} disabled={result?.isLoading}>
+        Tipe Event
+      </ColumnHeader>
+    ),
     // cell: (c) => <UserRoleBadge value={c.cell.getValue()} />,
     cell: (c) => c.cell.getValue(),
     filterFn: filterFn("option"),
@@ -62,7 +69,8 @@ const getEventLogColumns = (count?: Record<string, number>) => [
       icon: RouteIcon,
       options: allEventLogType.map((value) => {
         const { displayName, icon } = getEventLogMeta(value);
-        return { value, label: displayName, icon, count: count?.[value] };
+        const count = result?.count?.[value];
+        return { value, label: displayName, icon, count };
       }),
     },
   }),
@@ -100,7 +108,7 @@ export function EventLogTimeline({
           key,
           fetcher: async (state) => await dataFetcher(key, schema, state),
         }}
-        columns={(res) => getEventLogColumns(res?.count)}
+        columns={(result) => getEventLogColumns(result)}
         render={({ result, table }) => {
           const { data: res, isLoading } = result;
 
