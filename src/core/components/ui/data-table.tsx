@@ -3,8 +3,6 @@ import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
 import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
-import { RotateCcwSquareIcon } from "lucide-react";
-import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
 import {
   DataController,
@@ -19,6 +17,7 @@ import {
   ActiveFiltersContainer,
   ClearFilters,
   FilterSelector,
+  ResetFilters,
 } from "./data-filter";
 import { Label } from "./label";
 import { Separator } from "./separator";
@@ -68,11 +67,12 @@ export function DataTable<TData>({
   return (
     <DataController
       {...props}
-      render={({ result, table, columns, reset }) => {
+      render={({ result, table, columns }) => {
         const { data, isLoading } = result;
-        const state = table.getState();
 
+        const state = table.getState();
         const pageCount = table.getPageCount();
+
         const selectedRowsCount =
           Object.keys(state.rowSelection).length ??
           table.getFilteredSelectedRowModel().rows.length;
@@ -96,11 +96,12 @@ export function DataTable<TData>({
                 )}
               >
                 <ButtonGroup className="w-full lg:w-fit [&_button]:grow">
-                  <FilterSelector table={table} />
+                  <FilterSelector table={table} disabled={isLoading} />
 
                   <DataControllerVisibility
                     table={table}
                     align={isMobile ? "start" : "center"}
+                    disabled={isLoading}
                   />
                 </ButtonGroup>
 
@@ -113,18 +114,17 @@ export function DataTable<TData>({
               </div>
 
               <div className="flex gap-x-2 *:grow">
-                <Button variant="outline" onClick={() => reset()}>
-                  <RotateCcwSquareIcon /> {messages.actions.reset}
-                </Button>
+                <ResetFilters table={table} disabled={isLoading} />
 
                 <DataControllerSearch
                   table={table}
                   placeholder={placeholder?.search}
+                  disabled={isLoading}
                 />
               </div>
             </div>
 
-            {table.getState().columnFilters.length > 0 && (
+            {state.columnFilters.length > 0 && (
               <ActiveFiltersContainer className={classNames?.filterContainer}>
                 <ClearFilters table={table} />
                 <Separator orientation="vertical" className="h-4" />
@@ -231,7 +231,7 @@ export function DataTable<TData>({
             >
               <div className="order-4 flex shrink-0 items-center gap-x-2 lg:order-1">
                 <Label>Baris per halaman</Label>
-                <DataControllerPageSize table={table} />
+                <DataControllerPageSize table={table} disabled={isLoading} />
               </div>
 
               <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
@@ -254,6 +254,7 @@ export function DataTable<TData>({
                 table={table}
                 size={isMobile ? "icon" : "icon-sm"}
                 className="order-3 shrink-0 lg:order-5"
+                disabled={isLoading}
               />
             </div>
           </div>

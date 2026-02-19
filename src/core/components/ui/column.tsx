@@ -20,9 +20,11 @@ import {
 export function ColumnHeader<TData, TValue>({
   column,
   className,
+  disabled = false,
   children,
 }: Pick<HeaderContext<TData, TValue>, "column"> & {
   className?: string;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   const columnPinned = column.getIsPinned();
@@ -43,6 +45,7 @@ export function ColumnHeader<TData, TValue>({
             size="icon-xs"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            disabled={disabled}
           >
             <ArrowUpDownIcon />
           </Button>
@@ -51,7 +54,7 @@ export function ColumnHeader<TData, TValue>({
         {column.getCanPin() && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon-xs" variant="ghost">
+              <Button size="icon-xs" variant="ghost" disabled={disabled}>
                 <ColumnPinIcon />
               </Button>
             </DropdownMenuTrigger>

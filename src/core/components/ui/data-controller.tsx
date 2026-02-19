@@ -34,7 +34,7 @@ import {
   SearchIcon,
   ViewIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR, { mutate, SWRConfiguration, SWRResponse } from "swr";
 import z from "zod";
 import { Button, ButtonProps } from "./button";
@@ -112,13 +112,12 @@ export type DataControllerProps<TData> = DataQueryStateProps &
 
     columns:
       | ColumnDef<TData>
-      | ((response?: ApiResponse<TData[]>) => ColumnDef<TData>);
+      | ((result?: SWRResponse<ApiResponse<TData[]>>) => ColumnDef<TData>);
 
     render: (context: {
       result: SWRResponse<ApiResponse<TData[]>>;
       table: TableType<TData>;
       columns: ColumnDef<TData>;
-      reset: () => void;
     }) => React.ReactNode;
   };
 
@@ -343,26 +342,21 @@ export function DataController<TData>({
 
   // #endregion
 
-  const { data, isLoading, error, ...rest } = useSWR(
+  const result = useSWR(
     isManual ? { key: query.key, ...dataState } : { key: query.key },
     async () => await query.fetcher(dataState),
     query.config,
   );
 
   const resolvedColumns = useMemo(
-    () =>
-      typeof columns === "function"
-        ? data?.success
-          ? columns(data)
-          : columns()
-        : columns,
-    [data, columns],
+    () => (typeof columns === "function" ? columns(result) : columns),
+    [result, columns],
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     columns: resolvedColumns,
-    data: data?.success ? data.data : [],
+    data: result.data?.success ? result.data.data : [],
 
     state: {
       globalFilter,
@@ -405,69 +399,37 @@ export function DataController<TData>({
 
     // * Pagination
     manualPagination: isManual,
-    rowCount: data?.count?.total ?? 0,
+    rowCount: result.data?.count?.total ?? 0,
     onPaginationChange: setPagination,
     getPaginationRowModel: !isManual ? getPaginationRowModel() : undefined,
   });
 
-  const reset = useCallback(() => {
-    table.reset();
+  if (result.error) return <ErrorFallback error={result.error} />;
+  if (!result.isLoading && !result.data?.success)
+    return <ErrorFallback error={result.data?.error} />;
 
-    table.resetPagination();
-    table.resetPageIndex();
-    table.resetPageSize();
-
-    table.resetColumnOrder();
-    table.resetColumnSizing();
-    table.resetColumnVisibility();
-    table.resetColumnPinning();
-    table.resetColumnFilters();
-
-    table.resetRowPinning();
-    table.resetRowSelection();
-
-    table.resetGlobalFilter();
-    table.setGlobalFilter("");
-
-    table.resetSorting();
-    table.resetGrouping();
-    table.resetExpanded();
-    table.resetHeaderSizeInfo();
-  }, [table]);
-
-  if (error) return <ErrorFallback error={error} />;
-  if (!isLoading && !data?.success)
-    return <ErrorFallback error={data?.error} />;
-
-  return render({
-    result: { data, isLoading, error, ...rest },
-    table,
-    columns: resolvedColumns,
-    reset,
-  });
+  return render({ result, table, columns: resolvedColumns });
 }
 
 export function DataControllerVisibility<TData>({
   table,
   align,
   placeholder,
+  size = "default",
+  variant = "outline",
   className,
-  children,
-}: {
+  ...props
+}: ButtonProps & {
   table: TableType<TData>;
   align?: React.ComponentProps<typeof PopoverContent>["align"];
   placeholder?: { search?: string; empty?: string };
-  className?: string;
-  children?: React.ReactNode;
 }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {children ?? (
-          <Button variant="outline">
-            <ViewIcon /> Lihat
-          </Button>
-        )}
+        <Button size={size} variant={variant} {...props}>
+          <ViewIcon /> {!size?.startsWith("icon") && "Lihat"}
+        </Button>
       </PopoverTrigger>
 
       <PopoverContent
@@ -519,11 +481,11 @@ export function DataControllerSearch<TData>({
   table,
   placeholder = "Cari...",
   className,
-}: {
-  table: TableType<TData>;
-  placeholder?: string;
-  className?: string;
-}) {
+  ...props
+}: Omit<
+  React.ComponentProps<typeof InputGroupInput>,
+  "ref" | "value" | "onChange"
+> & { table: TableType<TData> }) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   useHotkey("/", () => searchRef.current?.focus());
@@ -535,6 +497,7 @@ export function DataControllerSearch<TData>({
         placeholder={placeholder}
         value={table.getState().globalFilter}
         onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+        {...props}
       />
 
       <InputGroupAddon>
@@ -554,7 +517,9 @@ export function DataControllerPaginationNav<TData>({
   size = "icon",
   variant = "outline",
   className,
-}: Pick<ButtonProps, "size" | "variant" | "className"> & {
+  disabled,
+  ...props
+}: Omit<ButtonProps, "onClick"> & {
   table: TableType<TData>;
 }) {
   return (
@@ -563,7 +528,8 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.firstPage()}
-        disabled={!table.getCanPreviousPage()}
+        disabled={disabled ?? !table.getCanPreviousPage()}
+        {...props}
       >
         <ChevronsLeftIcon />
       </Button>
@@ -572,7 +538,8 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
+        disabled={disabled ?? !table.getCanPreviousPage()}
+        {...props}
       >
         <ChevronLeftIcon />
       </Button>
@@ -581,7 +548,8 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
+        disabled={disabled ?? !table.getCanNextPage()}
+        {...props}
       >
         <ChevronRightIcon />
       </Button>
@@ -590,7 +558,8 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.lastPage()}
-        disabled={!table.getCanNextPage()}
+        disabled={disabled ?? !table.getCanNextPage()}
+        {...props}
       >
         <ChevronsRightIcon />
       </Button>
@@ -600,7 +569,9 @@ export function DataControllerPaginationNav<TData>({
 
 export function DataControllerPageSize<TData>({
   table,
-}: {
+  size = "sm",
+  ...props
+}: React.ComponentProps<typeof SelectTrigger> & {
   table: TableType<TData>;
 }) {
   return (
@@ -608,7 +579,7 @@ export function DataControllerPageSize<TData>({
       value={String(table.getState().pagination.pageSize ?? defaultDataSize)}
       onValueChange={(value) => table.setPageSize(Number(value))}
     >
-      <SelectTrigger size="sm">
+      <SelectTrigger size={size} {...props}>
         <SelectValue />
       </SelectTrigger>
 

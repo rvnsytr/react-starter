@@ -123,6 +123,7 @@ import {
   CookieIcon,
   EllipsisIcon,
   Gamepad2Icon,
+  HistoryIcon,
   InfinityIcon,
   InfoIcon,
   Layers2Icon,
@@ -152,6 +153,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UAParser, UAParserProps } from "ua-parser-js";
 import { z } from "zod";
+import { EventLogTimeline } from "../event-log/components";
 import {
   allRoles,
   allUserStatus,
@@ -913,11 +915,13 @@ export function UserAvatar({
 const createUserColumn = createColumnHelper<AuthSession["user"]>();
 const getUserColumns = (
   currentUserId: string,
-  count?: Record<string, number>,
+  result?: { isLoading?: boolean; count?: Record<string, number> },
 ) => [
   createUserColumn.display({
     id: "select",
-    header: (c) => <ColumnHeaderCheckbox table={c.table} />,
+    header: (c) => (
+      <ColumnHeaderCheckbox table={c.table} disabled={result?.isLoading} />
+    ),
     cell: (c) => <ColumnCellCheckbox row={c.row} />,
     enableHiding: false,
     enableSorting: false,
@@ -930,7 +934,11 @@ const getUserColumns = (
   }),
   createUserColumn.accessor((ac) => ac.name, {
     id: "name",
-    header: ({ column }) => <ColumnHeader column={column}>Nama</ColumnHeader>,
+    header: ({ column }) => (
+      <ColumnHeader column={column} disabled={result?.isLoading}>
+        Nama
+      </ColumnHeader>
+    ),
     cell: (c) => (
       <UserDetailDialog
         data={c.row.original}
@@ -942,7 +950,11 @@ const getUserColumns = (
   }),
   createUserColumn.accessor((ac) => ac.email, {
     id: "email",
-    header: (c) => <ColumnHeader column={c.column}>Alamat Email</ColumnHeader>,
+    header: (c) => (
+      <ColumnHeader column={c.column} disabled={result?.isLoading}>
+        Alamat Email
+      </ColumnHeader>
+    ),
     cell: (c) => (
       <div className="flex items-center gap-x-2">
         <span>{c.cell.getValue()}</span>
@@ -954,7 +966,11 @@ const getUserColumns = (
   }),
   createUserColumn.accessor((ac) => getUserStatus(ac), {
     id: "status",
-    header: (c) => <ColumnHeader column={c.column}>Status</ColumnHeader>,
+    header: (c) => (
+      <ColumnHeader column={c.column} disabled={result?.isLoading}>
+        Status
+      </ColumnHeader>
+    ),
     cell: (c) => <UserStatusBadge value={c.cell.getValue()} />,
     filterFn: filterFn("option"),
     meta: {
@@ -963,13 +979,18 @@ const getUserColumns = (
       icon: CircleDotIcon,
       options: allUserStatus.map((value) => {
         const { displayName, icon } = userStatusMeta[value];
-        return { value, label: displayName, icon, count: count?.[value] };
+        const count = result?.count?.[value];
+        return { value, label: displayName, icon, count };
       }),
     },
   }),
   createUserColumn.accessor((ac) => ac.role, {
     id: "role",
-    header: (c) => <ColumnHeader column={c.column}>Role</ColumnHeader>,
+    header: (c) => (
+      <ColumnHeader column={c.column} disabled={result?.isLoading}>
+        Role
+      </ColumnHeader>
+    ),
     cell: (c) => (
       <UserRoleDropdown
         data={c.row.original}
@@ -983,14 +1004,17 @@ const getUserColumns = (
       icon: ShieldUserIcon,
       options: allRoles.map((value) => {
         const { displayName, icon } = rolesMeta[value];
-        return { value, label: displayName, icon, count: count?.[value] };
+        const count = result?.count?.[value];
+        return { value, label: displayName, icon, count };
       }),
     },
   }),
   createUserColumn.accessor((ac) => ac.updatedAt, {
     id: "updatedAt",
     header: (c) => (
-      <ColumnHeader column={c.column}>Terakhir Diperbarui</ColumnHeader>
+      <ColumnHeader column={c.column} disabled={result?.isLoading}>
+        Terakhir Diperbarui
+      </ColumnHeader>
     ),
     cell: (c) => formatDate(c.cell.getValue(), "PPPp"),
     filterFn: filterFn("date"),
@@ -1002,7 +1026,11 @@ const getUserColumns = (
   }),
   createUserColumn.accessor((c) => c.createdAt, {
     id: "createdAt",
-    header: (c) => <ColumnHeader column={c.column}>Waktu Dibuat</ColumnHeader>,
+    header: (c) => (
+      <ColumnHeader column={c.column} disabled={result?.isLoading}>
+        Waktu Dibuat
+      </ColumnHeader>
+    ),
     cell: (c) => formatDate(c.cell.getValue(), "PPPp"),
     filterFn: filterFn("date"),
     meta: {
@@ -1029,7 +1057,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
           return { ...rest, data: data as AuthSession["user"][] };
         },
       }}
-      columns={(res) => getUserColumns(user.id, res?.count)}
+      columns={(result) => getUserColumns(user.id, result)}
       getRowId={(row) => row.id}
       enableRowSelection={(row) => row.original.id !== user.id}
       placeholder={{ search: "Cari Pengguna..." }}
@@ -1184,6 +1212,10 @@ export function UserDetailDialog({
                 <UserRoundIcon /> Informasi Profil
               </TabsTrigger>
 
+              <TabsTrigger value="activity">
+                <HistoryIcon /> Aktivitas
+              </TabsTrigger>
+
               <TabsTrigger value="sessions">
                 <CookieIcon /> Sesi Terdaftar
               </TabsTrigger>
@@ -1197,6 +1229,10 @@ export function UserDetailDialog({
                   <DetailList data={banInfo} />
                 </>
               )}
+            </TabsContent>
+
+            <TabsContent value="activity">
+              <EventLogTimeline url="/event-log/:id" userId={data.id} />
             </TabsContent>
 
             <TabsContent value="sessions">

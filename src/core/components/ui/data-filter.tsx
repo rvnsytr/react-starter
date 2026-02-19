@@ -28,6 +28,7 @@ import {
   EllipsisIcon,
   FilterIcon,
   FilterXIcon,
+  RotateCcwSquareIcon,
   XIcon,
 } from "lucide-react";
 import {
@@ -40,7 +41,7 @@ import {
   useState,
 } from "react";
 import { DateRange, TZDate } from "react-day-picker";
-import { Button } from "./button";
+import { Button, ButtonProps } from "./button";
 import { ButtonGroup } from "./button-group";
 import { Calendar } from "./calendar";
 import { Checkbox } from "./checkbox";
@@ -153,27 +154,80 @@ export function ActiveFiltersContainer({
 
 export function ClearFilters<TData>({
   table,
-  className,
-}: {
-  table: Table<TData>;
-  className?: string;
-}) {
+  size = "sm",
+  variant = "outline_destructive",
+  ...props
+}: Omit<ButtonProps, "onClick"> & { table: Table<TData> }) {
   return (
     <Button
-      size="sm"
-      variant="outline_destructive"
-      className={className}
+      size={size}
+      variant={variant}
       onClick={() => {
         table.setColumnFilters([]);
         table.setGlobalFilter("");
       }}
+      {...props}
     >
-      <FilterXIcon /> {messages.actions.clear}
+      <FilterXIcon />
+      {!size?.startsWith("icon") && messages.actions.clear}
     </Button>
   );
 }
 
-export function FilterSelector<TData>({ table }: { table: Table<TData> }) {
+export function ResetFilters<TData>({
+  table,
+  size = "default",
+  variant = "outline",
+  ...props
+}: Omit<ButtonProps, "onClick"> & { table: Table<TData> }) {
+  return (
+    <Button
+      size={size}
+      variant={variant}
+      onClick={() => {
+        table.reset();
+
+        table.resetPagination();
+        table.resetPageIndex();
+        table.resetPageSize();
+
+        table.resetColumnOrder();
+        table.resetColumnSizing();
+        table.resetColumnVisibility();
+        table.resetColumnPinning();
+        table.resetColumnFilters();
+
+        table.resetRowPinning();
+        table.resetRowSelection();
+
+        table.resetGlobalFilter();
+        table.setGlobalFilter("");
+
+        table.resetSorting();
+        table.resetGrouping();
+        table.resetExpanded();
+        table.resetHeaderSizeInfo();
+      }}
+      {...props}
+    >
+      <RotateCcwSquareIcon />
+      {!size?.startsWith("icon") && messages.actions.reset}
+    </Button>
+  );
+}
+
+export function FilterSelector<TData>({
+  table,
+  size,
+  variant = "outline",
+  align = "start",
+  placeholder = "Cari...",
+  ...props
+}: ButtonProps & {
+  table: Table<TData>;
+  align?: React.ComponentProps<typeof PopoverContent>["align"];
+  placeholder?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [property, setProperty] = useState<string | undefined>(undefined);
@@ -213,7 +267,7 @@ export function FilterSelector<TData>({ table }: { table: Table<TData> }) {
             value={value}
             onValueChange={setValue}
             ref={inputRef}
-            placeholder="Cari Kolom..."
+            placeholder={placeholder}
           />
           <CommandEmpty>{messages.empty}</CommandEmpty>
           <CommandList className="max-h-fit">
@@ -230,7 +284,7 @@ export function FilterSelector<TData>({ table }: { table: Table<TData> }) {
           </CommandList>
         </Command>
       ),
-    [property, column, columnMeta, value, table, properties],
+    [property, column, columnMeta, table, value, placeholder, properties],
   );
 
   return (
@@ -242,13 +296,14 @@ export function FilterSelector<TData>({ table }: { table: Table<TData> }) {
       }}
     >
       <PopoverTrigger asChild>
-        <Button variant="outline">
-          <FilterIcon /> Filter
+        <Button size={size} variant={variant} {...props}>
+          <FilterIcon />
+          {!size?.startsWith("icon") && "Filter"}
         </Button>
       </PopoverTrigger>
 
       <PopoverContent
-        align="start"
+        align={align}
         className="w-fit origin-(--radix-popover-content-transform-origin) p-0"
       >
         {content}

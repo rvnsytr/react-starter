@@ -2,8 +2,20 @@ import { dataFetcher } from "@/core/api";
 import { ColumnCellNumber, ColumnHeader } from "@/core/components/ui/column";
 import {
   DataController,
+  DataControllerPageSize,
+  DataControllerPaginationNav,
   DataQueryStateProps,
 } from "@/core/components/ui/data-controller";
+import {
+  ActiveFilters,
+  ActiveFiltersContainer,
+  ClearFilters,
+  FilterSelector,
+  ResetFilters,
+} from "@/core/components/ui/data-filter";
+import { LoadingFallback } from "@/core/components/ui/fallback";
+import { Label } from "@/core/components/ui/label";
+import { Separator } from "@/core/components/ui/separator";
 import {
   Timeline,
   TimelineContent,
@@ -17,6 +29,7 @@ import {
 import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/data-filter";
 import { formatDate } from "@/core/utils/date";
+import { formatNumber } from "@/core/utils/formaters";
 import { createColumnHelper } from "@tanstack/react-table";
 import { CalendarCheck2Icon, RouteIcon } from "lucide-react";
 import { allEventLogType, EventLog, getEventLogMeta } from "./constants";
@@ -82,58 +95,109 @@ export function EventLogTimeline({
     <>
       <DataController
         {...props}
+        mode="manual"
         query={{
           key,
           fetcher: async (state) => await dataFetcher(key, schema, state),
         }}
         columns={(res) => getEventLogColumns(res?.count)}
-        render={({ result }) => {
-          const { data: res } = result;
+        render={({ result, table }) => {
+          const { data: res, isLoading } = result;
 
-          if (!res?.data.length)
-            return (
-              <div className="flex justify-center text-center">
-                <small>{messages.empty}</small>
-              </div>
-            );
+          const state = table.getState();
+          const pageCount = table.getPageCount();
 
           return (
-            <Timeline orientation="vertical">
-              {res.data.map((item, index) => {
-                const {
-                  displayName,
-                  description,
-                  icon: Icon,
-                  color,
-                } = getEventLogMeta(item.type, item);
+            <div className="flex flex-col gap-y-4">
+              <div className="flex gap-x-2">
+                <FilterSelector table={table} size="sm" disabled={isLoading} />
+                <ResetFilters table={table} size="sm" disabled={isLoading} />
+              </div>
 
-                return (
-                  <TimelineItem
-                    key={index}
-                    step={index}
-                    style={{ "--timeline-color": color } as React.CSSProperties}
-                    className="has-[+[data-completed]]:**:data-[slot=timeline-separator]:bg-(--timeline-color)/10"
-                  >
-                    <TimelineHeader>
-                      <TimelineSeparator />
+              {state.columnFilters.length > 0 && (
+                <ActiveFiltersContainer>
+                  <ClearFilters table={table} size="icon-sm" />
+                  <Separator orientation="vertical" className="h-4" />
+                  <ActiveFilters table={table} />
+                </ActiveFiltersContainer>
+              )}
 
-                      <TimelineIndicator className="flex size-8 items-center justify-center border-none bg-(--timeline-color)/10 text-(--timeline-color)">
-                        <Icon className="size-4" />
-                      </TimelineIndicator>
+              {isLoading ? (
+                <LoadingFallback />
+              ) : res?.data.length ? (
+                <Timeline orientation="vertical">
+                  {res.data.map((item, index) => {
+                    const {
+                      displayName,
+                      description,
+                      icon: Icon,
+                      color,
+                    } = getEventLogMeta(item.type, item);
 
-                      <TimelineDate>
-                        {formatDate(item.createdAt, "PPPp")}
-                      </TimelineDate>
+                    return (
+                      <TimelineItem
+                        key={index}
+                        step={index}
+                        style={
+                          { "--timeline-color": color } as React.CSSProperties
+                        }
+                        className="has-[+[data-completed]]:**:data-[slot=timeline-separator]:bg-(--timeline-color)/10"
+                      >
+                        <TimelineHeader>
+                          <TimelineSeparator />
 
-                      <TimelineTitle className="text-(--timeline-color)">
-                        {displayName}
-                      </TimelineTitle>
-                    </TimelineHeader>
-                    <TimelineContent>{description}</TimelineContent>
-                  </TimelineItem>
-                );
-              })}
-            </Timeline>
+                          <TimelineIndicator className="flex size-8 items-center justify-center border-none bg-(--timeline-color)/10 text-(--timeline-color)">
+                            <Icon className="size-4" />
+                          </TimelineIndicator>
+
+                          <TimelineDate>
+                            {formatDate(item.createdAt, "PPPp")}
+                          </TimelineDate>
+
+                          <TimelineTitle className="text-(--timeline-color)">
+                            {displayName}
+                          </TimelineTitle>
+                        </TimelineHeader>
+                        <TimelineContent>{description}</TimelineContent>
+                      </TimelineItem>
+                    );
+                  })}
+                </Timeline>
+              ) : (
+                <div className="flex justify-center text-center">
+                  <small>{messages.empty}</small>
+                </div>
+              )}
+
+              <div className="flex w-full flex-col items-center gap-4 text-center lg:flex-row">
+                <div className="order-3 flex shrink-0 items-center gap-x-2 lg:order-1 lg:mr-auto">
+                  <Label>Data per halaman</Label>
+                  <DataControllerPageSize
+                    table={table}
+                    size="sm"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <small className="order-1 shrink-0 tabular-nums lg:order-2">
+                  Halaman{" "}
+                  {isLoading
+                    ? "?"
+                    : formatNumber(state.pagination.pageIndex + 1)}{" "}
+                  dari{" "}
+                  {isLoading
+                    ? "?"
+                    : formatNumber(pageCount > 0 ? pageCount : 1)}
+                </small>
+
+                <DataControllerPaginationNav
+                  table={table}
+                  size="icon-sm"
+                  className="order-2 shrink-0 lg:order-3"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
           );
         }}
       />
