@@ -172,8 +172,6 @@ import { useAuth } from "./provider.auth";
 import { passwordSchema, userSchema } from "./schema";
 
 const sharedText = {
-  signIn: (name?: string) =>
-    `Berhasil masuk - Selamat datang${name ? ` ${name}` : ""}!`,
   signOn: (social: string) => `Lanjutkan dengan ${social}`,
   // lastUsed: "Terakhir digunakan",
 
@@ -210,16 +208,19 @@ export function SignInForm() {
     setIsLoading(true);
     toast.promise(
       async () => {
-        const res = await authClient.signIn.email({
-          ...formData,
-          callbackURL: "/dashboard",
-        });
-
+        const res = await authClient.signIn.email(formData);
         if (res.error) throw res.error;
         return res;
       },
       {
-        success: (res) => sharedText.signIn(res.data?.user.name),
+        loading: messages.loading,
+        success: (res) => {
+          const url = `${import.meta.env.BASE_URL}dashboard`;
+          setTimeout(() => (location.href = url), 1000);
+          const name = res.data?.user.name;
+          return `Berhasil masuk - Selamat datang${name ? ` ${name}` : ""}!`;
+        },
+
         error: (e) => {
           setIsLoading(false);
           return e.message;
@@ -347,6 +348,7 @@ export function SignUpForm() {
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           form.reset();
@@ -507,10 +509,10 @@ export function SignOutButton() {
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           const url = `${import.meta.env.BASE_URL}sign-in`;
-          setTimeout(() => (window.location.href = url), 1000);
-
+          setTimeout(() => (location.href = url), 1000);
           return "Berhasil keluar - Sampai jumpa!";
         },
         error: (e) => {
@@ -569,6 +571,7 @@ function ProfilePicture({
         return uploadRes;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsChange(false);
           mutateSession();
@@ -591,6 +594,7 @@ function ProfilePicture({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsRemoved(false);
           mutateSession();
@@ -699,6 +703,7 @@ export function ProfileForm() {
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           mutateSession();
@@ -1252,6 +1257,7 @@ export function CreateUserDialog({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           mutateListUsers();
@@ -1468,6 +1474,7 @@ function UserRoleDropdown({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
@@ -1767,6 +1774,7 @@ export function ChangePasswordForm() {
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           form.reset();
@@ -2102,6 +2110,7 @@ export function RevokeOtherSessionsButton() {
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           mutateListSessions();
@@ -2164,6 +2173,7 @@ function RevokeUserSessionsDialog({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           mutateListUserSessions(data.id);
@@ -2325,6 +2335,7 @@ function ImpersonateUserDialog({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           setIsDialogOpen(false);
@@ -2401,6 +2412,7 @@ export function StopImpersonateUserMenuItem() {
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           mutateSession();
@@ -2473,6 +2485,7 @@ function BanUserDialog({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
@@ -2585,6 +2598,7 @@ function UnbanUserDialog({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           setIsDialogOpen(false);
@@ -2668,6 +2682,7 @@ function RemoveUserDialog({
         return res;
       },
       {
+        loading: messages.loading,
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
