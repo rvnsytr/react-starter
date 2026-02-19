@@ -1,8 +1,11 @@
 // * Headless state controller for managing tabular data.
 
 import { ApiResponse } from "@/core/api";
+import { messages } from "@/core/constants/messages";
 import { allFilterOperators } from "@/core/data-filter";
 import { useDebounce } from "@/core/hooks/use-debounce";
+import { formatNumber } from "@/core/utils/formaters";
+import { cn } from "@/core/utils/helpers";
 import {
   ColumnDef as ColumnDefType,
   ColumnFiltersState,
@@ -22,10 +25,39 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { isValid } from "date-fns";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+  SearchIcon,
+  ViewIcon,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR, { mutate, SWRConfiguration, SWRResponse } from "swr";
 import z from "zod";
+import { Button, ButtonProps } from "./button";
+import { ButtonGroup } from "./button-group";
+import { Checkbox } from "./checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./command";
 import { ErrorFallback } from "./fallback";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
+import { Kbd } from "./kbd";
+import { Label } from "./label";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 export const columnFiltersSchema = z.object({
   id: z.string(),
@@ -85,7 +117,8 @@ export type DataControllerProps<TData> = DataQueryStateProps &
       result: SWRResponse<ApiResponse<TData[]>>;
       table: TableType<TData>;
       columns: ColumnDef<TData>;
-    }) => ReactNode;
+      reset: () => void;
+    }) => React.ReactNode;
   };
 
 // #region Query State Parser
@@ -309,9 +342,8 @@ export function DataController<TData>({
 
   // #endregion
 
-  const baseSWRKey = { key: query.key };
   const { data, isLoading, error, ...rest } = useSWR(
-    isManual ? { ...baseSWRKey, ...dataState } : baseSWRKey,
+    isManual ? { key: query.key, ...dataState } : { key: query.key },
     async () => await query.fetcher(dataState),
     query.config,
   );
@@ -377,6 +409,31 @@ export function DataController<TData>({
     getPaginationRowModel: !isManual ? getPaginationRowModel() : undefined,
   });
 
+  const reset = useCallback(() => {
+    table.reset();
+
+    table.resetPagination();
+    table.resetPageIndex();
+    table.resetPageSize();
+
+    table.resetColumnOrder();
+    table.resetColumnSizing();
+    table.resetColumnVisibility();
+    table.resetColumnPinning();
+    table.resetColumnFilters();
+
+    table.resetRowPinning();
+    table.resetRowSelection();
+
+    table.resetGlobalFilter();
+    table.setGlobalFilter("");
+
+    table.resetSorting();
+    table.resetGrouping();
+    table.resetExpanded();
+    table.resetHeaderSizeInfo();
+  }, [table]);
+
   if (error) return <ErrorFallback error={error} />;
   if (!isLoading && !data?.success)
     return <ErrorFallback error={data?.error} />;
@@ -385,5 +442,196 @@ export function DataController<TData>({
     result: { data, isLoading, error, ...rest },
     table,
     columns: resolvedColumns,
+    reset,
   });
+}
+
+export function DataControllerVisibility<TData>({
+  table,
+  align,
+  placeholder,
+  className,
+  children,
+}: {
+  table: TableType<TData>;
+  align?: React.ComponentProps<typeof PopoverContent>["align"];
+  placeholder?: { search?: string; empty?: string };
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        {children ?? (
+          <Button variant="outline">
+            <ViewIcon /> Lihat
+          </Button>
+        )}
+      </PopoverTrigger>
+
+      <PopoverContent
+        align={align}
+        className={cn("flex flex-col gap-y-1 p-0", className)}
+      >
+        <Command>
+          <CommandInput placeholder={placeholder?.search ?? "Cari Kolom..."} />
+          <CommandList className="p-1">
+            <CommandEmpty>{placeholder?.empty ?? messages.empty}</CommandEmpty>
+
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                const cbId = `data-controller-visibility-cb-${column.id}`;
+                const isVisible = column.getIsVisible();
+                const Icon = column.columnDef.meta?.icon;
+                return (
+                  <CommandItem key={cbId} className="justify-between" asChild>
+                    <Label htmlFor={cbId}>
+                      <div className="flex items-center gap-x-2">
+                        {Icon && (
+                          <Icon className="text-muted-foreground group-hover:text-primary transition-colors" />
+                        )}
+
+                        <small className="font-medium">
+                          {column.columnDef.meta?.label ?? column.id}
+                        </small>
+                      </div>
+
+                      <Checkbox
+                        id={cbId}
+                        checked={isVisible}
+                        onCheckedChange={(v) => column.toggleVisibility(!!v)}
+                      />
+                    </Label>
+                  </CommandItem>
+                );
+              })}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function DataControllerSearch<TData>({
+  table,
+  placeholder = "Cari...",
+  className,
+}: {
+  table: TableType<TData>;
+  placeholder?: string;
+  className?: string;
+}) {
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "/") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
+  return (
+    <InputGroup className={className}>
+      <InputGroupInput
+        ref={searchRef}
+        placeholder={placeholder}
+        value={table.getState().globalFilter}
+        onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+      />
+
+      <InputGroupAddon>
+        <SearchIcon />
+      </InputGroupAddon>
+
+      <InputGroupAddon align="inline-end">
+        {/* <Kbd>⌘</Kbd> */}
+        <Kbd>/</Kbd>
+      </InputGroupAddon>
+    </InputGroup>
+  );
+}
+
+export function DataControllerPaginationNav<TData>({
+  table,
+  size = "icon",
+  variant = "outline",
+  className,
+}: Pick<ButtonProps, "size" | "variant" | "className"> & {
+  table: TableType<TData>;
+}) {
+  return (
+    <ButtonGroup className={cn(className)}>
+      <Button
+        size={size}
+        variant={variant}
+        onClick={() => table.firstPage()}
+        disabled={!table.getCanPreviousPage()}
+      >
+        <ChevronsLeftIcon />
+      </Button>
+
+      <Button
+        size={size}
+        variant={variant}
+        onClick={() => table.previousPage()}
+        disabled={!table.getCanPreviousPage()}
+      >
+        <ChevronLeftIcon />
+      </Button>
+
+      <Button
+        size={size}
+        variant={variant}
+        onClick={() => table.nextPage()}
+        disabled={!table.getCanNextPage()}
+      >
+        <ChevronRightIcon />
+      </Button>
+
+      <Button
+        size={size}
+        variant={variant}
+        onClick={() => table.lastPage()}
+        disabled={!table.getCanNextPage()}
+      >
+        <ChevronsRightIcon />
+      </Button>
+    </ButtonGroup>
+  );
+}
+
+export function DataControllerPageSize<TData>({
+  table,
+}: {
+  table: TableType<TData>;
+}) {
+  return (
+    <Select
+      value={String(table.getState().pagination.pageSize ?? defaultDataSize)}
+      onValueChange={(value) => table.setPageSize(Number(value))}
+    >
+      <SelectTrigger size="sm">
+        <SelectValue />
+      </SelectTrigger>
+
+      <SelectContent>
+        {dataSizes.map((v) => (
+          <SelectItem
+            key={v}
+            value={String(v)}
+            className={cn(v === defaultDataSize && "font-semibold")}
+          >
+            {formatNumber(v)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }

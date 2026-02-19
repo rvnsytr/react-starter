@@ -3,31 +3,16 @@ import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
 import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
-  RotateCcwSquareIcon,
-  SearchIcon,
-  ViewIcon,
-} from "lucide-react";
-import { useEffect, useRef } from "react";
+import { RotateCcwSquareIcon } from "lucide-react";
 import { Button } from "./button";
 import { ButtonGroup } from "./button-group";
-import { Checkbox } from "./checkbox";
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./command";
 import {
   DataController,
+  DataControllerPageSize,
+  DataControllerPaginationNav,
   DataControllerProps,
-  dataSizes,
-  defaultDataSize,
+  DataControllerSearch,
+  DataControllerVisibility,
 } from "./data-controller";
 import {
   ActiveFilters,
@@ -35,17 +20,7 @@ import {
   ClearFilters,
   FilterSelector,
 } from "./data-filter";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
-import { Kbd } from "./kbd";
 import { Label } from "./label";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
 import { Separator } from "./separator";
 import { Skeleton } from "./skeleton";
 import {
@@ -93,7 +68,7 @@ export function DataTable<TData>({
   return (
     <DataController
       {...props}
-      render={({ result, table, columns }) => {
+      render={({ result, table, columns, reset }) => {
         const { data, isLoading } = result;
         const state = table.getState();
 
@@ -122,7 +97,11 @@ export function DataTable<TData>({
               >
                 <ButtonGroup className="w-full lg:w-fit [&_button]:grow">
                   <FilterSelector table={table} />
-                  <View table={table} />
+
+                  <DataControllerVisibility
+                    table={table}
+                    align={isMobile ? "start" : "center"}
+                  />
                 </ButtonGroup>
 
                 {isSelected && !isMobile && (
@@ -134,11 +113,13 @@ export function DataTable<TData>({
               </div>
 
               <div className="flex gap-x-2 *:grow">
-                <Reset table={table} />
-                <Search
+                <Button variant="outline" onClick={() => reset()}>
+                  <RotateCcwSquareIcon /> {messages.actions.reset}
+                </Button>
+
+                <DataControllerSearch
                   table={table}
-                  placeholder={placeholder?.search ?? "Cari..."}
-                  className="col-span-2"
+                  placeholder={placeholder?.search}
                 />
               </div>
             </div>
@@ -248,10 +229,10 @@ export function DataTable<TData>({
                 classNames?.footer,
               )}
             >
-              <RowsPerPage
-                table={table}
-                className="order-4 shrink-0 lg:order-1"
-              />
+              <div className="order-4 flex shrink-0 items-center gap-x-2 lg:order-1">
+                <Label>Baris per halaman</Label>
+                <DataControllerPageSize table={table} />
+              </div>
 
               <small className="text-muted-foreground order-3 shrink-0 lg:order-2">
                 {formatNumber(selectedRowsCount)} dari{" "}
@@ -269,8 +250,9 @@ export function DataTable<TData>({
                 {isLoading ? "?" : formatNumber(pageCount > 0 ? pageCount : 1)}
               </small>
 
-              <Pagination
+              <DataControllerPaginationNav
                 table={table}
+                size={isMobile ? "icon" : "icon-sm"}
                 className="order-3 shrink-0 lg:order-5"
               />
             </div>
@@ -278,232 +260,5 @@ export function DataTable<TData>({
         );
       }}
     />
-  );
-}
-
-function View<TData>({ table }: { table: TableType<TData> }) {
-  const isMobile = useIsMobile();
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline">
-          <ViewIcon /> Lihat
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align={isMobile ? "end" : "center"}
-        className="flex flex-col gap-y-1 p-0"
-      >
-        <Command>
-          <CommandInput placeholder="Cari Kolom..." />
-          <CommandList className="p-1">
-            <CommandEmpty>{messages.empty}</CommandEmpty>
-
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                const cbId = `cb-${column.id}`;
-                const isVisible = column.getIsVisible();
-                const Icon = column.columnDef.meta?.icon;
-                return (
-                  <CommandItem key={cbId} className="justify-between" asChild>
-                    <Label htmlFor={cbId}>
-                      <div className="flex items-center gap-x-2">
-                        {Icon && (
-                          <Icon className="text-muted-foreground group-hover:text-primary transition-colors" />
-                        )}
-
-                        <small className="font-medium">
-                          {column.columnDef.meta?.label ?? column.id}
-                        </small>
-                      </div>
-
-                      <Checkbox
-                        id={cbId}
-                        checked={isVisible}
-                        onCheckedChange={(v) => column.toggleVisibility(!!v)}
-                      />
-                    </Label>
-                  </CommandItem>
-                );
-              })}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function Reset<TData>({
-  table,
-  className,
-}: {
-  table: TableType<TData>;
-  className?: string;
-}) {
-  return (
-    <Button
-      variant="outline"
-      className={className}
-      onClick={() => {
-        table.reset();
-
-        table.resetPagination();
-        table.resetPageIndex();
-        table.resetPageSize();
-
-        table.resetColumnOrder();
-        table.resetColumnSizing();
-        table.resetColumnVisibility();
-        table.resetColumnPinning();
-        table.resetColumnFilters();
-
-        table.resetRowPinning();
-        table.resetRowSelection();
-
-        table.resetGlobalFilter();
-        table.setGlobalFilter("");
-
-        table.resetSorting();
-        table.resetGrouping();
-        table.resetExpanded();
-        table.resetHeaderSizeInfo();
-      }}
-    >
-      <RotateCcwSquareIcon /> {messages.actions.reset}
-    </Button>
-  );
-}
-
-function Search<TData>({
-  table,
-  placeholder = "Cari...",
-  className,
-}: {
-  table: TableType<TData>;
-  placeholder?: string;
-  className?: string;
-}) {
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "/") {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
-
-  return (
-    <InputGroup className={className}>
-      <InputGroupInput
-        ref={searchRef}
-        placeholder={placeholder}
-        value={table.getState().globalFilter}
-        onChange={(e) => table.setGlobalFilter(String(e.target.value))}
-      />
-
-      <InputGroupAddon>
-        <SearchIcon />
-      </InputGroupAddon>
-
-      <InputGroupAddon align="inline-end">
-        {/* <Kbd>⌘</Kbd> */}
-        <Kbd>/</Kbd>
-      </InputGroupAddon>
-    </InputGroup>
-  );
-}
-
-function Pagination<TData>({
-  table,
-  className,
-}: {
-  table: TableType<TData>;
-  className?: string;
-}) {
-  const isMobile = useIsMobile();
-
-  const size = isMobile ? "icon" : "icon-sm";
-  const variant = "outline";
-  return (
-    <ButtonGroup className={cn(className)}>
-      <Button
-        size={size}
-        variant={variant}
-        onClick={() => table.firstPage()}
-        disabled={!table.getCanPreviousPage()}
-      >
-        <ChevronsLeftIcon />
-      </Button>
-
-      <Button
-        size={size}
-        variant={variant}
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
-      >
-        <ChevronLeftIcon />
-      </Button>
-
-      <Button
-        size={size}
-        variant={variant}
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
-      >
-        <ChevronRightIcon />
-      </Button>
-
-      <Button
-        size={size}
-        variant={variant}
-        onClick={() => table.lastPage()}
-        disabled={!table.getCanNextPage()}
-      >
-        <ChevronsRightIcon />
-      </Button>
-    </ButtonGroup>
-  );
-}
-
-function RowsPerPage<TData>({
-  table,
-  className,
-}: {
-  table: TableType<TData>;
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex items-center gap-x-2", className)}>
-      <Label>Baris per halaman</Label>
-      <Select
-        value={String(table.getState().pagination.pageSize ?? defaultDataSize)}
-        onValueChange={(value) => table.setPageSize(Number(value))}
-      >
-        <SelectTrigger size="sm">
-          <SelectValue />
-        </SelectTrigger>
-
-        <SelectContent>
-          {dataSizes.map((v) => (
-            <SelectItem
-              key={v}
-              value={String(v)}
-              className={cn(v === defaultDataSize && "font-semibold")}
-            >
-              {formatNumber(v)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
   );
 }
