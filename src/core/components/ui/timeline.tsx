@@ -2,14 +2,9 @@ import { cn } from "@/core/utils/helpers";
 import { Slot } from "radix-ui";
 import { createContext, useCallback, useContext, useState } from "react";
 
-type TimelineContextValue = {
-  activeStep: number;
-  setActiveStep: (step: number) => void;
-};
-
-const TimelineContext = createContext<TimelineContextValue | undefined>(
-  undefined,
-);
+const TimelineContext = createContext<
+  { activeStep: number; setActiveStep: (step: number) => void } | undefined
+>(undefined);
 
 const useTimeline = () => {
   const context = useContext(TimelineContext);
@@ -51,7 +46,7 @@ function Timeline({
       <div
         data-slot="timeline"
         className={cn(
-          "group/timeline flex h-fit data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-row data-[orientation=vertical]:flex-col",
+          "group/timeline flex h-fit px-2 data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-row data-[orientation=vertical]:flex-col",
           className,
         )}
         data-orientation={orientation}
@@ -77,15 +72,11 @@ function TimelineContent({
   );
 }
 
-type TimelineDateProps = React.HTMLAttributes<HTMLTimeElement> & {
-  asChild?: boolean;
-};
-
 function TimelineDate({
   asChild = false,
   className,
   ...props
-}: TimelineDateProps) {
+}: React.HTMLAttributes<HTMLTimeElement> & { asChild?: boolean }) {
   const Comp = asChild ? Slot.Root : "time";
 
   return (
@@ -129,11 +120,11 @@ function TimelineIndicator({
   );
 }
 
-type TimelineItemProps = React.HTMLAttributes<HTMLDivElement> & {
-  step: number;
-};
-
-function TimelineItem({ step, className, ...props }: TimelineItemProps) {
+function TimelineItem({
+  step,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { step: number }) {
   const { activeStep } = useTimeline();
 
   return (
@@ -189,3 +180,4 @@ export {
   TimelineSeparator,
   TimelineTitle,
 };
+export type { TimelineProps };
