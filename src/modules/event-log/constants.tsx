@@ -21,10 +21,11 @@ type EventLogMetaData = {
 };
 
 export type EventLogType = (typeof allEventLogType)[number];
-
 export const allEventLogType = [
   "user-registered",
   "user-created",
+  // "user-imported",
+  // "user-activated",
   "user-verified",
   "user-banned",
   "user-unbanned",
@@ -61,6 +62,19 @@ export const eventLogMeta: Record<
     icon: PlusCircleIcon,
     color: "var(--color-success)",
   },
+  // "user-imported": {
+  //   displayName: "Akun Diimpor",
+  //   description: "Akun berhasil dimuat melalui loader ke dalam sistem.",
+  //   icon: PlusCircleIcon,
+  //   color: "var(--color-success)",
+  // },
+  // "user-activated": {
+  //   displayName: "Akun Diaktivasi",
+  //   description:
+  //     "Pengguna mengaktifkan akunnya dan melanjutkan ke proses verifikasi.",
+  //   icon: UserRoundCheckIcon,
+  //   color: "var(--color-success)",
+  // },
   "user-verified": {
     displayName: "Akun Diverifikasi",
     description:
@@ -89,13 +103,21 @@ export const eventLogMeta: Record<
 
   "password-reset": {
     displayName: "Kata Sandi Diatur Ulang",
-    description: 'Kata sandi diatur ulang melalui fitur "Lupa Kata Sandi".',
+    description: (
+      <>
+        Kata sandi diatur ulang melalui fitur <span>Lupa Kata Sandi</span>.
+      </>
+    ),
     icon: LockKeyholeOpenIcon,
     color: "var(--foreground)",
   },
   "password-changed": {
     displayName: "Kata Sandi Diperbarui",
-    description: 'Kata sandi diperbarui melalui fitur "Ubah Kata Sandi".',
+    description: (
+      <>
+        Kata sandi diperbarui melalui fitur <span>Ubah Kata Sandi</span>.
+      </>
+    ),
     icon: LockKeyholeOpenIcon,
     color: "var(--foreground)",
   },
@@ -126,7 +148,12 @@ export const eventLogMeta: Record<
   }),
   // "admin-user-import": (c) => ({
   //   displayName: "Mengimpor Akun",
-  //   description: `Mengimpor ${c?.data} akun ke dalam sistem melalui fitur 'Import User'.`,
+  //   description: (
+  //     <>
+  //       Mengimpor <span>{c?.data} akun</span> ke dalam sistem melalui fitur{" "}
+  //       <span>Import User</span>.
+  //     </>
+  //   ),
   //   icon: ImportIcon,
   //   color: "var(--color-sky-500)",
   // }),
@@ -171,3 +198,11 @@ export const eventLogMeta: Record<
     color: "var(--color-destructive)",
   }),
 };
+
+export function getEventLogMeta(
+  type: EventLogType,
+  ctx?: Pick<EventLog, "data" | "entity">,
+) {
+  const meta = eventLogMeta[type];
+  return typeof meta === "function" ? meta(ctx) : meta;
+}

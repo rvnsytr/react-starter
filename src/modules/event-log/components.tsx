@@ -19,7 +19,7 @@ import { filterFn } from "@/core/data-filter";
 import { formatDate } from "@/core/utils/date";
 import { createColumnHelper } from "@tanstack/react-table";
 import { CalendarCheck2Icon, RouteIcon } from "lucide-react";
-import { allEventLogType, EventLog, eventLogMeta } from "./constants";
+import { allEventLogType, EventLog, getEventLogMeta } from "./constants";
 import { eventLogSchema } from "./schema";
 
 const createEventLogColumn = createColumnHelper<EventLog>();
@@ -48,9 +48,7 @@ const getEventLogColumns = (count?: Record<string, number>) => [
       type: "option",
       icon: RouteIcon,
       options: allEventLogType.map((value) => {
-        const meta = eventLogMeta[value];
-        const { displayName, icon } =
-          typeof meta === "function" ? meta() : meta;
+        const { displayName, icon } = getEventLogMeta(value);
         return { value, label: displayName, icon, count: count?.[value] };
       }),
     },
@@ -102,13 +100,12 @@ export function EventLogTimeline({
           return (
             <Timeline orientation="vertical">
               {res.data.map((item, index) => {
-                const meta = eventLogMeta[item.type];
                 const {
                   displayName,
                   description,
                   icon: Icon,
                   color,
-                } = typeof meta === "function" ? meta(item) : meta;
+                } = getEventLogMeta(item.type, item);
 
                 return (
                   <TimelineItem
