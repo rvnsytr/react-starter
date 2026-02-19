@@ -6,6 +6,7 @@ import { allFilterOperators } from "@/core/data-filter";
 import { useDebounce } from "@/core/hooks/use-debounce";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import {
   ColumnDef as ColumnDefType,
   ColumnFiltersState,
@@ -525,17 +526,7 @@ export function DataControllerSearch<TData>({
 }) {
   const searchRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "/") {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  useHotkey("/", () => searchRef.current?.focus());
 
   return (
     <InputGroup className={className}>

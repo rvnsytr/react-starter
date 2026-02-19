@@ -1,3 +1,4 @@
+import { Hotkey } from "@tanstack/react-hotkeys";
 import { FrameIcon, LucideIcon, MinimizeIcon, ScanIcon } from "lucide-react";
 import {
   createContext,
@@ -7,6 +8,8 @@ import {
   useState,
 } from "react";
 import z from "zod";
+
+export const LAYOUT_TOGGLE_HOTKEY: Hotkey = "Alt+L";
 
 export type LayoutMode = (typeof allLayoutMode)[number];
 export const allLayoutMode = ["fullwidth", "centered", "unset"] as const;

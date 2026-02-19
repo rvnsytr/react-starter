@@ -1,5 +1,8 @@
+import { Hotkey } from "@tanstack/react-hotkeys";
 import { LucideIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
+
+export const THEME_TOGGLE_HOTKEY: Hotkey = "Alt+T";
 
 export type Theme = (typeof allThemes)[number];
 export const allThemes = ["light", "system", "dark"] as const;
@@ -52,16 +55,17 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
-    },
-  };
-
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext.Provider
+      value={{
+        theme,
+        setTheme: (theme: Theme) => {
+          localStorage.setItem(storageKey, theme);
+          setTheme(theme);
+        },
+      }}
+      {...props}
+    >
       {children}
     </ThemeProviderContext.Provider>
   );

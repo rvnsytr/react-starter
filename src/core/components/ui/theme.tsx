@@ -1,8 +1,15 @@
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
-import { nextTheme, Theme, themeMeta, useTheme } from "@/core/providers/theme";
+import {
+  nextTheme,
+  Theme,
+  THEME_TOGGLE_HOTKEY,
+  themeMeta,
+  useTheme,
+} from "@/core/providers/theme";
+import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { Button, ButtonProps } from "./button";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";
-import { Kbd, KbdGroup } from "./kbd";
+import { Kbd } from "./kbd";
 import { RadioGroup, RadioGroupItem } from "./radio-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
@@ -46,11 +53,7 @@ export function ThemeToggle({
         className="flex flex-col items-center gap-2"
       >
         <span>Toggle Theme</span>
-        <KbdGroup>
-          <Kbd>Alt</Kbd>
-          <span>+</span>
-          <Kbd>T</Kbd>
-        </KbdGroup>
+        <Kbd>{formatForDisplay(THEME_TOGGLE_HOTKEY)}</Kbd>
       </TooltipContent>
     </Tooltip>
   );

@@ -12,12 +12,15 @@ import { Kbd, KbdGroup } from "@/core/components/ui/kbd";
 import { LayoutSettings } from "@/core/components/ui/layout";
 import { ThemeSettings } from "@/core/components/ui/theme";
 import { appMeta } from "@/core/constants/app";
+import { LAYOUT_TOGGLE_HOTKEY } from "@/core/providers/layout";
+import { THEME_TOGGLE_HOTKEY } from "@/core/providers/theme";
 import { getRouteTitle } from "@/core/route";
 import {
   ChangePasswordForm,
   RevokeOtherSessionsButton,
   SessionList,
 } from "@/modules/auth/components";
+import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   FrameIcon,
@@ -46,11 +49,7 @@ function RouteComponent() {
           </CardDescription>
 
           <CardAction>
-            <KbdGroup>
-              <Kbd>Alt</Kbd>
-              <span className="font-light">+</span>
-              <Kbd>T</Kbd>
-            </KbdGroup>
+            <Kbd>{formatForDisplay(THEME_TOGGLE_HOTKEY)}</Kbd>
           </CardAction>
         </CardHeader>
 
@@ -71,9 +70,7 @@ function RouteComponent() {
           </CardDescription>
           <CardAction>
             <KbdGroup>
-              <Kbd>Alt</Kbd>
-              <span className="font-light">+</span>
-              <Kbd>L</Kbd>
+              <Kbd>{formatForDisplay(LAYOUT_TOGGLE_HOTKEY)}</Kbd>
             </KbdGroup>
           </CardAction>
         </CardHeader>

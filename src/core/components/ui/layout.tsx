@@ -1,7 +1,12 @@
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
-import { LayoutMode, layoutModeMeta, useLayout } from "@/core/providers/layout";
+import {
+  LAYOUT_TOGGLE_HOTKEY,
+  LayoutMode,
+  layoutModeMeta,
+  useLayout,
+} from "@/core/providers/layout";
 import { cn } from "@/core/utils/helpers";
-import { useEffect, useEffectEvent } from "react";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { Button, ButtonProps } from "./button";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";
 import { Kbd, KbdGroup } from "./kbd";
@@ -25,19 +30,8 @@ export function LayoutToggle({
 
   const toggleLayout = () =>
     setLayout((prev) => (prev === "fullwidth" ? "centered" : "fullwidth"));
-  const onLayout = useEffectEvent(() => toggleLayout());
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === "l") {
-        e.preventDefault();
-        onLayout();
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  useHotkey(LAYOUT_TOGGLE_HOTKEY, toggleLayout);
 
   const element = (
     <Button

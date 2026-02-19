@@ -1,5 +1,6 @@
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { cn } from "@/core/utils/helpers";
+import { formatForDisplay, Hotkey, useHotkey } from "@tanstack/react-hotkeys";
 import { cva, VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 import { Slot } from "radix-ui";
@@ -7,7 +8,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -36,7 +36,9 @@ const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH_ICON = "3rem";
-const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+
+export const SIDEBAR_TOGGLE_HOTKEY_CONTROL: Hotkey = "Control+B";
+export const SIDEBAR_TOGGLE_HOTKEY_ALT: Hotkey = "Alt+B";
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
@@ -95,20 +97,8 @@ function SidebarProvider({
   }, [isMobile, setOpen, setOpenMobile]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.ctrlKey || event.altKey)
-      ) {
-        event.preventDefault();
-        toggleSidebar();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleSidebar]);
+  useHotkey(SIDEBAR_TOGGLE_HOTKEY_CONTROL, toggleSidebar);
+  useHotkey(SIDEBAR_TOGGLE_HOTKEY_ALT, toggleSidebar);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -288,10 +278,9 @@ function SidebarTrigger({
       >
         <span>Toggle Sidebar</span>
         <KbdGroup>
-          (<Kbd>Ctrl</Kbd>
-          <span>/</span>
-          <Kbd>Alt</Kbd>)<span>+</span>
-          <Kbd>B</Kbd>
+          <Kbd>{formatForDisplay(SIDEBAR_TOGGLE_HOTKEY_CONTROL)}</Kbd>
+          <span>or</span>
+          <Kbd>{formatForDisplay(SIDEBAR_TOGGLE_HOTKEY_ALT)}</Kbd>
         </KbdGroup>
       </TooltipContent>
     </Tooltip>
