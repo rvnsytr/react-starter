@@ -1,5 +1,5 @@
 import z from "zod";
-import { apiFetcher } from "./api";
+import { fetcher } from "./api";
 import { sharedSchemas } from "./schema";
 
 export const storageSchema = z.object({
@@ -51,11 +51,11 @@ export async function uploadFiles(
     })
     .array();
 
-  return await apiFetcher(url, { schema, method: "POST", body });
+  return await fetcher.api(url, { schema, method: "POST", body });
 }
 
 export async function removeFiles(ids: string[]) {
-  return await apiFetcher("/storage", {
+  return await fetcher.api("/storage", {
     schema: z.null(),
     method: "DELETE",
     body: JSON.stringify({ ids }),

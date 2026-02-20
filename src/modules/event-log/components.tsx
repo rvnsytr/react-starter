@@ -1,4 +1,4 @@
-import { dataFetcher } from "@/core/api";
+import { fetcher } from "@/core/api";
 import { ColumnCellNumber, ColumnHeader } from "@/core/components/ui/column";
 import {
   DataController,
@@ -106,7 +106,7 @@ export function EventLogTimeline({
         mode="manual"
         query={{
           key,
-          fetcher: async (state) => await dataFetcher(key, state, { schema }),
+          fetcher: async (state) => await fetcher.data(key, state, { schema }),
         }}
         columns={(result) => getEventLogColumns(result)}
         render={({ result, table }) => {

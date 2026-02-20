@@ -26,10 +26,10 @@ export type FetcherConfig<T> = RequestInit & {
 
 export type ApiFetcherConfig<T> = Omit<FetcherConfig<T>, "credentials">;
 
-export async function fetcher<T>(
+const fetcher = async <T>(
   url: string,
   config?: FetcherConfig<T>,
-): Promise<T> {
+): Promise<T> => {
   const res = await fetch(url, config);
   const json = await res.json();
 
@@ -40,28 +40,28 @@ export async function fetcher<T>(
 
   if (!config?.schema) return json;
   return config.schema.parse(json);
-}
+};
 
-export async function apiFetcher<T>(
+fetcher.api = async <T>(
   url: string,
   config?: ApiFetcherConfig<T>,
-): Promise<ApiResponse<T>> {
-  return await fetcher(`${apiConfig.baseUrl}${url}`, {
+): Promise<ApiResponse<T>> =>
+  await fetcher(`${apiConfig.baseUrl}${url}`, {
     ...config,
     credentials: "include",
     schema: apiResponseSchema.extend({ data: config?.schema ?? z.any() }),
   });
-}
 
-export async function dataFetcher<T>(
+fetcher.data = async <T>(
   key: string,
   state: DataState,
   config?: Omit<ApiFetcherConfig<T>, "method" | "body">,
-) {
-  return apiFetcher(key, {
+) =>
+  await fetcher.api(key, {
     ...config,
     method: "POST",
     body: JSON.stringify(state),
     headers: { "Content-Type": "application/json", ...config?.headers },
   });
-}
+
+export { fetcher };

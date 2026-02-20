@@ -1,4 +1,4 @@
-import { dataFetcher } from "@/core/api";
+import { fetcher } from "@/core/api";
 import { authClient } from "@/core/auth";
 import {
   AlertDialog,
@@ -1057,7 +1057,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
       query={{
         key,
         fetcher: async (state) => {
-          const { data, ...rest } = await dataFetcher(key, state, { schema });
+          const { data, ...rest } = await fetcher.data(key, state, { schema });
           return { ...rest, data: data as AuthSession["user"][] };
         },
       }}
