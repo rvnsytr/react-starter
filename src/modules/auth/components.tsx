@@ -587,6 +587,7 @@ function ProfilePicture({
     );
   };
 
+  // TODO: Remove Image
   const deleteHandler = async () => {
     toast.promise(
       async () => {
@@ -1053,7 +1054,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
       query={{
         key,
         fetcher: async (state) => {
-          const { data, ...rest } = await dataFetcher(key, schema, state);
+          const { data, ...rest } = await dataFetcher(key, state, { schema });
           return { ...rest, data: data as AuthSession["user"][] };
         },
       }}

@@ -106,7 +106,7 @@ export function EventLogTimeline({
         mode="manual"
         query={{
           key,
-          fetcher: async (state) => await dataFetcher(key, schema, state),
+          fetcher: async (state) => await dataFetcher(key, state, { schema }),
         }}
         columns={(result) => getEventLogColumns(result)}
         render={({ result, table }) => {

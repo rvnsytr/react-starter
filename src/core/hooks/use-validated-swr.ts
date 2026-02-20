@@ -1,17 +1,15 @@
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
-import z from "zod";
 import { fetcher, FetcherConfig } from "../api";
 
-export type UseValidatedSWRConfig = {
+export type UseValidatedSWRConfig<T> = {
   swr?: SWRConfiguration;
-  fetcher?: FetcherConfig;
+  fetcher?: FetcherConfig<T>;
 };
 
 export function useValidatedSWR<T>(
   key: string,
-  schema: z.ZodType<T>,
-  config?: UseValidatedSWRConfig,
+  config?: UseValidatedSWRConfig<T>,
 ): SWRResponse<T> {
-  const fn = async () => await fetcher(key, schema, config?.fetcher);
+  const fn = async () => await fetcher(key, config?.fetcher);
   return useSWR(key, fn, config?.swr);
 }

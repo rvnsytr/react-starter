@@ -51,11 +51,12 @@ export async function uploadFiles(
     })
     .array();
 
-  return await apiFetcher(url, schema, { method: "POST", body });
+  return await apiFetcher(url, { schema, method: "POST", body });
 }
 
 export async function removeFiles(ids: string[]) {
-  return await apiFetcher("/storage", z.null(), {
+  return await apiFetcher("/storage", {
+    schema: z.null(),
     method: "DELETE",
     body: JSON.stringify({ ids }),
     headers: { "Content-Type": "application/json" },

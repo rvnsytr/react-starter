@@ -19,13 +19,16 @@ export type ApiResponse<T> = z.infer<typeof apiResponseSchema> & {
   error?: unknown;
 };
 
-export type FetcherConfig = RequestInit & { safeFetch?: boolean };
-export type ApiFetcherConfig = Omit<FetcherConfig, "credentials">;
+export type FetcherConfig<T> = RequestInit & {
+  schema?: z.ZodType<T>;
+  safeFetch?: boolean;
+};
+
+export type ApiFetcherConfig<T> = Omit<FetcherConfig<T>, "credentials">;
 
 export async function fetcher<T>(
   url: string,
-  schema: z.ZodType<T>,
-  config?: FetcherConfig,
+  config?: FetcherConfig<T>,
 ): Promise<T> {
   const res = await fetch(url, config);
   const json = await res.json();
@@ -35,32 +38,30 @@ export async function fetcher<T>(
     throw json;
   }
 
-  if (!schema) return json;
-  return schema.parse(json);
+  if (!config?.schema) return json;
+  return config.schema.parse(json);
 }
 
 export async function apiFetcher<T>(
   url: string,
-  schema: z.ZodType<T>,
-  config?: ApiFetcherConfig,
+  config?: ApiFetcherConfig<T>,
 ): Promise<ApiResponse<T>> {
-  return await fetcher(
-    `${apiConfig.baseUrl}${url}`,
-    apiResponseSchema.extend({ data: schema }),
-    { credentials: "include", ...config },
-  );
+  return await fetcher(`${apiConfig.baseUrl}${url}`, {
+    ...config,
+    credentials: "include",
+    schema: apiResponseSchema.extend({ data: config?.schema ?? z.any() }),
+  });
 }
 
 export async function dataFetcher<T>(
   key: string,
-  schema: z.ZodType<T>,
   state: DataState,
-  config?: Omit<ApiFetcherConfig, "method" | "body" | "headers">,
+  config?: Omit<ApiFetcherConfig<T>, "method" | "body">,
 ) {
-  return apiFetcher(key, schema, {
+  return apiFetcher(key, {
     ...config,
     method: "POST",
     body: JSON.stringify(state),
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...config?.headers },
   });
 }
