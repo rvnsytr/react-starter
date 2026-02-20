@@ -564,7 +564,11 @@ function ProfilePicture({
 
         const body = new FormData();
         body.append("image", files[0]);
-        const uploadRes = await uploadFiles(body, { fileName: data.id });
+
+        const uploadRes = await uploadFiles(body, {
+          fileName: data.id,
+          withExtension: false,
+        });
 
         const image = uploadRes.data[0].id;
         const res = await authClient.updateUser({ image });
@@ -587,7 +591,6 @@ function ProfilePicture({
     );
   };
 
-  // TODO: Remove Image
   const deleteHandler = async () => {
     toast.promise(
       async () => {
