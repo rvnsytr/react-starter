@@ -101,7 +101,7 @@ import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/data-filter";
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { sharedSchemas } from "@/core/schema";
-import { removeFiles, uploadFiles } from "@/core/storage";
+import { prepareFiles, removeFiles, uploadFiles } from "@/core/storage";
 import { formatDate } from "@/core/utils/date";
 import { capitalize } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
@@ -551,30 +551,28 @@ function ProfilePicture({
   const [isChange, setIsChange] = useState<boolean>(false);
   const [isRemoved, setIsRemoved] = useState<boolean>(false);
 
-  const formSchema = sharedSchemas.files("image");
-
   const changeHandler = (fileList: FileList) => {
     toast.promise(
       async () => {
         setIsChange(true);
         const files = Array.from(fileList).map((f) => f);
 
-        const parseRes = formSchema.safeParse(files);
-        if (!parseRes.success) return toast.error(parseRes.error.message);
-
-        const body = new FormData();
-        body.append("image", files[0]);
-
-        const uploadRes = await uploadFiles(body, {
+        const preparedFiles = prepareFiles(files, "image", {
+          max: 1,
           fileName: data.id,
           withExtension: false,
         });
 
-        const image = uploadRes.data[0].id;
+        if (!preparedFiles.success) throw preparedFiles;
+
+        const upload = await uploadFiles(preparedFiles.data);
+        if (!upload.success) throw upload;
+
+        const image = upload.data[0].id;
         const res = await authClient.updateUser({ image });
 
         if (res.error) throw res.error;
-        return uploadRes;
+        return upload;
       },
       {
         loading: messages.loading,

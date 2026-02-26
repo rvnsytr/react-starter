@@ -1,7 +1,11 @@
 import z from "zod";
 import { fetcher } from "./api";
+import { FileType } from "./constants/file";
+import { ActionResponse } from "./constants/types";
 import { sharedSchemas } from "./schema";
+import { formatZodError } from "./utils/formaters";
 
+export type Storage = z.infer<typeof storageSchema>;
 export const storageSchema = z.object({
   id: z.uuidv4(),
 
@@ -20,38 +24,64 @@ export const storageSchema = z.object({
   createdBy: sharedSchemas.string("createdBy"),
 });
 
+export type UploadFilesData = z.infer<typeof uploadFilesDataSchema>;
+const uploadFilesDataSchema = storageSchema.pick({
+  id: true,
+  fileName: true,
+  category: true,
+  filePath: true,
+  mimeType: true,
+  fileSize: true,
+  fileUrl: true,
+});
+
 type UploadFilesOptions = {
-  url?: boolean;
+  fileType?: FileType;
   fileName?: string;
+
+  unique?: boolean;
+  prefix?: string;
+  suffix?: string;
+
+  min?: number;
+  max?: number;
+  maxFileSize?: number;
+
+  url?: boolean;
   withExtension?: boolean;
 };
 
-export async function uploadFiles(
-  body: FormData,
+export function validateFiles(
+  files: File[],
+  options?: Pick<UploadFilesOptions, "min" | "max" | "maxFileSize">,
+): ActionResponse<File[]> {
+  const parsedFiles = sharedSchemas.files("image", options).safeParse(files);
+  if (!parsedFiles.success) return formatZodError(parsedFiles.error);
+  return parsedFiles;
+}
+
+export function prepareFiles(
+  files: File[],
+  category: Storage["category"],
   options?: UploadFilesOptions,
-) {
-  const basePath = "/storage";
-  const optionsQuery = options
-    ? `?${Object.entries(options)
-        .map(([k, v]) => `${k}=${String(v)}`)
-        .join("&")}`
-    : "";
+): ActionResponse<FormData> {
+  const validated = validateFiles(files, options);
+  if (!validated.success) return validated;
 
-  const url = `${basePath}${optionsQuery}`;
+  const data = new FormData();
+  validated.data.forEach((f) => data.append(category, f));
+  if (options)
+    Object.entries(options).map(([k, v]) => data.append(k, String(v)));
 
-  const schema = storageSchema
-    .pick({
-      id: true,
-      fileName: true,
-      category: true,
-      filePath: true,
-      mimeType: true,
-      fileSize: true,
-      fileUrl: true,
-    })
-    .array();
+  return { success: true, data };
+}
 
-  return await fetcher.api(url, { schema, method: "POST", body });
+export async function uploadFiles(
+  preparedFiles: FormData,
+): Promise<ActionResponse<UploadFilesData[]>> {
+  const body = preparedFiles;
+  const schema = uploadFilesDataSchema.array();
+  return await fetcher.api("/storage", { schema, method: "POST", body });
 }
 
 export async function removeFiles(ids: string[]) {
