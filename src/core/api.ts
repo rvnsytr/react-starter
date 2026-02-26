@@ -3,7 +3,6 @@ import { DataState } from "./components/ui/data-controller";
 import { apiConfig } from "./constants/app";
 
 export const apiResponseSchema = z.object({
-  code: z.number(),
   success: z.boolean(),
   message: z.string(),
   count: z

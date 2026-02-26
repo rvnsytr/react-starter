@@ -1,8 +1,11 @@
 export const appMeta = {
   name: "React Starter",
   description: "App description...",
-
   lang: "id",
+
+  baseUrl: import.meta.env.PROD
+    ? "https://yourdomain.com"
+    : "http://localhost:3000",
 
   logo: {
     default: `${import.meta.env.BASE_URL}logo.png`,
