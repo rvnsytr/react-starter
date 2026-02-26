@@ -6,14 +6,16 @@ import {
   formatNumberRange,
   sanitizeNumber,
 } from "@/core/utils/formaters";
-import { getExcelColumnKey } from "@/core/utils/helpers";
+import { cn, getExcelColumnKey } from "@/core/utils/helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FileSpreadsheetIcon,
   ImportIcon,
-  ListXIcon,
+  PlusIcon,
+  RefreshCcwDot,
   RotateCcwIcon,
   Settings2Icon,
+  XIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -49,16 +51,21 @@ import {
 import { Separator } from "./separator";
 import { LoadingSpinner } from "./spinner";
 
+type ReadExcelSheetMode = (typeof allReadExcelSheetModes)[number];
+const allReadExcelSheetModes = ["include", "exclude"] as const;
+const defaultMode: ReadExcelSheetMode = "include";
+
 type ImportDialogFormSchema = z.infer<typeof importDialogSchema>;
 
 export type ImportDialogProps<T, K extends string> = {
   source: Record<K, { label: string; column: number }>;
 
   onSubmit: (data: {
-    file: z.core.File;
+    files: z.core.File[];
     sheet: string;
+    mode: ReadExcelSheetMode;
     source: Record<K, number>;
-    skipRows: number[];
+    rows: number[];
   }) => Promise<T>;
   onSuccess?: (response: T) => string | undefined;
   onError?: (error: unknown) => string | undefined;
@@ -66,25 +73,24 @@ export type ImportDialogProps<T, K extends string> = {
   title?: string;
   description?: React.ReactNode;
   className?: string;
+  multiple?: boolean;
 
   renderTrigger?: React.ReactNode;
   children?: React.ReactNode;
 };
 
 const importDialogSchema = z.object({
-  file: sharedSchemas.files("spreadsheet", { min: 1 }),
-  sheet: sharedSchemas.string("Worksheet"),
+  files: sharedSchemas.files("spreadsheet", { min: 1 }),
+  sheet: sharedSchemas.string({ label: "Worksheet" }),
+  mode: z.enum(allReadExcelSheetModes),
   source: z
     .object({
-      key: sharedSchemas.string("Key", { min: 1 }),
-      label: sharedSchemas.string("Label"),
-      column: sharedSchemas.number("Nomor kolom", {
-        min: 1,
-        withRequired: false,
-      }),
+      key: sharedSchemas.string({ min: 1, withRequired: true }),
+      label: sharedSchemas.string({ min: 1 }),
+      column: sharedSchemas.number({ label: "Nomor kolom", min: 1 }),
     })
     .array(),
-  skipRows: sharedSchemas.string("Lewati baris", { sanitize: true }),
+  rows: sharedSchemas.string({ label: "Lewati baris" }),
 });
 
 export function ImportDialog<T, K extends string>({
@@ -97,23 +103,26 @@ export function ImportDialog<T, K extends string>({
   title,
   description,
   className,
+  multiple = true,
 
   renderTrigger,
   children,
 }: ImportDialogProps<T, K>) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [mode, setMode] = useState<ReadExcelSheetMode>(defaultMode);
 
   const form = useForm<ImportDialogFormSchema>({
     resolver: zodResolver(importDialogSchema),
     defaultValues: {
-      file: [],
+      files: [],
       source: Object.entries(source).map(([k, v]) => ({
         key: k,
         ...(v as { label: string; column: number }),
       })),
       sheet: "",
-      skipRows: "1",
+      mode: defaultMode,
+      rows: "1",
     },
   });
 
@@ -132,12 +141,13 @@ export function ImportDialog<T, K extends string>({
     toast.promise(
       async () =>
         await onSubmit({
-          file: formData.file[0],
+          files: formData.files,
           sheet: formData.sheet,
+          mode: formData.mode,
           source: Object.fromEntries(
             formData.source.map((v) => [v.key, v.column]),
           ) as Record<K, number>,
-          skipRows: parse(formData.skipRows),
+          rows: parse(formData.rows),
         }),
       {
         loading: messages.loading,
@@ -163,6 +173,8 @@ export function ImportDialog<T, K extends string>({
     </Button>
   );
 
+  const ModeIcon = mode === "include" ? PlusIcon : XIcon;
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -177,7 +189,7 @@ export function ImportDialog<T, K extends string>({
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
-            name="file"
+            name="files"
             control={form.control}
             render={({ field, fieldState }) => (
               <FieldWrapper
@@ -188,7 +200,8 @@ export function ImportDialog<T, K extends string>({
                 <FileUpload
                   id={field.name}
                   accept="spreadsheet"
-                  className="md:grid-cols-2"
+                  className="md:grid-cols-3"
+                  multiple={multiple}
                   required
                   {...field}
                 />
@@ -235,17 +248,39 @@ export function ImportDialog<T, K extends string>({
               />
 
               <Controller
-                name="skipRows"
+                name="rows"
                 control={form.control}
                 render={({ field, fieldState }) => {
                   const rows = formatNumberRange(parse(field.value));
                   return (
                     <FieldWrapper
-                      label="Lewati baris"
                       htmlFor={field.name}
                       errors={fieldState.error}
                     >
                       <InputGroup>
+                        <InputGroupAddon
+                          align="block-start"
+                          className="justify-between"
+                        >
+                          <div className="flex items-center gap-x-1">
+                            <ModeIcon className="size-4 shrink-0" />
+                            {mode === "include" ? "Muat" : "Lewati"} baris
+                          </div>
+
+                          <Button
+                            size="icon-xs"
+                            variant="outline"
+                            className="z-10"
+                            onClick={() =>
+                              setMode((prev) =>
+                                prev === "include" ? "exclude" : "include",
+                              )
+                            }
+                          >
+                            <RefreshCcwDot />
+                          </Button>
+                        </InputGroupAddon>
+
                         <InputGroupInput
                           type="text"
                           id={field.name}
@@ -255,8 +290,14 @@ export function ImportDialog<T, K extends string>({
                         />
 
                         <InputGroupAddon align="block-end" className="border-t">
-                          <ListXIcon className="shrink-0" />
-                          <InputGroupText className="*:text-destructive *:bg-destructive/10 dark:*:bg-destructive/20 gap-1 overflow-x-auto *:text-xs">
+                          <InputGroupText
+                            className={cn(
+                              "gap-1 overflow-x-auto *:text-xs",
+                              mode === "include"
+                                ? "*:text-foreground *:bg-foreground/10 dark:*:bg-foreground/20"
+                                : "*:text-destructive *:bg-destructive/10 dark:*:bg-destructive/20",
+                            )}
+                          >
                             {rows.length
                               ? rows.map((v) => <code key={v}>{v}</code>)
                               : "Tidak ada"}

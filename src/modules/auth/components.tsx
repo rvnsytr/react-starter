@@ -2496,8 +2496,10 @@ function BanUserDialog({
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = z.object({
-    banReason: sharedSchemas.string("Alasan diblokir").optional(),
-    banExpiresDate: sharedSchemas.date("Tanggal blokir berakhir").optional(),
+    banReason: sharedSchemas.string({ label: "Alasan diblokir" }).optional(),
+    banExpiresDate: sharedSchemas
+      .date({ label: "Tanggal blokir berakhir" })
+      .optional(),
   });
 
   const form = useForm<FormSchema>({
@@ -2699,7 +2701,7 @@ function RemoveUserDialog({
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = z
-    .object({ input: sharedSchemas.string("Nama") })
+    .object({ input: sharedSchemas.string({ label: "Nama" }) })
     .refine((sc) => sc.input === data.name, {
       message: messages.thingNotMatch("Nama"),
       path: ["input"],
@@ -2816,13 +2818,14 @@ function ActionRemoveUsersDialog({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const label = "Total pengguna yang dihapus";
   const inputValue = `Hapus ${String(data.length)} Pengguna`;
 
   type FormSchema = z.infer<typeof formSchema>;
   const formSchema = z
-    .object({ input: sharedSchemas.string("Total pengguna yang dihapus") })
+    .object({ input: sharedSchemas.string({ label }) })
     .refine((sc) => sc.input === inputValue, {
-      message: messages.thingNotMatch("Total pengguna yang dihapus"),
+      message: messages.thingNotMatch(label),
       path: ["input"],
     });
 
