@@ -20,6 +20,7 @@ import {
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { TextMorph } from "torph/react";
 import z from "zod";
 import { Button } from "./button";
 import {
@@ -112,6 +113,8 @@ export function ImportDialog<T, K extends string>({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<ReadExcelSheetMode>(defaultMode);
 
+  const isInclude = mode === "include";
+
   const form = useForm<ImportDialogFormSchema>({
     resolver: zodResolver(importDialogSchema),
     defaultValues: {
@@ -172,8 +175,6 @@ export function ImportDialog<T, K extends string>({
       <ImportIcon /> Import
     </Button>
   );
-
-  const ModeIcon = mode === "include" ? PlusIcon : XIcon;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -262,12 +263,32 @@ export function ImportDialog<T, K extends string>({
                           align="block-start"
                           className="justify-between"
                         >
-                          <div className="flex items-center gap-x-1">
-                            <ModeIcon className="size-4 shrink-0" />
-                            {mode === "include" ? "Muat" : "Lewati"} baris
+                          <div
+                            className={cn(
+                              "relative flex items-center gap-x-1 *:transition",
+                              !isInclude && "text-destructive",
+                            )}
+                          >
+                            <XIcon
+                              className={cn(
+                                "size-4",
+                                isInclude ? "scale-0" : "scale-100",
+                              )}
+                            />
+                            <PlusIcon
+                              className={cn(
+                                "absolute size-4",
+                                isInclude ? "scale-100" : "scale-0",
+                              )}
+                            />
+
+                            <TextMorph>
+                              {isInclude ? "Muat baris" : "Lewati baris"}
+                            </TextMorph>
                           </div>
 
                           <Button
+                            type="button"
                             size="icon-xs"
                             variant="outline"
                             className="z-10"
@@ -292,8 +313,8 @@ export function ImportDialog<T, K extends string>({
                         <InputGroupAddon align="block-end" className="border-t">
                           <InputGroupText
                             className={cn(
-                              "gap-1 overflow-x-auto *:text-xs",
-                              mode === "include"
+                              "gap-1 overflow-x-auto *:text-xs *:transition",
+                              isInclude
                                 ? "*:text-foreground *:bg-foreground/10 dark:*:bg-foreground/20"
                                 : "*:text-destructive *:bg-destructive/10 dark:*:bg-destructive/20",
                             )}
