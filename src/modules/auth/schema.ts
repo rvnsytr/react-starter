@@ -29,6 +29,8 @@ export const userSchema = betterAuthUserSchema.extend({
   banned: z.boolean().optional().nullable(),
   banReason: z.string().optional().nullable(),
   banExpires: z.date().optional().nullable(),
+  updatedAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
 });
 
 export const sessionSchema = betterAuthSessionSchema.extend({
