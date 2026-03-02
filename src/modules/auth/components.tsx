@@ -830,13 +830,16 @@ export function UserStatusBadge({
 }
 
 export function UserRoleBadge({
+  withText = false,
   value,
   className,
 }: {
+  withText?: boolean;
   value: Role;
   className?: string;
 }) {
   const { displayName, description, icon: Icon, color } = rolesMeta[value];
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -848,7 +851,7 @@ export function UserRoleBadge({
             className,
           )}
         >
-          <Icon /> {displayName}
+          <Icon /> {withText && displayName}
         </Badge>
       </TooltipTrigger>
       <TooltipContent
@@ -863,15 +866,19 @@ export function UserRoleBadge({
 }
 
 export function UserVerifiedBadge({
-  noText = false,
+  withText = false,
   className,
   classNames,
 }: {
-  noText?: boolean;
+  withText?: boolean;
   className?: string;
   classNames?: { badge?: string; icon?: string; content?: string };
 }) {
-  return noText ? (
+  return withText ? (
+    <Badge variant="success" className={cn("capitalize", classNames?.badge)}>
+      <BadgeCheckIcon className={classNames?.icon} /> Terverifikasi
+    </Badge>
+  ) : (
     <Tooltip>
       <TooltipTrigger className={className} asChild>
         <BadgeCheckIcon
@@ -885,10 +892,6 @@ export function UserVerifiedBadge({
         Terverifikasi.
       </TooltipContent>
     </Tooltip>
-  ) : (
-    <Badge variant="success" className={cn("capitalize", classNames?.badge)}>
-      <BadgeCheckIcon className={classNames?.icon} /> Terverifikasi
-    </Badge>
   );
 }
 
@@ -960,7 +963,7 @@ const getUserColumns = (
     cell: (c) => (
       <div className="flex items-center gap-x-2">
         <span>{c.cell.getValue()}</span>
-        {c.row.original.emailVerified && <UserVerifiedBadge noText />}
+        {c.row.original.emailVerified && <UserVerifiedBadge withText={false} />}
       </div>
     ),
     filterFn: filterFn("text"),
@@ -1149,7 +1152,7 @@ export function UserDetailDialog({
             <div className="grid">
               <SheetTitle className="flex gap-x-2">
                 <span className="text-base">{data.name}</span>
-                {data.emailVerified && <UserVerifiedBadge noText />}
+                {data.emailVerified && <UserVerifiedBadge withText={false} />}
               </SheetTitle>
               <SheetDescription>{data.email}</SheetDescription>
             </div>

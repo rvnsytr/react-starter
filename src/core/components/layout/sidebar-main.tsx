@@ -66,19 +66,22 @@ export function SidebarMain() {
                 />
 
                 <div className="grid break-all">
-                  <div className="flex gap-x-2">
-                    <span className="line-clamp-1 text-sm font-semibold">
+                  <div className="flex gap-x-2 truncate">
+                    <span className="line-clamp-1 text-sm font-semibold tracking-tight">
                       {user.name}
                     </span>
+
                     {user.emailVerified && (
                       <UserVerifiedBadge
                         classNames={{ icon: "size-3.5" }}
-                        noText
+                        withText={false}
                       />
                     )}
                   </div>
 
-                  <span className="line-clamp-1 text-xs">{user.email}</span>
+                  <span className="text-muted-foreground line-clamp-1 text-xs">
+                    {user.email}
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
