@@ -53,6 +53,7 @@ import {
   CommandItem,
   CommandList,
 } from "./command";
+import { useDataController } from "./data-controller";
 import { Input } from "./input";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Slider } from "./slider";
@@ -180,6 +181,8 @@ export function ResetFilters<TData>({
   variant = "outline",
   ...props
 }: Omit<ButtonProps, "onClick"> & { table: Table<TData> }) {
+  const dc = useDataController();
+
   return (
     <Button
       size={size}
@@ -187,9 +190,11 @@ export function ResetFilters<TData>({
       onClick={() => {
         table.reset();
 
-        table.resetPagination();
-        table.resetPageIndex();
-        table.resetPageSize();
+        // table.resetPagination();
+        if (dc.defaultState?.page) table.setPageIndex(dc.defaultState.page);
+        else table.resetPageIndex();
+        if (dc.defaultState?.size) table.setPageSize(dc.defaultState.size);
+        else table.resetPageSize();
 
         table.resetColumnOrder();
         table.resetColumnSizing();

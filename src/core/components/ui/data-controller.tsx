@@ -34,7 +34,14 @@ import {
   SearchIcon,
   ViewIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import useSWR, { mutate, SWRConfiguration, SWRResponse } from "swr";
 import z from "zod";
 import { Button, ButtonProps } from "./button";
@@ -245,8 +252,17 @@ function columnFiltersParser<TData>() {
 
 // #endregion
 
-export const dataSizes = [5, 10, 20, 30, 40, 50, 100];
-export const defaultDataSize = dataSizes[1];
+type DataControllerContextType = {
+  state: DataState;
+  defaultState?: DataQueryState;
+};
+
+const DataControllerContext = createContext<
+  DataControllerContextType | undefined
+>(undefined);
+
+export const pageSizes = [5, 10, 20, 30, 40, 50, 100];
+export const defaultPageSize = pageSizes[1];
 
 export const mutateData = (key: string) =>
   mutate((a) => !!a && typeof a === "object" && "key" in a && a.key === key);
@@ -295,7 +311,7 @@ export function DataController<TData>({
 
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: defaultState?.page ? defaultState.page - 1 : 0,
-    pageSize: defaultState?.size ?? defaultDataSize,
+    pageSize: defaultState?.size ?? defaultPageSize,
   });
 
   const debouncedGlobalFilter = useDebounce(globalFilter);
@@ -325,7 +341,7 @@ export function DataController<TData>({
 
       page: pagination.pageIndex > 0 ? pagination.pageIndex + 1 : undefined,
       size:
-        pagination.pageSize !== defaultDataSize
+        pagination.pageSize !== defaultPageSize
           ? pagination.pageSize
           : undefined,
     } satisfies DataQueryState);
@@ -408,7 +424,21 @@ export function DataController<TData>({
   if (!result.isLoading && !result.data?.success)
     return <ErrorFallback error={result.data?.error} />;
 
-  return render({ result, table, columns: resolvedColumns });
+  return (
+    <DataControllerContext.Provider value={{ state: dataState, defaultState }}>
+      {render({ result, table, columns: resolvedColumns })}
+    </DataControllerContext.Provider>
+  );
+}
+
+export function useDataController() {
+  const ctx = useContext(DataControllerContext);
+  if (!ctx) {
+    const message =
+      "useDataControllerState must be used in DataControllerProvider";
+    throw new Error(message);
+  }
+  return ctx;
 }
 
 export function DataControllerVisibility<TData>({
@@ -569,14 +599,19 @@ export function DataControllerPaginationNav<TData>({
 
 export function DataControllerPageSize<TData>({
   table,
+  initialSizeState,
   size = "sm",
   ...props
 }: React.ComponentProps<typeof SelectTrigger> & {
   table: TableType<TData>;
+  initialSizeState?: number;
 }) {
+  const value =
+    table.getState().pagination.pageSize ?? initialSizeState ?? defaultPageSize;
+
   return (
     <Select
-      value={String(table.getState().pagination.pageSize ?? defaultDataSize)}
+      value={String(value)}
       onValueChange={(value) => table.setPageSize(Number(value))}
     >
       <SelectTrigger size={size} {...props}>
@@ -584,11 +619,11 @@ export function DataControllerPageSize<TData>({
       </SelectTrigger>
 
       <SelectContent>
-        {dataSizes.map((v) => (
+        {pageSizes.map((v) => (
           <SelectItem
             key={v}
             value={String(v)}
-            className={cn(v === defaultDataSize && "font-semibold")}
+            className={cn(v === defaultPageSize && "font-semibold")}
           >
             {formatNumber(v)}
           </SelectItem>
