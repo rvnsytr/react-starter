@@ -59,7 +59,7 @@ const defaultMode: ReadExcelSheetMode = "include";
 type ImportDialogFormSchema = z.infer<typeof importDialogSchema>;
 
 export type ImportDialogProps<T, K extends string> = {
-  source: Record<K, { label: string; column: number }>;
+  source: Record<K, Omit<ImportDialogFormSchema["source"][number], "key">>;
 
   onSubmit: (data: {
     files: z.core.File[];
@@ -89,6 +89,7 @@ const importDialogSchema = z.object({
       key: sharedSchemas.string({ min: 1, withRequired: true }),
       label: sharedSchemas.string({ min: 1 }),
       column: sharedSchemas.number({ label: "Nomor kolom", min: 1 }),
+      required: z.boolean().optional(),
     })
     .array(),
   rows: sharedSchemas.string({ label: "Lewati baris" }),
@@ -121,7 +122,7 @@ export function ImportDialog<T, K extends string>({
       files: [],
       source: Object.entries(source).map(([k, v]) => ({
         key: k,
-        ...(v as { label: string; column: number }),
+        ...(v as ImportDialogFormSchema["source"]),
       })),
       sheet: "",
       mode: defaultMode,
@@ -353,7 +354,10 @@ export function ImportDialog<T, K extends string>({
                         <div className="grid grid-cols-4 gap-x-4">
                           <FieldLabel
                             htmlFor={field.name}
-                            className="col-span-2"
+                            className={cn(
+                              "col-span-2",
+                              item.required && "label-required",
+                            )}
                           >
                             {item.label}
                           </FieldLabel>
