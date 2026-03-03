@@ -547,7 +547,7 @@ export function DataControllerPaginationNav<TData>({
   size = "icon",
   variant = "outline",
   className,
-  disabled,
+  disabled = false,
   ...props
 }: Omit<ButtonProps, "onClick"> & {
   table: TableType<TData>;
@@ -558,7 +558,7 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.firstPage()}
-        disabled={disabled ?? !table.getCanPreviousPage()}
+        disabled={disabled || !table.getCanPreviousPage()}
         {...props}
       >
         <ChevronsLeftIcon />
@@ -568,7 +568,7 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.previousPage()}
-        disabled={disabled ?? !table.getCanPreviousPage()}
+        disabled={disabled || !table.getCanPreviousPage()}
         {...props}
       >
         <ChevronLeftIcon />
@@ -578,7 +578,7 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.nextPage()}
-        disabled={disabled ?? !table.getCanNextPage()}
+        disabled={disabled || !table.getCanNextPage()}
         {...props}
       >
         <ChevronRightIcon />
@@ -588,7 +588,7 @@ export function DataControllerPaginationNav<TData>({
         size={size}
         variant={variant}
         onClick={() => table.lastPage()}
-        disabled={disabled ?? !table.getCanNextPage()}
+        disabled={disabled || !table.getCanNextPage()}
         {...props}
       >
         <ChevronsRightIcon />

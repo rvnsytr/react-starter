@@ -88,7 +88,7 @@ export async function removeFiles(ids: string[]) {
   return await fetcher.api("/storage", {
     schema: z.null(),
     method: "DELETE",
-    body: JSON.stringify({ ids }),
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
   });
 }

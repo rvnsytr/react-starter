@@ -59,8 +59,8 @@ fetcher.data = async <T>(
   await fetcher.api(key, {
     ...config,
     method: "POST",
-    body: JSON.stringify(state),
     headers: { "Content-Type": "application/json", ...config?.headers },
+    body: JSON.stringify(state),
   });
 
 export { fetcher };

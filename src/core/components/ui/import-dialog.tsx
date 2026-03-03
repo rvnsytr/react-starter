@@ -110,7 +110,6 @@ export function ImportDialog<T, K extends string>({
   renderTrigger,
   children,
 }: ImportDialogProps<T, K>) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<ReadExcelSheetMode>(defaultMode);
 
@@ -140,14 +139,11 @@ export function ImportDialog<T, K extends string>({
 
   const formHandler = (formData: ImportDialogFormSchema) => {
     setIsLoading(true);
-    setIsOpen(true);
 
     toast.promise(
       async () =>
         await onSubmit({
-          files: formData.files,
-          sheet: formData.sheet,
-          mode: formData.mode,
+          ...formData,
           source: Object.fromEntries(
             formData.source.map((v) => [v.key, v.column]),
           ) as Record<K, number>,
@@ -156,8 +152,8 @@ export function ImportDialog<T, K extends string>({
       {
         loading: messages.loading,
         success: (res) => {
+          setMode(defaultMode);
           setIsLoading(false);
-          setIsOpen(false);
           form.reset();
           const message = onSuccess?.(res);
           return message ?? "Sukses";
@@ -178,7 +174,7 @@ export function ImportDialog<T, K extends string>({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent className={className}>
@@ -294,9 +290,12 @@ export function ImportDialog<T, K extends string>({
                             variant="outline"
                             className="z-10"
                             onClick={() =>
-                              setMode((prev) =>
-                                prev === "include" ? "exclude" : "include",
-                              )
+                              setMode((prev) => {
+                                const newMode =
+                                  prev === "include" ? "exclude" : "include";
+                                form.setValue("mode", newMode);
+                                return newMode;
+                              })
                             }
                           >
                             <RefreshCcwDot />
