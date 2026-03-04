@@ -830,12 +830,12 @@ export function UserStatusBadge({
 }
 
 export function UserRoleBadge({
-  withText = false,
   value,
+  withText = true,
   className,
 }: {
-  withText?: boolean;
   value: Role;
+  withText?: boolean;
   className?: string;
 }) {
   const { displayName, description, icon: Icon, color } = rolesMeta[value];
@@ -866,7 +866,7 @@ export function UserRoleBadge({
 }
 
 export function UserVerifiedBadge({
-  withText = false,
+  withText = true,
   className,
   classNames,
 }: {
@@ -962,7 +962,7 @@ const getUserColumns = (
     ),
     cell: (c) => (
       <div className="flex items-center gap-x-2">
-        <span>{c.cell.getValue()}</span>
+        {c.cell.getValue()}
         {c.row.original.emailVerified && <UserVerifiedBadge withText={false} />}
       </div>
     ),

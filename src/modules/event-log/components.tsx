@@ -14,7 +14,6 @@ import {
   ResetFilters,
 } from "@/core/components/ui/data-filter";
 import { LoadingFallback } from "@/core/components/ui/fallback";
-import { Label } from "@/core/components/ui/label";
 import { Separator } from "@/core/components/ui/separator";
 import {
   Timeline,
@@ -30,6 +29,7 @@ import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/data-filter";
 import { formatDate } from "@/core/utils/date";
 import { formatNumber } from "@/core/utils/formaters";
+import { cn } from "@/core/utils/helpers";
 import { createColumnHelper } from "@tanstack/react-table";
 import { CalendarCheck2Icon, RouteIcon } from "lucide-react";
 import { allEventLogType, EventLog, getEventLogMeta } from "./constants";
@@ -90,9 +90,9 @@ const getEventLogColumns = (result?: {
 export function EventLogTimeline({
   url,
   userId,
+  className,
   ...props
-}: DataQueryStateProps &
-  (
+}: DataQueryStateProps & { className?: string } & (
     | { url: "/event-log" | "/event-log/me"; userId?: never }
     | { url: "/event-log/:id"; userId: string }
   )) {
@@ -109,6 +109,7 @@ export function EventLogTimeline({
           fetcher: async (state) => await fetcher.data(key, state, { schema }),
         }}
         columns={(result) => getEventLogColumns(result)}
+        defaultState={{ size: 5 }}
         render={({ result, table }) => {
           const { data: res, isLoading } = result;
 
@@ -116,7 +117,7 @@ export function EventLogTimeline({
           const pageCount = table.getPageCount();
 
           return (
-            <div className="flex flex-col gap-y-4">
+            <div className={cn("flex flex-col gap-y-4", className)}>
               <div className="flex gap-x-2">
                 <FilterSelector table={table} size="sm" disabled={isLoading} />
                 <ResetFilters table={table} size="sm" disabled={isLoading} />
@@ -177,22 +178,18 @@ export function EventLogTimeline({
                 </div>
               )}
 
-              <div className="flex w-full flex-col items-center gap-4 text-center lg:flex-row">
-                <div className="order-3 flex shrink-0 items-center gap-x-2 lg:order-1 lg:mr-auto">
-                  <Label>Data per halaman</Label>
-                  <DataControllerPageSize
-                    table={table}
-                    size="sm"
-                    disabled={isLoading}
-                  />
-                </div>
+              <div className="flex w-full items-center justify-between gap-2">
+                <DataControllerPageSize
+                  table={table}
+                  size="sm"
+                  disabled={isLoading}
+                />
 
-                <small className="order-1 shrink-0 tabular-nums lg:order-2">
-                  Halaman{" "}
+                <small className="shrink-0 tabular-nums">
                   {isLoading
                     ? "?"
-                    : formatNumber(state.pagination.pageIndex + 1)}{" "}
-                  dari{" "}
+                    : formatNumber(state.pagination.pageIndex + 1)}
+                  {" / "}
                   {isLoading
                     ? "?"
                     : formatNumber(pageCount > 0 ? pageCount : 1)}
@@ -201,7 +198,7 @@ export function EventLogTimeline({
                 <DataControllerPaginationNav
                   table={table}
                   size="icon-sm"
-                  className="order-2 shrink-0 lg:order-3"
+                  className="shrink-0"
                   disabled={isLoading}
                 />
               </div>
