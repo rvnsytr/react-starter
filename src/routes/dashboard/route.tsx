@@ -5,6 +5,7 @@ import {
   SidebarMainSiteHeader,
 } from "@/core/components/layout/sidebar-main";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
+import { BreadcrumbProvider } from "@/core/providers/breadcrumb";
 import { LayoutProvider } from "@/core/providers/layout";
 import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/route";
 import { useSession } from "@/modules/auth/hooks";
@@ -41,24 +42,26 @@ function DashboardLayout() {
 
   return (
     <AuthProvider session={session ?? loader.session}>
-      <LayoutProvider>
-        <div className="[--header-height:calc(--spacing(14))]">
-          <SidebarProvider className="flex flex-col">
-            <SidebarMainSiteHeader />
+      <BreadcrumbProvider>
+        <LayoutProvider>
+          <div className="[--header-height:calc(--spacing(14))]">
+            <SidebarProvider className="flex flex-col">
+              <SidebarMainSiteHeader />
 
-            <div className="flex flex-1">
-              <SidebarMain />
+              <div className="flex flex-1">
+                <SidebarMain />
 
-              <SidebarInset>
-                <Outlet />
-                <footer className="bg-background/90 z-10 mt-auto flex items-center justify-center border-t py-4 text-center md:h-12.5">
-                  <FooterNote className="container" />
-                </footer>
-              </SidebarInset>
-            </div>
-          </SidebarProvider>
-        </div>
-      </LayoutProvider>
+                <SidebarInset>
+                  <Outlet />
+                  <footer className="bg-background/90 z-10 mt-auto flex items-center justify-center border-t py-4 text-center md:h-12.5">
+                    <FooterNote className="container" />
+                  </footer>
+                </SidebarInset>
+              </div>
+            </SidebarProvider>
+          </div>
+        </LayoutProvider>
+      </BreadcrumbProvider>
     </AuthProvider>
   );
 }

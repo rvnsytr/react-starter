@@ -1,5 +1,5 @@
-import { getRouteHierarchy, normalizeRoute, routesMeta } from "@/core/route";
-import { Link, useLocation } from "@tanstack/react-router";
+import { useBreadcrumb } from "@/core/providers/breadcrumb";
+import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {
   Breadcrumb,
@@ -17,20 +17,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+import { Skeleton } from "./skeleton";
 
 // type DynamicBreadcrumbContent = { href: Route; label: string };
 // type DynamicBreadcrumbData = Route | DynamicBreadcrumbContent;
 
 export function DynamicBreadcrumb({ className }: { className?: string }) {
-  const { pathname } = useLocation();
+  const { breadcrumbs } = useBreadcrumb();
 
-  const breadcrumbs = getRouteHierarchy(normalizeRoute(pathname))
-    .map((r) => {
-      const meta = routesMeta[r];
-      if (!meta) return null;
-      return typeof r === "string" ? { href: r, label: meta.displayName } : r;
-    })
-    .filter((v) => !!v);
+  if (!breadcrumbs.length) return <Skeleton className="h-4 w-48" />;
 
   const isCompact = breadcrumbs.length > 3;
   const lastPart = breadcrumbs[breadcrumbs.length - 1];
