@@ -1,5 +1,4 @@
-import { useIsMobile } from "@/core/hooks/use-is-mobile";
-import { normalizeRoute, Route, routesMeta } from "@/core/route";
+import { getRouteHierarchy, normalizeRoute, routesMeta } from "@/core/route";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {
@@ -11,6 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./breadcrumb";
+import { Button } from "./button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,63 +18,63 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
-type DynamicBreadcrumbContent = { href: Route; label: string };
-type DynamicBreadcrumbData = Route | DynamicBreadcrumbContent;
-export type DynamicBreadcrumbProps = {
-  breadcrumb?: DynamicBreadcrumbData[];
-  currentPage?: string;
-};
+// type DynamicBreadcrumbContent = { href: Route; label: string };
+// type DynamicBreadcrumbData = Route | DynamicBreadcrumbContent;
 
-function getProps(data: DynamicBreadcrumbData): DynamicBreadcrumbContent {
-  return typeof data === "string"
-    ? { href: data, label: routesMeta[data].displayName }
-    : data;
-}
-
-export function DynamicBreadcrumb({
-  breadcrumb,
-  currentPage,
-  className,
-}: DynamicBreadcrumbProps & { className?: string }) {
+export function DynamicBreadcrumb({ className }: { className?: string }) {
   const { pathname } = useLocation();
-  const isMobile = useIsMobile();
+
+  const breadcrumbs = getRouteHierarchy(normalizeRoute(pathname)).map((r) => {
+    const meta = routesMeta[r];
+    return typeof r === "string" ? { href: r, label: meta.displayName } : r;
+  });
+
+  const withDropdown = breadcrumbs.length > 3;
+  const lastPart = breadcrumbs[breadcrumbs.length - 1];
 
   return (
     <Breadcrumb className={className}>
       <BreadcrumbList>
-        {breadcrumb?.map((item, index) => {
-          const { href, label } = getProps(item);
-          if (isMobile && index !== 0) return;
+        <BreadcrumbSeparator>/</BreadcrumbSeparator>
 
-          return (
-            <Fragment key={href}>
-              <BreadcrumbItem className="shrink-0">
-                <BreadcrumbLink asChild>
-                  <Link to={href} className="link">
-                    {label}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>/</BreadcrumbSeparator>
-            </Fragment>
-          );
-        })}
+        {breadcrumbs.length > 1 &&
+          breadcrumbs.map((br, i) => {
+            if (
+              (withDropdown && i > 0) ||
+              (!withDropdown && (i > 1 || i === breadcrumbs.length - 1))
+            )
+              return;
 
-        {breadcrumb && breadcrumb.length > 2 && (
+            return (
+              <Fragment key={br.href}>
+                <BreadcrumbItem className="shrink-0">
+                  <BreadcrumbLink asChild>
+                    <Link to={br.href} className="link">
+                      {br.label}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+
+                <BreadcrumbSeparator>/</BreadcrumbSeparator>
+              </Fragment>
+            );
+          })}
+
+        {withDropdown && (
           <>
-            <BreadcrumbItem className="mx-0.5 md:hidden">
+            <BreadcrumbItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <BreadcrumbEllipsis />
+                  <Button size="icon-xs" variant="ghost">
+                    <BreadcrumbEllipsis />
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  {breadcrumb?.map((item, index) => {
-                    const { href, label } = getProps(item);
-                    if (isMobile && index === 0) return;
-
+                  {breadcrumbs.map((br, i) => {
+                    if ([0, breadcrumbs.length - 1].includes(i)) return;
                     return (
-                      <DropdownMenuItem key={href} asChild>
-                        <Link to={href}>{label}</Link>
+                      <DropdownMenuItem key={br.href} className="h-7" asChild>
+                        <Link to={br.href}>{br.label}</Link>
                       </DropdownMenuItem>
                     );
                   })}
@@ -82,14 +82,12 @@ export function DynamicBreadcrumb({
               </DropdownMenu>
             </BreadcrumbItem>
 
-            <BreadcrumbSeparator className="md:hidden">/</BreadcrumbSeparator>
+            <BreadcrumbSeparator>/</BreadcrumbSeparator>
           </>
         )}
 
         <BreadcrumbItem>
-          <BreadcrumbPage className="line-clamp-1 cursor-default text-ellipsis">
-            {currentPage ?? routesMeta[normalizeRoute(pathname)]?.displayName}
-          </BreadcrumbPage>
+          <BreadcrumbPage>{lastPart.label}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

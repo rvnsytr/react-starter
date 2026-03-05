@@ -93,7 +93,7 @@ export function SidebarMain() {
 
         <SidebarSeparator className="flex lg:hidden" />
 
-        <CommandPalette data={menu} className="mt-2 lg:mt-0" />
+        <CommandPalette data={menu} className="mt-0 lg:mt-2" />
       </SidebarHeader>
 
       {/* Content */}
@@ -229,16 +229,15 @@ export function SidebarMainSiteHeader() {
       <div className="flex h-(--header-height) w-full items-center justify-between gap-2 px-4">
         <div className="flex items-center gap-x-2">
           <SidebarToggle align="start" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Separator orientation="vertical" className="h-4" />
           <Link
             to="/dashboard"
-            className="font-mono text-sm font-medium tracking-tight"
+            className="mx-2 font-mono text-sm font-medium tracking-tight"
           >
             {appMeta.name}
           </Link>
+          <DynamicBreadcrumb className="hidden md:flex" />
         </div>
-
-        <DynamicBreadcrumb className="hidden lg:flex" />
 
         <div className="flex items-center gap-x-2">
           <ImpersonateUserBadge />

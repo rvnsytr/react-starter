@@ -44,6 +44,31 @@ export function getRouteTitle(route: Route) {
   return setRouteTitle(routesMeta[route].displayName);
 }
 
+export function getRouteHierarchy(path: string): Route[] {
+  const parts = path.split("/").filter(Boolean);
+  return parts.map((_, i) => "/" + parts.slice(0, i + 1).join("/")) as Route[];
+}
+
+export function getActiveRoute(pathname: string) {
+  const allRoutes = Object.keys(routesMeta) as Route[];
+  const allMenuRoutes = dashboardMenu.flatMap((m) =>
+    m.content.map((c) => c.route),
+  );
+
+  const parts = pathname.split("/").filter(Boolean);
+  const paths: string[] = [];
+
+  for (let i = parts.length; i > 0; i--)
+    paths.push("/" + parts.slice(0, i).join("/"));
+
+  paths.push("/");
+
+  for (const path of paths) {
+    const p = path as Route;
+    if (allMenuRoutes.includes(p) && allRoutes.includes(p)) return p;
+  }
+}
+
 export function getMenuByRole(
   currentRole: Role,
   menu: Menu[] = dashboardMenu,
@@ -72,24 +97,4 @@ export function getMenuByRole(
   });
 
   return filteredMenu.filter((item) => item !== null);
-}
-
-export function getActiveRoute(pathname: string) {
-  const allRoutes = Object.keys(routesMeta) as Route[];
-  const allMenuRoutes = dashboardMenu.flatMap((m) =>
-    m.content.map((c) => c.route),
-  );
-
-  const parts = pathname.split("/").filter(Boolean);
-  const paths: string[] = [];
-
-  for (let i = parts.length; i > 0; i--)
-    paths.push("/" + parts.slice(0, i).join("/"));
-
-  paths.push("/");
-
-  for (const path of paths) {
-    const p = path as Route;
-    if (allMenuRoutes.includes(p) && allRoutes.includes(p)) return p;
-  }
 }

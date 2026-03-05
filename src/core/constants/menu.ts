@@ -1,6 +1,5 @@
 import { LinkProps } from "@tanstack/react-router";
 import {
-  CircleHelpIcon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
   LucideIcon,
@@ -59,10 +58,4 @@ export const dashboardMenu: Menu[] = [
 
 export const dashboardfooterMenu: (MenuContent & { displayName: string })[] = [
   { route: "/", displayName: "Beranda", icon: ExternalLinkIcon },
-  {
-    route: "/dashboard",
-    displayName: "Bantuan",
-    icon: CircleHelpIcon,
-    disabled: true,
-  },
 ];
