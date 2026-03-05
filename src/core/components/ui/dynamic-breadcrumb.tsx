@@ -24,12 +24,15 @@ import {
 export function DynamicBreadcrumb({ className }: { className?: string }) {
   const { pathname } = useLocation();
 
-  const breadcrumbs = getRouteHierarchy(normalizeRoute(pathname)).map((r) => {
-    const meta = routesMeta[r];
-    return typeof r === "string" ? { href: r, label: meta.displayName } : r;
-  });
+  const breadcrumbs = getRouteHierarchy(normalizeRoute(pathname))
+    .map((r) => {
+      const meta = routesMeta[r];
+      if (!meta) return null;
+      return typeof r === "string" ? { href: r, label: meta.displayName } : r;
+    })
+    .filter((v) => !!v);
 
-  const withDropdown = breadcrumbs.length > 3;
+  const isCompact = breadcrumbs.length > 3;
   const lastPart = breadcrumbs[breadcrumbs.length - 1];
 
   return (
@@ -40,8 +43,8 @@ export function DynamicBreadcrumb({ className }: { className?: string }) {
         {breadcrumbs.length > 1 &&
           breadcrumbs.map((br, i) => {
             if (
-              (withDropdown && i > 0) ||
-              (!withDropdown && (i > 1 || i === breadcrumbs.length - 1))
+              (isCompact && i > 0) ||
+              (!isCompact && (i > 1 || i === breadcrumbs.length - 1))
             )
               return;
 
@@ -60,7 +63,7 @@ export function DynamicBreadcrumb({ className }: { className?: string }) {
             );
           })}
 
-        {withDropdown && (
+        {isCompact && (
           <>
             <BreadcrumbItem>
               <DropdownMenu>
@@ -87,7 +90,9 @@ export function DynamicBreadcrumb({ className }: { className?: string }) {
         )}
 
         <BreadcrumbItem>
-          <BreadcrumbPage>{lastPart.label}</BreadcrumbPage>
+          <BreadcrumbPage className="line-clamp-1">
+            {lastPart.label}
+          </BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

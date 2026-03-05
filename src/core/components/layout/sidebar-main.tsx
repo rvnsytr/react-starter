@@ -11,7 +11,7 @@ import {
 } from "@/modules/auth/components";
 import { useAuth } from "@/modules/auth/provider.auth";
 import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronUpIcon } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import {
   Collapsible,
@@ -142,8 +142,8 @@ export function SidebarMain() {
                       {subMenu && (
                         <>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuAction className="*:transition-transform data-[state=open]:*:rotate-180">
-                              <ChevronUpIcon />
+                            <SidebarMenuAction className="*:transition-transform data-[state=open]:*:rotate-90">
+                              <ChevronRightIcon />
                             </SidebarMenuAction>
                           </CollapsibleTrigger>
 
@@ -225,8 +225,8 @@ export function SidebarMainSiteHeader() {
   const { user } = useAuth();
 
   return (
-    <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
-      <div className="flex h-(--header-height) w-full items-center justify-between gap-2 px-4">
+    <header className="bg-background sticky top-0 z-50 w-full">
+      <div className="flex h-(--header-height) items-center justify-between gap-2 border-b px-4">
         <div className="flex items-center gap-x-2">
           <SidebarToggle align="start" />
           <Separator orientation="vertical" className="h-4" />
@@ -250,6 +250,10 @@ export function SidebarMainSiteHeader() {
             <UserAvatar data={user} className="rounded-md" />
           </Link>
         </div>
+      </div>
+
+      <div className="overflow-x-auto border-b px-4 py-2 **:text-xs md:hidden">
+        <DynamicBreadcrumb />
       </div>
     </header>
   );
