@@ -6,10 +6,10 @@ import {
   useLayout,
 } from "@/core/providers/layout";
 import { cn } from "@/core/utils/helpers";
-import { useHotkey } from "@tanstack/react-hotkeys";
+import { formatForDisplay, useHotkey } from "@tanstack/react-hotkeys";
 import { Button, ButtonProps } from "./button";
 import { Field, FieldContent, FieldLabel, FieldTitle } from "./field";
-import { Kbd, KbdGroup } from "./kbd";
+import { Kbd } from "./kbd";
 import { RadioGroup, RadioGroupItem } from "./radio-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
@@ -59,11 +59,7 @@ export function LayoutToggle({
         className="flex flex-col items-center gap-2"
       >
         <span>Toggle Layout</span>
-        <KbdGroup>
-          <Kbd>Alt</Kbd>
-          <span>+</span>
-          <Kbd>L</Kbd>
-        </KbdGroup>
+        <Kbd>{formatForDisplay(LAYOUT_TOGGLE_HOTKEY)}</Kbd>
       </TooltipContent>
     </Tooltip>
   );

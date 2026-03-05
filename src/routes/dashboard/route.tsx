@@ -1,6 +1,9 @@
 import { FooterNote } from "@/core/components/layout/footer-note";
 import { NotFound } from "@/core/components/layout/not-found";
-import { SidebarMain } from "@/core/components/layout/sidebar-main";
+import {
+  SidebarMain,
+  SidebarMainSiteHeader,
+} from "@/core/components/layout/sidebar-main";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
 import { LayoutProvider } from "@/core/providers/layout";
 import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/route";
@@ -38,18 +41,24 @@ function DashboardLayout() {
 
   return (
     <AuthProvider session={session ?? loader.session}>
-      <SidebarProvider>
-        <SidebarMain />
+      <LayoutProvider>
+        <div className="[--header-height:calc(--spacing(14))]">
+          <SidebarProvider className="flex flex-col">
+            <SidebarMainSiteHeader />
 
-        <SidebarInset>
-          <LayoutProvider>
-            <Outlet />
-          </LayoutProvider>
-          <footer className="bg-background/90 z-10 mt-auto flex items-center justify-center border-t py-4 text-center md:h-12.5">
-            <FooterNote className="container" />
-          </footer>
-        </SidebarInset>
-      </SidebarProvider>
+            <div className="flex flex-1">
+              <SidebarMain />
+
+              <SidebarInset>
+                <Outlet />
+                <footer className="bg-background/90 z-10 mt-auto flex items-center justify-center border-t py-4 text-center md:h-12.5">
+                  <FooterNote className="container" />
+                </footer>
+              </SidebarInset>
+            </div>
+          </SidebarProvider>
+        </div>
+      </LayoutProvider>
     </AuthProvider>
   );
 }

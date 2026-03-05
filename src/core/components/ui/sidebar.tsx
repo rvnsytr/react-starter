@@ -2,7 +2,7 @@ import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { cn } from "@/core/utils/helpers";
 import { formatForDisplay, Hotkey, useHotkey } from "@tanstack/react-hotkeys";
 import { cva, VariantProps } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import { SidebarCloseIcon, SidebarOpenIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 import {
   createContext,
@@ -242,27 +242,29 @@ function Sidebar({
   );
 }
 
-function SidebarTrigger({
-  align,
+function SidebarToggle({
+  align = "start",
+  className,
   onClick,
   ...props
 }: ButtonProps & Pick<React.ComponentProps<typeof TooltipContent>, "align">) {
   const isMobile = useIsMobile();
-  const { toggleSidebar } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
 
   const element = (
     <Button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
+      size="icon-sm"
       variant="ghost"
-      size="icon"
+      className={cn("*:transition", className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      {open ? <SidebarOpenIcon /> : <SidebarCloseIcon />}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
@@ -561,7 +563,7 @@ function SidebarMenuAction({
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
       className={cn(
-        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform group-data-[collapsible=icon]:hidden peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 after:absolute after:-inset-2 focus-visible:ring-2 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0",
+        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 z-10 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform group-data-[collapsible=icon]:hidden peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 after:absolute after:-inset-2 focus-visible:ring-2 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0",
         showOnHover &&
           "peer-data-active/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className,
@@ -710,6 +712,6 @@ export {
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
-  SidebarTrigger,
+  SidebarToggle,
   useSidebar,
 };

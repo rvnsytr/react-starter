@@ -1,7 +1,9 @@
+import { appMeta } from "@/core/constants/app";
 import { dashboardfooterMenu } from "@/core/constants/menu";
 import { getActiveRoute, getMenuByRole, routesMeta } from "@/core/route";
 import { toCase } from "@/core/utils/formaters";
 import {
+  ImpersonateUserBadge,
   SignOutButton,
   StopImpersonateUserMenuItem,
   UserAvatar,
@@ -9,7 +11,7 @@ import {
 } from "@/modules/auth/components";
 import { useAuth } from "@/modules/auth/provider.auth";
 import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronUpIcon } from "lucide-react";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import {
   Collapsible,
@@ -17,6 +19,9 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import { CommandPalette } from "../ui/command-palette";
+import { DynamicBreadcrumb } from "../ui/dynamic-breadcrumb";
+import { LayoutToggle } from "../ui/layout";
+import { Separator } from "../ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -33,8 +38,10 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
+  SidebarToggle,
   useSidebar,
 } from "../ui/sidebar";
+import { ThemeToggle } from "../ui/theme";
 
 export function SidebarMain() {
   const { user } = useAuth();
@@ -45,10 +52,13 @@ export function SidebarMain() {
   const menu = useMemo(() => getMenuByRole(user.role), [user.role]);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+    >
       {/* Header */}
       <SidebarHeader>
-        <SidebarMenu>
+        <SidebarMenu className="flex lg:hidden">
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
@@ -56,18 +66,11 @@ export function SidebarMain() {
               asChild
             >
               <Link to="/dashboard/profile">
-                <UserAvatar
-                  data={user}
-                  className="rounded-md"
-                  classNames={{
-                    image: "rounded-md group-hover/head-button:scale-105",
-                    fallback: "rounded-md group-hover/head-button:scale-105",
-                  }}
-                />
+                <UserAvatar data={user} className="rounded-md" />
 
                 <div className="grid break-all">
                   <div className="flex gap-x-2 truncate">
-                    <span className="line-clamp-1 text-sm font-semibold tracking-tight">
+                    <span className="line-clamp-1 text-sm font-medium tracking-tight">
                       {user.name}
                     </span>
 
@@ -88,9 +91,9 @@ export function SidebarMain() {
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <SidebarSeparator className="mb-2" />
+        <SidebarSeparator className="flex lg:hidden" />
 
-        <CommandPalette data={menu} />
+        <CommandPalette data={menu} className="mt-2 lg:mt-0" />
       </SidebarHeader>
 
       {/* Content */}
@@ -139,8 +142,8 @@ export function SidebarMain() {
                       {subMenu && (
                         <>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuAction className="data-[state=open]:rotate-90">
-                              <ChevronRightIcon />
+                            <SidebarMenuAction className="*:transition-transform data-[state=open]:*:rotate-180">
+                              <ChevronUpIcon />
                             </SidebarMenuAction>
                           </CollapsibleTrigger>
 
@@ -215,6 +218,41 @@ export function SidebarMain() {
 
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+export function SidebarMainSiteHeader() {
+  const { user } = useAuth();
+
+  return (
+    <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
+      <div className="flex h-(--header-height) w-full items-center justify-between gap-2 px-4">
+        <div className="flex items-center gap-x-2">
+          <SidebarToggle align="start" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Link
+            to="/dashboard"
+            className="font-mono text-sm font-medium tracking-tight"
+          >
+            {appMeta.name}
+          </Link>
+        </div>
+
+        <DynamicBreadcrumb className="hidden lg:flex" />
+
+        <div className="flex items-center gap-x-2">
+          <ImpersonateUserBadge />
+          <LayoutToggle />
+          <ThemeToggle align="end" />
+
+          <Separator orientation="vertical" className="mr-2 h-4" />
+
+          <Link to="/dashboard/profile">
+            <UserAvatar data={user} className="rounded-md" />
+          </Link>
+        </div>
+      </div>
+    </header>
   );
 }
 

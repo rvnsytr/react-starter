@@ -31,13 +31,13 @@ import { LoadingSpinner } from "./spinner";
 type CommandPalleteProps = {
   data: Menu[];
   className?: string;
-  placeholder?: string;
+  inputProps?: Omit<React.ComponentProps<"input">, "disabled">;
 };
 
 export function CommandPalette({
   data,
   className,
-  placeholder: plch,
+  inputProps,
 }: CommandPalleteProps) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -48,15 +48,21 @@ export function CommandPalette({
   useHotkey("Control+K", onOpen);
   useHotkey("Meta+K", onOpen);
 
-  const placeholder = plch ?? "Pencarian cepat...";
+  const placeholder = inputProps?.placeholder ?? "Pencarian cepat...";
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <InputGroup className="**:cursor-default group-data-[collapsible=icon]:size-8">
+        <InputGroup
+          className={cn(
+            "**:cursor-default group-data-[collapsible=icon]:size-8",
+            className,
+          )}
+        >
           <InputGroupInput
+            {...inputProps}
+            className={cn("disabled:opacity-100", inputProps?.className)}
             placeholder={placeholder}
-            className={cn("disabled:opacity-100", className)}
             disabled
           />
 
