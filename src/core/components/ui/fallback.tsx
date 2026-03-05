@@ -28,7 +28,7 @@ export function ErrorFallback({
   return (
     <div
       className={cn(
-        "border-destructive/40 shadow-destructive text-destructive flex flex-col items-center gap-4 rounded-md border p-4 text-center text-sm",
+        "bg-destructive/10 shadow-destructive text-destructive flex flex-col items-center gap-4 rounded-md p-4 text-center text-sm",
         className,
       )}
     >
@@ -37,10 +37,12 @@ export function ErrorFallback({
           <TriangleAlertIcon className="size-4 shrink-0" /> {appMeta.name}
         </div>
 
-        <code className="bg-destructive/10 texxs">{error?.code ?? 500}</code>
+        <code className="bg-destructive/10 text-xs tabular-nums">
+          {error?.code ?? 500}
+        </code>
       </div>
 
-      <Separator className="bg-destructive/40" />
+      <Separator className="bg-destructive/20" />
 
       {!hideText && <pre className="whitespace-pre-line">{message}</pre>}
     </div>

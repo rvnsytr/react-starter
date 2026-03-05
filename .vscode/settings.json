@@ -12,8 +12,7 @@
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
   "search.exclude": { "**/routeTree.gen.ts": true },
 
-  "typescript.preferences.autoImportFileExcludePatterns": ["radix-ui"],
+  "js/ts.preferences.autoImportFileExcludePatterns": ["radix-ui"],
 
-  "typescript.preferences.importModuleSpecifier": "shortest",
-  "javascript.preferences.importModuleSpecifier": "shortest"
+  "js/ts.preferences.importModuleSpecifier": "shortest"
 }
