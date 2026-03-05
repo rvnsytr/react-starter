@@ -68,6 +68,15 @@ import {
   InputGroupInput,
 } from "@/core/components/ui/input-group";
 import { Label } from "@/core/components/ui/label";
+import {
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+  ModalTrigger,
+} from "@/core/components/ui/modal";
 import { PasswordInput } from "@/core/components/ui/password-input";
 import { Ping } from "@/core/components/ui/ping";
 import {
@@ -1314,20 +1323,20 @@ export function CreateUserDialog({
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Modal>
+      <ModalTrigger asChild>
         <Button size={size} variant={variant} className={className}>
           <UserRoundPlusIcon /> Tambah Pengguna
         </Button>
-      </DialogTrigger>
+      </ModalTrigger>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Tambah Pengguna</DialogTitle>
-          <DialogDescription>
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle>Tambah Pengguna</ModalTitle>
+          <ModalDescription>
             Pastikan semua informasi sudah benar sebelum mengkonfirmasi.
-          </DialogDescription>
-        </DialogHeader>
+          </ModalDescription>
+        </ModalHeader>
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
@@ -1475,9 +1484,8 @@ export function CreateUserDialog({
             )}
           />
 
-          <Separator />
-
-          <DialogFooter showCloseButton>
+          <ModalFooter className="flex-col-reverse" showCloseButton>
+            <ResetButton onClick={() => form.reset()} />
             <Button type="submit" disabled={isLoading}>
               <LoadingSpinner
                 loading={isLoading}
@@ -1485,10 +1493,10 @@ export function CreateUserDialog({
               />
               {messages.actions.add}
             </Button>
-          </DialogFooter>
+          </ModalFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 
