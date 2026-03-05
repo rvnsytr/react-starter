@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 export function ThemeToggle({
   align,
-  size = "icon",
+  size = "icon-sm",
   variant = "ghost",
   onClick,
   ...props

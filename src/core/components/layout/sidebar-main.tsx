@@ -247,7 +247,7 @@ export function SidebarMainSiteHeader() {
           <Separator orientation="vertical" className="mr-2 h-4" />
 
           <Link to="/dashboard/profile">
-            <UserAvatar data={user} className="rounded-md" />
+            <UserAvatar data={user} />
           </Link>
         </div>
       </div>

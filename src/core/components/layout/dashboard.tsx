@@ -25,7 +25,7 @@ export function DashboardMain({
       <div
         data-slot="dashboard-main"
         className={cn(
-          "relative z-10 flex flex-1 flex-col gap-4 overflow-hidden py-4",
+          "relative z-10 flex flex-1 flex-col gap-4 py-4",
           "px-4 group-data-[layout-mode=centered]/layout-mode:container",
           !withLayoutLoader &&
             "group-data-[layout-mode=unset]/layout-mode:hidden",

@@ -1620,21 +1620,21 @@ function ResetPasswordDialog() {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger className="link shrink-0">
+    <Modal>
+      <ModalTrigger className="link shrink-0">
         <Label>Lupa kata sandi ?</Label>
-      </DialogTrigger>
+      </ModalTrigger>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-x-2">
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle className="flex items-center gap-x-2">
             <LockKeyholeOpenIcon /> Atur ulang kata sandi
-          </DialogTitle>
-          <DialogDescription>
+          </ModalTitle>
+          <ModalDescription>
             Masukan alamat email yang terdaftar pada akun Anda, dan kami akan
             mengirimkan tautan untuk mengatur ulang kata sandi Anda.
-          </DialogDescription>
-        </DialogHeader>
+          </ModalDescription>
+        </ModalHeader>
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
@@ -1663,7 +1663,7 @@ function ResetPasswordDialog() {
             )}
           />
 
-          <DialogFooter showCloseButton>
+          <ModalFooter className="flex-col-reverse" showCloseButton>
             <ResetButton onClick={() => form.reset()} />
             <Button
               type="submit"
@@ -1676,10 +1676,10 @@ function ResetPasswordDialog() {
               />
               Atur ulang kata sandi
             </Button>
-          </DialogFooter>
+          </ModalFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -1766,14 +1766,14 @@ export function ResetPasswordForm({ token }: { token?: string }) {
         />
       </CardContent>
 
-      <CardFooter className="flex-col items-stretch justify-between gap-2 border-t md:flex-row">
+      <CardFooter className="flex-col-reverse items-stretch justify-between gap-2 border-t md:flex-row">
         <Button variant="outline" asChild>
           <Link to="/sign-in">
             <ArrowLeftIcon /> {messages.actions.back}
           </Link>
         </Button>
 
-        <div className="flex flex-col gap-2 md:flex-row">
+        <div className="flex flex-col-reverse gap-2 md:flex-row">
           <ResetButton onClick={() => form.reset()} />
           <Button type="submit" disabled={isLoading}>
             <LoadingSpinner

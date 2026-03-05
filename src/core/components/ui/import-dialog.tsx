@@ -30,15 +30,6 @@ import {
   CollapsibleTrigger,
 } from "./collapsible";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./dialog";
-import {
   Field,
   FieldDescription,
   FieldError,
@@ -55,6 +46,15 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "./input-group";
+import {
+  Modal,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+  ModalTrigger,
+} from "./modal";
 import { Separator } from "./separator";
 import { LoadingSpinner } from "./spinner";
 
@@ -182,16 +182,16 @@ export function ImportDialog<T, K extends string>({
   );
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Modal>
+      <ModalTrigger asChild>{trigger}</ModalTrigger>
 
-      <DialogContent className={className}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-x-2">
+      <ModalContent className={className}>
+        <ModalHeader>
+          <ModalTitle className="flex items-center gap-x-2">
             <ImportIcon /> {title}
-          </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+          </ModalTitle>
+          <ModalDescription>{description}</ModalDescription>
+        </ModalHeader>
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
@@ -437,7 +437,7 @@ export function ImportDialog<T, K extends string>({
 
           <Separator />
 
-          <DialogFooter showCloseButton>
+          <ModalFooter showCloseButton>
             <Button type="submit" disabled={isLoading}>
               <LoadingSpinner
                 loading={isLoading}
@@ -445,9 +445,9 @@ export function ImportDialog<T, K extends string>({
               />
               {messages.actions.confirm}
             </Button>
-          </DialogFooter>
+          </ModalFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }

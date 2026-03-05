@@ -28,8 +28,8 @@ export const Route = createFileRoute("/sign-in")({
 
 function RouteComponent() {
   return (
-    <main className="container flex min-h-dvh items-center justify-center">
-      <Card className="w-full max-w-lg">
+    <main className="flex min-h-dvh items-center justify-center md:container">
+      <Card className="w-full max-w-lg rounded-none md:rounded-lg">
         <CardHeader className="border-b text-center">
           <CardTitle className="mx-auto">
             <Link to="/">

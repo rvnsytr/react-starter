@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 export function LayoutToggle({
   align,
-  size = "icon",
+  size = "icon-sm",
   variant = "ghost",
   onClick,
   className,
