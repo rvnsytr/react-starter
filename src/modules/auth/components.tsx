@@ -163,6 +163,7 @@ import { toast } from "sonner";
 import { UAParser, UAParserProps } from "ua-parser-js";
 import { z } from "zod";
 import { EventLogTimeline } from "../event-log/components";
+import { mutateEventLogMe } from "../event-log/hooks";
 import {
   allRoles,
   allUserStatus,
@@ -588,6 +589,7 @@ function ProfilePicture({
         success: () => {
           setIsChange(false);
           mutateSession();
+          mutateEventLogMe();
           return "Foto profil Anda berhasil diperbarui.";
         },
         error: (e) => {
@@ -611,6 +613,7 @@ function ProfilePicture({
         success: () => {
           setIsRemoved(false);
           mutateSession();
+          mutateEventLogMe();
           return "Foto profil Anda berhasil dihapus.";
         },
         error: (e) => {
@@ -720,6 +723,7 @@ export function ProfileForm() {
         success: () => {
           setIsLoading(false);
           mutateSession();
+          mutateEventLogMe();
           return "Profil Anda berhasil diperbarui.";
         },
         error: (e) => {
