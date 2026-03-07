@@ -62,11 +62,11 @@ type ReadExcelSheetMode = (typeof allReadExcelSheetModes)[number];
 const allReadExcelSheetModes = ["include", "exclude"] as const;
 const defaultMode: ReadExcelSheetMode = "include";
 
-type ImportDialogFormSchema = z.infer<typeof importDialogSchema>;
+type ImportModalFormSchema = z.infer<typeof importModalSchema>;
 
-export type ImportDialogProps<T, K extends string> = {
-  source: Record<K, Omit<ImportDialogFormSchema["source"][number], "key">>;
-  defaultValues?: Partial<Omit<ImportDialogFormSchema, "source">>;
+export type ImportModalProps<T, K extends string> = {
+  source: Record<K, Omit<ImportModalFormSchema["source"][number], "key">>;
+  defaultValues?: Partial<Omit<ImportModalFormSchema, "source">>;
 
   onSubmit: (data: {
     files: z.core.File[];
@@ -87,7 +87,7 @@ export type ImportDialogProps<T, K extends string> = {
   children?: React.ReactNode;
 };
 
-const importDialogSchema = z.object({
+const importModalSchema = z.object({
   files: sharedSchemas.files("spreadsheet", { min: 1 }),
   sheet: sharedSchemas.string({ label: "Worksheet" }),
   mode: z.enum(allReadExcelSheetModes),
@@ -102,7 +102,7 @@ const importDialogSchema = z.object({
     .array(),
 });
 
-export function ImportDialog<T, K extends string>({
+export function ImportModal<T, K extends string>({
   source,
   defaultValues,
 
@@ -117,14 +117,14 @@ export function ImportDialog<T, K extends string>({
 
   renderTrigger,
   children,
-}: ImportDialogProps<T, K>) {
+}: ImportModalProps<T, K>) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<ReadExcelSheetMode>(defaultMode);
 
   const isInclude = mode === "include";
 
-  const form = useForm<ImportDialogFormSchema>({
-    resolver: zodResolver(importDialogSchema),
+  const form = useForm<ImportModalFormSchema>({
+    resolver: zodResolver(importModalSchema),
     defaultValues: {
       files: [],
       sheet: defaultValues?.sheet ?? "",
@@ -132,7 +132,7 @@ export function ImportDialog<T, K extends string>({
       rows: defaultValues?.rows ?? "",
       source: Object.entries(source).map(([k, v]) => ({
         key: k,
-        ...(v as ImportDialogFormSchema["source"]),
+        ...(v as ImportModalFormSchema["source"]),
       })),
     },
   });
@@ -145,7 +145,7 @@ export function ImportDialog<T, K extends string>({
   const parse = (value: string) =>
     formatCsvRange(value, { sort: "asc", distinct: true });
 
-  const formHandler = (formData: ImportDialogFormSchema) => {
+  const formHandler = (formData: ImportModalFormSchema) => {
     setIsLoading(true);
 
     toast.promise(

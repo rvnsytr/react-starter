@@ -306,7 +306,7 @@ export function SignInForm() {
             </Field>
           )}
         />
-        <ResetPasswordDialog />
+        <ResetPasswordModal />
       </div>
 
       <Button type="submit" className="relative" disabled={isLoading}>
@@ -1119,6 +1119,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
   );
 }
 
+// TODO: Modal
 export function UserDetailDialog({
   data,
   isCurrentUser,
@@ -1267,7 +1268,7 @@ export function UserDetailDialog({
   );
 }
 
-export function CreateUserDialog({
+export function CreateUserModal({
   size,
   variant,
   className,
@@ -1589,7 +1590,7 @@ function UserRoleDropdown({
 
 // #region PASSWORD
 
-function ResetPasswordDialog() {
+function ResetPasswordModal() {
   const [isLoading, setIsLoading] = useState(false);
 
   type FormSchema = z.infer<typeof formSchema>;
@@ -2499,6 +2500,7 @@ export function StopImpersonateUserMenuItem() {
 
 // #region BAN & REMOVAL
 
+// TODO: Modal
 function BanUserDialog({
   data,
   setIsDialogOpen,
@@ -2703,6 +2705,7 @@ function UnbanUserDialog({
   );
 }
 
+// TODO: Modal
 function RemoveUserDialog({
   data,
   setIsDialogOpen,
@@ -2822,6 +2825,7 @@ function RemoveUserDialog({
 // TODO: function ActionBanUserDialog() {}
 // TODO: function ActionUnbanUserDialog() {}
 
+// TODO: Modal
 function ActionRemoveUsersDialog({
   data,
   onSuccess,

@@ -14,7 +14,7 @@ import {
 } from "@/core/components/ui/popover";
 import { Separator } from "@/core/components/ui/separator";
 import { getRouteTitle } from "@/core/route";
-import { CreateUserDialog, UserDataTable } from "@/modules/auth/components";
+import { CreateUserModal, UserDataTable } from "@/modules/auth/components";
 import { createFileRoute } from "@tanstack/react-router";
 import { EllipsisIcon } from "lucide-react";
 
@@ -50,7 +50,7 @@ function RouteComponent() {
             </PopoverTrigger>
 
             <PopoverContent align="end" className="grid gap-y-1 p-1">
-              <CreateUserDialog
+              <CreateUserModal
                 size="sm"
                 variant="ghost"
                 className="justify-start"
@@ -60,7 +60,7 @@ function RouteComponent() {
         </CardAction>
 
         <CardAction className="hidden lg:flex">
-          <CreateUserDialog />
+          <CreateUserModal />
         </CardAction>
       </CardHeader>
 

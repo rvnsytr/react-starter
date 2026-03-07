@@ -33,12 +33,6 @@ export function Modal({
   );
 }
 
-// function useModalIsMobile() {
-//   const ctx = useContext(ModalContext);
-//   if (!ctx) throw new Error("useModalIsMobile must be used in ModalProvider");
-//   return ctx;
-// }
-
 export function ModalTrigger({
   ...props
 }: React.ComponentProps<typeof DrawerTrigger> &
