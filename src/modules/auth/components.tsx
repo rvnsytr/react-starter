@@ -86,7 +86,6 @@ import {
 } from "@/core/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/core/components/ui/radio-group";
 import { Separator } from "@/core/components/ui/separator";
-import { SheetDescription, SheetTitle } from "@/core/components/ui/sheet";
 import {
   SidebarMenuButton,
   SidebarMenuItem,
@@ -1119,7 +1118,6 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
   );
 }
 
-// TODO: Modal
 export function UserDetailDialog({
   data,
   isCurrentUser,
@@ -1127,7 +1125,7 @@ export function UserDetailDialog({
   data: AuthSession["user"];
   isCurrentUser: boolean;
 }) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const profile: DetailListData = [
     {
@@ -1150,7 +1148,7 @@ export function UserDetailDialog({
   ];
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex items-center gap-x-3">
         <UserAvatar data={data} className="rounded-full" />
         <DialogTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
@@ -1164,11 +1162,11 @@ export function UserDetailDialog({
           <div className="flex items-center gap-x-3">
             <UserAvatar data={data} className="size-12" />
             <div className="grid">
-              <SheetTitle className="flex gap-x-2">
+              <DialogTitle className="flex gap-x-2">
                 <span className="text-base">{data.name}</span>
                 {data.emailVerified && <UserVerifiedBadge withText={false} />}
-              </SheetTitle>
-              <SheetDescription>{data.email}</SheetDescription>
+              </DialogTitle>
+              <DialogDescription>{data.email}</DialogDescription>
             </div>
           </div>
 
@@ -1186,7 +1184,7 @@ export function UserDetailDialog({
               >
                 <ImpersonateUserDialog
                   data={data}
-                  setIsDialogOpen={setIsDialogOpen}
+                  setIsDialogOpen={setIsOpen}
                 />
 
                 <RevokeUserSessionsDialog data={data} />
@@ -1194,21 +1192,12 @@ export function UserDetailDialog({
                 <Separator />
 
                 {data.banned ? (
-                  <UnbanUserDialog
-                    data={data}
-                    setIsDialogOpen={setIsDialogOpen}
-                  />
+                  <UnbanUserDialog data={data} setIsDialogOpen={setIsOpen} />
                 ) : (
-                  <BanUserDialog
-                    data={data}
-                    setIsDialogOpen={setIsDialogOpen}
-                  />
+                  <BanUserModal data={data} setIsModalOpen={setIsOpen} />
                 )}
 
-                <RemoveUserDialog
-                  data={data}
-                  setIsDialogOpen={setIsDialogOpen}
-                />
+                <RemoveUserModal data={data} setIsModalOpen={setIsOpen} />
               </PopoverContent>
             </Popover>
           )}
@@ -2500,13 +2489,12 @@ export function StopImpersonateUserMenuItem() {
 
 // #region BAN & REMOVAL
 
-// TODO: Modal
-function BanUserDialog({
+function BanUserModal({
   data,
-  setIsDialogOpen,
+  setIsModalOpen,
 }: {
   data: Pick<AuthSession["user"], "id" | "name" | "image">;
-  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -2546,7 +2534,7 @@ function BanUserDialog({
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
-          setIsDialogOpen(false);
+          setIsModalOpen(false);
           mutateListUsers();
           return `Akun atas nama ${data.name} berhasil diblokir.`;
         },
@@ -2559,24 +2547,24 @@ function BanUserDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <ModalTrigger asChild>
         <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <BanIcon /> }} />
           Blokir
         </Button>
-      </DialogTrigger>
+      </ModalTrigger>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-destructive flex items-center gap-x-2">
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle className="text-destructive flex items-center gap-x-2">
             <TriangleAlertIcon /> Blokir akun atas nama {data.name}
-          </DialogTitle>
-          <DialogDescription>
+          </ModalTitle>
+          <ModalDescription>
             PERINGATAN: Tindakan ini akan memblokir and menonaktifkan akun{" "}
             <span>{data.name}</span>. Harap berhati-hati sebelum melanjutkan.
-          </DialogDescription>
-        </DialogHeader>
+          </ModalDescription>
+        </ModalHeader>
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
@@ -2620,7 +2608,7 @@ function BanUserDialog({
             )}
           />
 
-          <DialogFooter showCloseButton>
+          <ModalFooter className="flex-col-reverse" showCloseButton>
             <ResetButton onClick={() => form.reset()} />
             <Button type="submit" variant="destructive" disabled={isLoading}>
               <LoadingSpinner
@@ -2629,10 +2617,10 @@ function BanUserDialog({
               />
               {messages.actions.confirm}
             </Button>
-          </DialogFooter>
+          </ModalFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 
@@ -2705,13 +2693,12 @@ function UnbanUserDialog({
   );
 }
 
-// TODO: Modal
-function RemoveUserDialog({
+function RemoveUserModal({
   data,
-  setIsDialogOpen,
+  setIsModalOpen,
 }: {
   data: Pick<AuthSession["user"], "id" | "name" | "image">;
-  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [input, setInput] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -2744,7 +2731,7 @@ function RemoveUserDialog({
         success: () => {
           setIsLoading(false);
           setIsOpen(false);
-          setIsDialogOpen(false);
+          setIsModalOpen(false);
           mutateListUsers();
           return `Akun atas nama ${data.name} berhasil dihapus.`;
         },
@@ -2757,25 +2744,25 @@ function RemoveUserDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <ModalTrigger asChild>
         <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2Icon /> }} />
           {messages.actions.remove}
         </Button>
-      </DialogTrigger>
+      </ModalTrigger>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-destructive flex items-center gap-x-2">
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle className="text-destructive flex items-center gap-x-2">
             <TriangleAlertIcon /> Hapus akun atas nama {data.name}
-          </DialogTitle>
-          <DialogDescription>
+          </ModalTitle>
+          <ModalDescription>
             PERINGATAN: Tindakan ini akan menghapus akun{" "}
             <span>{data.name}</span> beserta seluruh datanya secara permanen.
             Harap berhati-hati karena aksi ini tidak dapat dibatalkan.
-          </DialogDescription>
-        </DialogHeader>
+          </ModalDescription>
+        </ModalHeader>
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
@@ -2803,7 +2790,7 @@ function RemoveUserDialog({
             )}
           />
 
-          <DialogFooter showCloseButton>
+          <ModalFooter showCloseButton>
             <Button
               type="submit"
               variant="destructive"
@@ -2815,17 +2802,16 @@ function RemoveUserDialog({
               />
               {messages.actions.confirm}
             </Button>
-          </DialogFooter>
+          </ModalFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 
 // TODO: function ActionBanUserDialog() {}
 // TODO: function ActionUnbanUserDialog() {}
 
-// TODO: Modal
 function ActionRemoveUsersDialog({
   data,
   onSuccess,
@@ -2884,26 +2870,26 @@ function ActionRemoveUsersDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
+      <ModalTrigger asChild>
         <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2Icon /> }} />
           {messages.actions.remove}
         </Button>
-      </DialogTrigger>
+      </ModalTrigger>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-destructive flex items-center gap-x-2">
+      <ModalContent>
+        <ModalHeader>
+          <ModalTitle className="text-destructive flex items-center gap-x-2">
             <TriangleAlertIcon /> Hapus {data.length} Akun
-          </DialogTitle>
-          <DialogDescription>
+          </ModalTitle>
+          <ModalDescription>
             PERINGATAN: Tindakan ini akan menghapus{" "}
             <span>{data.length} akun</span> yang dipilih beserta seluruh datanya
             secara permanen. Harap berhati-hati karena aksi ini tidak dapat
             dibatalkan.
-          </DialogDescription>
-        </DialogHeader>
+          </ModalDescription>
+        </ModalHeader>
 
         <form onSubmit={form.handleSubmit(formHandler)} noValidate>
           <Controller
@@ -2931,7 +2917,7 @@ function ActionRemoveUsersDialog({
             )}
           />
 
-          <DialogFooter showCloseButton>
+          <ModalFooter showCloseButton>
             <Button
               type="submit"
               variant="destructive"
@@ -2943,10 +2929,10 @@ function ActionRemoveUsersDialog({
               />
               {messages.actions.confirm}
             </Button>
-          </DialogFooter>
+          </ModalFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 
