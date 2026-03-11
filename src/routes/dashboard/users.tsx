@@ -1,11 +1,12 @@
-import { DashboardMain } from "@/core/components/layout/dashboard";
-import { Button } from "@/core/components/ui/button";
 import {
-  CardAction,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/core/components/ui/card";
+  Page,
+  PageAction,
+  PageDescription,
+  PageHeader,
+  PageTitle,
+} from "@/core/components/layout/page";
+import { Button } from "@/core/components/ui/button";
+import { CardAction } from "@/core/components/ui/card";
 import { dataQueryStateSchema } from "@/core/components/ui/data-controller";
 import {
   Popover,
@@ -34,14 +35,14 @@ function RouteComponent() {
   const navigate = Route.useNavigate();
 
   return (
-    <DashboardMain>
-      <CardHeader className="px-0">
-        <CardTitle>Manajemen Pengguna</CardTitle>
-        <CardDescription>
+    <Page>
+      <PageHeader>
+        <PageTitle>Manajemen Pengguna</PageTitle>
+        <PageDescription>
           Kelola dan lihat detail semua pengguna yang telah terdaftar.
-        </CardDescription>
+        </PageDescription>
 
-        <CardAction className="flex lg:hidden">
+        <PageAction className="flex lg:hidden">
           <Popover>
             <PopoverTrigger asChild>
               <Button size="icon-sm" variant="outline">
@@ -57,12 +58,12 @@ function RouteComponent() {
               />
             </PopoverContent>
           </Popover>
-        </CardAction>
+        </PageAction>
 
         <CardAction className="hidden lg:flex">
           <CreateUserModal />
         </CardAction>
-      </CardHeader>
+      </PageHeader>
 
       <Separator />
 
@@ -94,6 +95,6 @@ function RouteComponent() {
           })
         }
       /> */}
-    </DashboardMain>
+    </Page>
   );
 }

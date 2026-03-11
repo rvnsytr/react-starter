@@ -1,4 +1,4 @@
-import { DashboardMain } from "@/core/components/layout/dashboard";
+import { Page } from "@/core/components/layout/page";
 import {
   Card,
   CardAction,
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/dashboard/settings")({
 
 function RouteComponent() {
   return (
-    <DashboardMain className="items-center" withLayoutLoader={false}>
+    <Page className="items-center" withLayoutLoader={false}>
       <Card id="tema" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
@@ -111,6 +111,6 @@ function RouteComponent() {
 
         <ChangePasswordForm />
       </Card>
-    </DashboardMain>
+    </Page>
   );
 }

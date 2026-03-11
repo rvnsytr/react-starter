@@ -1,4 +1,4 @@
-import { DashboardMain } from "@/core/components/layout/dashboard";
+import { Page } from "@/core/components/layout/page";
 import { FieldLegend } from "@/core/components/ui/field";
 import { R } from "@/core/components/ui/r";
 import { Separator } from "@/core/components/ui/separator";
@@ -14,7 +14,7 @@ function RouteComponent() {
   const authSession = useAuth();
 
   return (
-    <DashboardMain>
+    <Page>
       <R className="mx-auto my-4" />
 
       <Separator />
@@ -26,6 +26,6 @@ function RouteComponent() {
 
       <FieldLegend>Session Example</FieldLegend>
       <pre className="container">{JSON.stringify(authSession, null, 2)}</pre>
-    </DashboardMain>
+    </Page>
   );
 }

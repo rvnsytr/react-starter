@@ -1,4 +1,4 @@
-import { DashboardMain } from "@/core/components/layout/dashboard";
+import { Page } from "@/core/components/layout/page";
 import {
   Card,
   CardAction,
@@ -26,7 +26,7 @@ function RouteComponent() {
   const { user } = useAuth();
 
   return (
-    <DashboardMain className="items-center" withLayoutLoader={false}>
+    <Page className="items-center" withLayoutLoader={false}>
       <Card id="informasi-pribadi" className="w-full scroll-m-20 lg:max-w-2xl">
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-x-2">
@@ -43,6 +43,6 @@ function RouteComponent() {
 
         <ProfileForm />
       </Card>
-    </DashboardMain>
+    </Page>
   );
 }
