@@ -1,5 +1,4 @@
 import z from "zod";
-import { DataState } from "./components/ui/data-controller";
 import { apiConfig } from "./constants/app";
 
 export const apiResponseSchema = z.object({
@@ -37,30 +36,28 @@ const fetcher = async <T>(
     throw json;
   }
 
-  if (config?.schema) return config.schema.parse(json);
-  return json;
+  if (!config?.schema) return json;
+  return config.schema.parse(json);
 };
 
 fetcher.api = async <T>(
-  url: string,
+  path: string,
   config?: ApiFetcherConfig<T>,
 ): Promise<ApiResponse<T>> =>
-  await fetcher(`${apiConfig.baseUrl}${url}`, {
+  await fetcher(`${apiConfig.baseUrl}${path}`, {
     ...config,
     credentials: "include",
     schema: apiResponseSchema.extend({ data: config?.schema ?? z.any() }),
   });
 
-fetcher.data = async <T>(
-  key: string,
-  state: DataState,
-  config?: Omit<ApiFetcherConfig<T>, "method" | "body">,
+fetcher.postJson = async <T>(
+  path: string,
+  config?: Omit<ApiFetcherConfig<T>, "method">,
 ) =>
-  await fetcher.api(key, {
+  await fetcher.api(path, {
     ...config,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...config?.headers },
-    body: JSON.stringify(state),
+    headers: { ...config?.headers, "Content-Type": "application/json" },
   });
 
 export { fetcher };

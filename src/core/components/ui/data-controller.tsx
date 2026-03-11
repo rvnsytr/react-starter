@@ -1,8 +1,8 @@
 // * Headless state controller for managing tabular data.
 
-import { ApiResponse } from "@/core/api";
 import { messages } from "@/core/constants/messages";
 import { allFilterOperators } from "@/core/data-filter";
+import { ApiResponse } from "@/core/fetcher";
 import { useDebounce } from "@/core/hooks/use-debounce";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";

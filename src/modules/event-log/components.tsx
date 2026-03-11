@@ -1,4 +1,3 @@
-import { fetcher } from "@/core/api";
 import { ColumnCellNumber, ColumnHeader } from "@/core/components/ui/column";
 import {
   DataController,
@@ -27,6 +26,7 @@ import {
 } from "@/core/components/ui/timeline";
 import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/data-filter";
+import { fetcher } from "@/core/fetcher";
 import { formatDate } from "@/core/utils/date";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
@@ -106,7 +106,10 @@ export function EventLogTimeline({
         mode="manual"
         query={{
           key,
-          fetcher: async (state) => await fetcher.data(key, state, { schema }),
+          fetcher: async (state) => {
+            const body = JSON.stringify(state);
+            return await fetcher.postJson(key, { schema, body });
+          },
         }}
         columns={(result) => getEventLogColumns(result)}
         defaultState={{ size: 5 }}

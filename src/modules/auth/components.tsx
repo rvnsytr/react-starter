@@ -1,4 +1,3 @@
-import { fetcher } from "@/core/api";
 import { authClient } from "@/core/auth";
 import {
   AlertDialog,
@@ -107,6 +106,7 @@ import { appMeta } from "@/core/constants/app";
 import { fileMeta } from "@/core/constants/file";
 import { messages } from "@/core/constants/messages";
 import { filterFn } from "@/core/data-filter";
+import { fetcher } from "@/core/fetcher";
 import { useIsMobile } from "@/core/hooks/use-is-mobile";
 import { sharedSchemas } from "@/core/schema";
 import { prepareFiles, removeFiles, uploadFiles } from "@/core/storage";
@@ -1069,10 +1069,8 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
       mode="manual"
       query={{
         key,
-        fetcher: async (state) => {
-          const { data, ...rest } = await fetcher.data(key, state, { schema });
-          return { ...rest, data: data as AuthSession["user"][] };
-        },
+        fetcher: async (state) =>
+          await fetcher.postJson(key, { schema, body: JSON.stringify(state) }),
       }}
       columns={(result) => getUserColumns(user.id, result)}
       getRowId={(row) => row.id}

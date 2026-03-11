@@ -1,5 +1,5 @@
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
-import { fetcher, FetcherConfig } from "../api";
+import { fetcher, FetcherConfig } from "../fetcher";
 
 export type UseValidatedSWRConfig<T> = {
   swr?: SWRConfiguration;
