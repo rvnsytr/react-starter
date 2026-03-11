@@ -20,7 +20,7 @@ export function useListSessions(config?: SWRConfiguration) {
     "/auth/list-sessions",
     async () => {
       const { data, error } = await authClient.listSessions();
-      if (error) throw new Error(error.message);
+      if (error) throw error;
       return data;
     },
     config,
@@ -34,7 +34,7 @@ export function useListUserSessions(userId: string, config?: SWRConfiguration) {
       const { data, error } = await authClient.admin.listUserSessions({
         userId,
       });
-      if (error) throw new Error(error.message);
+      if (error) throw error;
       return data.sessions as AuthSession["session"][];
     },
     config,

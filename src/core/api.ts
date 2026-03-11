@@ -37,8 +37,8 @@ const fetcher = async <T>(
     throw json;
   }
 
-  if (!config?.schema) return json;
-  return config.schema.parse(json);
+  if (config?.schema) return config.schema.parse(json);
+  return json;
 };
 
 fetcher.api = async <T>(

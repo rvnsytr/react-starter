@@ -12,17 +12,17 @@ export const allRequestMetaKey = [
 ] as const;
 
 export type Gender = (typeof allGenders)[number];
-export const allGenders = ["l", "p"] as const;
+export const allGenders = ["m", "f"] as const;
 export const genderMeta: Record<
   Gender,
   { displayName: string; icon: LucideIcon; color: string }
 > = {
-  l: {
+  m: {
     displayName: "Laki-laki",
     icon: MarsIcon,
     color: "var(--color-sky-500)",
   },
-  p: {
+  f: {
     displayName: "Perempuan",
     icon: VenusIcon,
     color: "var(--color-pink-500)",

@@ -3,7 +3,9 @@ import { cn } from "@/core/utils/helpers";
 import { LoaderIcon, TriangleAlertIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Separator } from "./separator";
+import { ShimmerText } from "./shimmer-text";
 import { Spinner } from "./spinner";
+import { ThemeToggle } from "./theme";
 
 export function LoadingFallback({ className }: { className?: string }) {
   return (
@@ -28,7 +30,7 @@ export function ErrorFallback({
   return (
     <div
       className={cn(
-        "bg-destructive/10 shadow-destructive text-destructive flex flex-col items-center gap-4 rounded-md p-4 text-center text-sm",
+        "bg-destructive/10 shadow-destructive text-destructive flex size-full flex-col items-center gap-4 rounded-md p-4 text-sm",
         className,
       )}
     >
@@ -44,7 +46,11 @@ export function ErrorFallback({
 
       <Separator className="bg-destructive/20" />
 
-      {!hideText && <pre className="whitespace-pre-line">{message}</pre>}
+      {!hideText && (
+        <div className="flex size-full items-center justify-center">
+          <pre>{message}</pre>
+        </div>
+      )}
     </div>
   );
 }
@@ -55,9 +61,31 @@ export function AppLoadingFallback() {
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 2 }}
-      className="flex min-h-svh flex-col items-center justify-center gap-y-8"
+      className="relative container flex min-h-svh flex-col items-center justify-center gap-y-8"
     >
-      <Spinner variant="orbit" className="size-8" />
+      <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-end">
+        <img
+          src={appMeta.logo.withText}
+          alt="Logo Bukit Asam Purnaku"
+          width={1200}
+          height={800}
+          loading="eager"
+          className="h-12 w-full lg:h-16 lg:w-auto"
+        />
+
+        <ShimmerText className="text-2xl font-extrabold lg:text-4xl">
+          PURNAKU
+        </ShimmerText>
+      </div>
+
+      <Spinner variant="orbit" className="size-5" />
+
+      <ThemeToggle
+        size="lg"
+        variant="outline"
+        className="fixed right-6 bottom-6 rounded-full lg:right-10 lg:bottom-8"
+        align="end"
+      />
     </motion.div>
   );
 }
@@ -66,7 +94,15 @@ export function AppLoadingFallback() {
 export function AppErrorFallback({ error }: { error?: any }) {
   return (
     <div className="container flex min-h-dvh flex-col items-center justify-center gap-y-8">
-      <ErrorFallback error={error} />
+      <img
+        src={appMeta.logo.withText}
+        alt="Logo Bukit Asam Purnaku"
+        width={1200}
+        height={800}
+        loading="eager"
+        className="h-auto w-40"
+      />
+      <ErrorFallback error={error} className="size-fit" />
     </div>
   );
 }
