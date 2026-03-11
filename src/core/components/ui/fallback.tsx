@@ -3,9 +3,7 @@ import { cn } from "@/core/utils/helpers";
 import { LoaderIcon, TriangleAlertIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Separator } from "./separator";
-import { ShimmerText } from "./shimmer-text";
 import { Spinner } from "./spinner";
-import { ThemeToggle } from "./theme";
 
 export function LoadingFallback({ className }: { className?: string }) {
   return (
@@ -63,29 +61,7 @@ export function AppLoadingFallback() {
       exit={{ opacity: 0, scale: 2 }}
       className="relative container flex min-h-svh flex-col items-center justify-center gap-y-8"
     >
-      <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-end">
-        <img
-          src={appMeta.logo.withText}
-          alt="Logo Bukit Asam Purnaku"
-          width={1200}
-          height={800}
-          loading="eager"
-          className="h-12 w-full lg:h-16 lg:w-auto"
-        />
-
-        <ShimmerText className="text-2xl font-extrabold lg:text-4xl">
-          PURNAKU
-        </ShimmerText>
-      </div>
-
-      <Spinner variant="orbit" className="size-5" />
-
-      <ThemeToggle
-        size="lg"
-        variant="outline"
-        className="fixed right-6 bottom-6 rounded-full lg:right-10 lg:bottom-8"
-        align="end"
-      />
+      <Spinner variant="orbit" className="size-8" />
     </motion.div>
   );
 }
@@ -94,15 +70,7 @@ export function AppLoadingFallback() {
 export function AppErrorFallback({ error }: { error?: any }) {
   return (
     <div className="container flex min-h-dvh flex-col items-center justify-center gap-y-8">
-      <img
-        src={appMeta.logo.withText}
-        alt="Logo Bukit Asam Purnaku"
-        width={1200}
-        height={800}
-        loading="eager"
-        className="h-auto w-40"
-      />
-      <ErrorFallback error={error} className="size-fit" />
+      <ErrorFallback error={error} />
     </div>
   );
 }
