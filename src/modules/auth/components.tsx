@@ -36,15 +36,6 @@ import { DataTable } from "@/core/components/ui/data-table";
 import { DatePicker } from "@/core/components/ui/date-picker";
 import { DetailList, DetailListData } from "@/core/components/ui/detail-list";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/core/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -194,8 +185,7 @@ function getUserStatus(
 ): UserStatus {
   if (data.banned) return "banned";
   if (data.emailVerified) return "verified";
-  if (data.email) return "active";
-  return "nonactive";
+  return "active";
 }
 
 // #region SIGN
@@ -957,7 +947,7 @@ const getUserColumns = (
       </ColumnHeader>
     ),
     cell: (c) => (
-      <UserDetailDialog
+      <UserDetailModal
         data={c.row.original}
         isCurrentUser={c.row.original.id === currentUserId}
       />
@@ -1116,7 +1106,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
   );
 }
 
-export function UserDetailDialog({
+export function UserDetailModal({
   data,
   isCurrentUser,
 }: {
@@ -1146,25 +1136,25 @@ export function UserDetailDialog({
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Modal open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex items-center gap-x-3">
         <UserAvatar data={data} className="rounded-full" />
-        <DialogTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
+        <ModalTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
           <span className="link-group">{data.name}</span>
           <ArrowUpRightIcon className="group-hover:text-primary size-3.5" />
-        </DialogTrigger>
+        </ModalTrigger>
       </div>
 
-      <DialogContent className="sm:max-w-2xl" showCloseButton={false}>
-        <DialogHeader className="flex-row justify-between gap-x-4">
+      <ModalContent className="sm:max-w-2xl" showCloseButton={false}>
+        <ModalHeader className="flex-row justify-between gap-x-4">
           <div className="flex items-center gap-x-3">
             <UserAvatar data={data} className="size-12" />
             <div className="grid">
-              <DialogTitle className="flex gap-x-2">
+              <ModalTitle className="flex gap-x-2">
                 <span className="text-base">{data.name}</span>
                 {data.emailVerified && <UserVerifiedBadge withText={false} />}
-              </DialogTitle>
-              <DialogDescription>{data.email}</DialogDescription>
+              </ModalTitle>
+              <ModalDescription>{data.email}</ModalDescription>
             </div>
           </div>
 
@@ -1199,9 +1189,9 @@ export function UserDetailDialog({
               </PopoverContent>
             </Popover>
           )}
-        </DialogHeader>
+        </ModalHeader>
 
-        <div className="flex flex-col gap-y-3 overflow-y-auto">
+        <div className="flex flex-col gap-y-3 px-4 md:px-0">
           <div className="flex items-center gap-2">
             {isCurrentUser && (
               <Badge variant="outline">Pengguna saat ini</Badge>
@@ -1248,10 +1238,14 @@ export function UserDetailDialog({
 
           <Separator />
 
-          <DialogFooter showCloseButton closeButtonText="back" />
+          <ModalFooter
+            showCloseButton
+            closeButtonText="back"
+            className="hidden md:flex"
+          />
         </div>
-      </DialogContent>
-    </Dialog>
+      </ModalContent>
+    </Modal>
   );
 }
 

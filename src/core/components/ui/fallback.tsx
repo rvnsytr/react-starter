@@ -59,7 +59,7 @@ export function AppLoadingFallback() {
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 2 }}
-      className="relative container flex min-h-svh flex-col items-center justify-center gap-y-8"
+      className="container flex min-h-svh items-center justify-center"
     >
       <Spinner variant="orbit" className="size-8" />
     </motion.div>
@@ -69,8 +69,8 @@ export function AppLoadingFallback() {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function AppErrorFallback({ error }: { error?: any }) {
   return (
-    <div className="container flex min-h-dvh flex-col items-center justify-center gap-y-8">
-      <ErrorFallback error={error} />
+    <div className="container flex min-h-svh items-center justify-center">
+      <ErrorFallback error={error} className="size-fit" />
     </div>
   );
 }

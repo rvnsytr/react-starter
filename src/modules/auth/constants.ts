@@ -2,7 +2,6 @@ import {
   BanIcon,
   CircleCheckIcon,
   CircleDotIcon,
-  CircleXIcon,
   LucideIcon,
   ShieldUserIcon,
   UserRoundIcon,
@@ -38,12 +37,7 @@ export const rolesMeta: Record<
 };
 
 export type UserStatus = (typeof allUserStatus)[number];
-export const allUserStatus = [
-  "verified",
-  "active",
-  "nonactive",
-  "banned",
-] as const;
+export const allUserStatus = ["verified", "active", "banned"] as const;
 export const userStatusMeta: Record<
   UserStatus,
   { displayName: string; description: string; icon: LucideIcon; color: string }
@@ -56,16 +50,9 @@ export const userStatusMeta: Record<
   },
   active: {
     displayName: "Aktif",
-    description: "Pengguna telah melakukan aktivasi dan menunggu verifikasi.",
+    description: "Pengguna aktif dan dapat mengakses sistem.",
     icon: CircleDotIcon,
     color: "var(--primary)",
-  },
-  nonactive: {
-    displayName: "Nonaktif",
-    description:
-      "Pengguna belum melakukan aktivasi dan belum memiliki akses ke sistem.",
-    icon: CircleXIcon,
-    color: "var(--muted-foreground)",
   },
   banned: {
     displayName: "Diblokir",
