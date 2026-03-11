@@ -104,7 +104,7 @@ export function SidebarMain() {
 
             <SidebarMenu>
               {content.map(({ route, icon: Icon, disabled, subMenu }) => {
-                const { displayName } = routesMeta[route];
+                const { label } = routesMeta[route];
 
                 const isActive = route === getActiveRoute(pathname);
                 const iconElement = Icon && <Icon />;
@@ -114,7 +114,7 @@ export function SidebarMain() {
                     <SidebarMenuItem key={route}>
                       <SidebarMenuButton disabled>
                         {iconElement}
-                        <span className="line-clamp-1">{displayName}</span>
+                        <span className="line-clamp-1">{label}</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
@@ -130,12 +130,12 @@ export function SidebarMain() {
                       <SidebarMenuButton
                         onClick={() => isMobile && toggleSidebar()}
                         isActive={isActive}
-                        tooltip={displayName}
+                        tooltip={label}
                         asChild
                       >
                         <Link to={route}>
                           {iconElement}
-                          <span className="line-clamp-1">{displayName}</span>
+                          <span className="line-clamp-1">{label}</span>
                         </Link>
                       </SidebarMenuButton>
 
@@ -160,11 +160,11 @@ export function SidebarMain() {
                                     <Link
                                       to={
                                         itm.href ??
-                                        (`${route}/#${toCase(itm.displayName, "kebab")}` as string)
+                                        (`${route}/#${toCase(itm.label, "kebab")}` as string)
                                       }
                                       className="line-clamp-1"
                                     >
-                                      {itm.displayName}
+                                      {itm.label}
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
@@ -185,26 +185,24 @@ export function SidebarMain() {
       {/* Footer */}
       <SidebarFooter>
         <SidebarMenu className="gap-2">
-          {dashboardfooterMenu.map(
-            ({ route, displayName, icon: Icon, disabled }) => {
-              const iconElement = Icon && <Icon />;
-              return (
-                <SidebarMenuItem key={route}>
-                  {disabled ? (
-                    <SidebarMenuButton size="sm" disabled>
-                      {iconElement} {displayName}
-                    </SidebarMenuButton>
-                  ) : (
-                    <SidebarMenuButton size="sm" tooltip={displayName} asChild>
-                      <Link to={route}>
-                        {iconElement} {displayName}
-                      </Link>
-                    </SidebarMenuButton>
-                  )}
-                </SidebarMenuItem>
-              );
-            },
-          )}
+          {dashboardfooterMenu.map(({ route, label, icon: Icon, disabled }) => {
+            const iconElement = Icon && <Icon />;
+            return (
+              <SidebarMenuItem key={route}>
+                {disabled ? (
+                  <SidebarMenuButton size="sm" disabled>
+                    {iconElement} {label}
+                  </SidebarMenuButton>
+                ) : (
+                  <SidebarMenuButton size="sm" tooltip={label} asChild>
+                    <Link to={route}>
+                      {iconElement} {label}
+                    </Link>
+                  </SidebarMenuButton>
+                )}
+              </SidebarMenuItem>
+            );
+          })}
 
           <SidebarSeparator />
 

@@ -33,7 +33,7 @@ export function BreadcrumbProvider({
   const setByPathname = useCallback(() => {
     const crumbs = getRouteHierarchy(normalizeRoute(pathname)).flatMap((r) => {
       const meta = routesMeta[r];
-      return meta ? [{ href: r, label: meta.displayName }] : [];
+      return meta ? [{ href: r, label: meta.label }] : [];
     });
     setBreadcrumbs(crumbs);
   }, [pathname]);

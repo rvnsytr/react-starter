@@ -115,14 +115,14 @@ export function CommandPalette({
                             disabled={disabled}
                             onSelect={() => onSelectHandler(route)}
                           >
-                            {Icon && <Icon />} {meta.displayName}
+                            {Icon && <Icon />} {meta.label}
                           </CommandItem>
 
                           {!disabled &&
                             subMenu?.map((itm) => {
                               const isDestructive =
                                 itm.variant === "destructive";
-                              const href = `${route}/#${toCase(itm.displayName, "kebab")}`;
+                              const href = `${route}/#${toCase(itm.label, "kebab")}`;
                               return (
                                 <CommandItem
                                   key={href}
@@ -138,7 +138,7 @@ export function CommandPalette({
                                       isDestructive && "text-destructive",
                                     )}
                                   />
-                                  {itm.displayName}
+                                  {itm.label}
                                 </CommandItem>
                               );
                             })}

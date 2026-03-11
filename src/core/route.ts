@@ -6,21 +6,18 @@ import { dashboardMenu, Menu } from "./constants/menu";
 export type Route = FileRouteTypes["to"];
 export type RouteRole = "all" | Role[];
 
-export const routesMeta: Record<
-  Route,
-  { displayName: string; role?: RouteRole }
-> = {
-  "/": { displayName: "Beranda" },
-  "/about": { displayName: "Tentang" },
-  "/sign-in": { displayName: "Masuk" },
+export const routesMeta: Record<Route, { label: string; role?: RouteRole }> = {
+  "/": { label: "Beranda" },
+  "/about": { label: "Tentang" },
+  "/sign-in": { label: "Masuk" },
 
-  "/verify-user": { displayName: "Verifikasi Pengguna" },
-  "/reset-password": { displayName: "Atur Ulang Kata Sandi" },
+  "/verify-user": { label: "Verifikasi Pengguna" },
+  "/reset-password": { label: "Atur Ulang Kata Sandi" },
 
-  "/dashboard": { displayName: "Dashboard", role: "all" },
-  "/dashboard/users": { displayName: "Pengguna", role: ["admin"] },
-  "/dashboard/profile": { displayName: "Profil Saya", role: "all" },
-  "/dashboard/settings": { displayName: "Pengaturan", role: "all" },
+  "/dashboard": { label: "Dashboard", role: "all" },
+  "/dashboard/users": { label: "Pengguna", role: ["admin"] },
+  "/dashboard/profile": { label: "Profil Saya", role: "all" },
+  "/dashboard/settings": { label: "Pengaturan", role: "all" },
 };
 
 export function authorizedRoute(route: Route | null, role?: Role) {
@@ -41,7 +38,7 @@ export function setRouteTitle(title: string) {
 }
 
 export function getRouteTitle(route: Route) {
-  return setRouteTitle(routesMeta[route].displayName);
+  return setRouteTitle(routesMeta[route].label);
 }
 
 export function getRouteHierarchy(path: string): Route[] {
