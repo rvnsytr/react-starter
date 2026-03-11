@@ -1,6 +1,6 @@
 import { FooterNote } from "@/core/components/layout/footer-note";
+import { PageCard } from "@/core/components/layout/page";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardFooter,
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/sign-in")({
 function RouteComponent() {
   return (
     <main className="flex min-h-dvh items-center justify-center md:container">
-      <Card className="w-full max-w-lg rounded-none md:rounded-lg">
+      <PageCard className="w-full max-w-lg">
         <CardHeader className="border-b text-center">
           <CardTitle className="mx-auto">
             <Link to="/">
@@ -60,7 +60,7 @@ function RouteComponent() {
         <CardFooter className="justify-center border-t text-center">
           <FooterNote />
         </CardFooter>
-      </Card>
+      </PageCard>
     </main>
   );
 }

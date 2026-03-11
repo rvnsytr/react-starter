@@ -1,6 +1,5 @@
-import { Page } from "@/core/components/layout/page";
+import { Page, PageCard } from "@/core/components/layout/page";
 import {
-  Card,
   CardAction,
   CardContent,
   CardDescription,
@@ -8,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
-import { Kbd, KbdGroup } from "@/core/components/ui/kbd";
+import { Kbd } from "@/core/components/ui/kbd";
 import { LayoutSettings } from "@/core/components/ui/layout";
 import { ThemeSettings } from "@/core/components/ui/theme";
 import { appMeta } from "@/core/constants/app";
@@ -36,8 +35,8 @@ export const Route = createFileRoute("/dashboard/settings")({
 
 function RouteComponent() {
   return (
-    <Page className="items-center" withLayoutLoader={false}>
-      <Card id="tema" className="w-full scroll-m-20 lg:max-w-2xl">
+    <Page className="items-center px-0 md:px-4" withLayoutLoader={false}>
+      <PageCard id="tema" className="w-full lg:max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <SunMoonIcon /> Tema
@@ -56,9 +55,9 @@ function RouteComponent() {
         <CardContent>
           <ThemeSettings />
         </CardContent>
-      </Card>
+      </PageCard>
 
-      <Card id="layout" className="w-full scroll-m-20 lg:max-w-2xl">
+      <PageCard id="layout" className="w-full lg:max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <FrameIcon /> Layout
@@ -69,18 +68,16 @@ function RouteComponent() {
             sesuai keinginan Anda.
           </CardDescription>
           <CardAction>
-            <KbdGroup>
-              <Kbd>{formatForDisplay(LAYOUT_TOGGLE_HOTKEY)}</Kbd>
-            </KbdGroup>
+            <Kbd>{formatForDisplay(LAYOUT_TOGGLE_HOTKEY)}</Kbd>
           </CardAction>
         </CardHeader>
 
         <CardContent>
           <LayoutSettings />
         </CardContent>
-      </Card>
+      </PageCard>
 
-      <Card id="sesi-aktif" className="w-full scroll-m-20 lg:max-w-2xl">
+      <PageCard id="sesi-aktif" className="w-full lg:max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <ShieldIcon /> Sesi Aktif
@@ -97,9 +94,9 @@ function RouteComponent() {
         <CardFooter className="*:w-full *:lg:w-fit">
           <RevokeOtherSessionsButton />
         </CardFooter>
-      </Card>
+      </PageCard>
 
-      <Card id="ubah-kata-sandi" className="w-full scroll-m-20 lg:max-w-2xl">
+      <PageCard id="ubah-kata-sandi" className="w-full lg:max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <LockKeyholeIcon /> Ubah Kata Sandi
@@ -110,7 +107,7 @@ function RouteComponent() {
         </CardHeader>
 
         <ChangePasswordForm />
-      </Card>
+      </PageCard>
     </Page>
   );
 }

@@ -1,6 +1,5 @@
-import { Page } from "@/core/components/layout/page";
+import { Page, PageCard } from "@/core/components/layout/page";
 import {
-  Card,
   CardAction,
   CardDescription,
   CardHeader,
@@ -26,8 +25,11 @@ function RouteComponent() {
   const { user } = useAuth();
 
   return (
-    <Page className="items-center" withLayoutLoader={false}>
-      <Card id="informasi-pribadi" className="w-full scroll-m-20 lg:max-w-2xl">
+    <Page className="items-center px-0 md:px-4" withLayoutLoader={false}>
+      <PageCard
+        id="informasi-pribadi"
+        className="w-full scroll-m-20 lg:max-w-2xl"
+      >
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-x-2">
             <UserRoundIcon /> Informasi Pribadi
@@ -42,7 +44,7 @@ function RouteComponent() {
         </CardHeader>
 
         <ProfileForm />
-      </Card>
+      </PageCard>
     </Page>
   );
 }
