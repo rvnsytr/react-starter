@@ -125,7 +125,6 @@ import {
   HistoryIcon,
   InfinityIcon,
   InfoIcon,
-  Layers2Icon,
   LockKeyholeIcon,
   LockKeyholeOpenIcon,
   LogInIcon,
@@ -146,6 +145,7 @@ import {
   TvMinimalIcon,
   UserRoundIcon,
   UserRoundPlusIcon,
+  VenetianMaskIcon,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -2343,7 +2343,7 @@ export function ImpersonateUserBadge({
   return (
     <div className="relative">
       <Badge variant="outline" className="relative">
-        <Layers2Icon />
+        <VenetianMaskIcon />
         <span className="hidden md:flex">Mode Impersonasi</span>
       </Badge>
       <Ping />
@@ -2392,7 +2392,7 @@ function ImpersonateUserDialog({
         <Button size="sm" variant="ghost" disabled={isLoading}>
           <LoadingSpinner
             loading={isLoading}
-            icon={{ base: <Layers2Icon /> }}
+            icon={{ base: <VenetianMaskIcon /> }}
           />
           Akses Akun
         </Button>
@@ -2401,7 +2401,7 @@ function ImpersonateUserDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-x-2">
-            <Layers2Icon /> Impersonasi {data.name}
+            <VenetianMaskIcon /> Impersonasi {data.name}
           </AlertDialogTitle>
           <div className="space-y-2">
             <AlertDialogDescription>
@@ -2470,7 +2470,10 @@ export function StopImpersonateUserMenuItem() {
         disabled={isLoading}
         onClick={clickHandler}
       >
-        <LoadingSpinner loading={isLoading} icon={{ base: <Layers2Icon /> }} />
+        <LoadingSpinner
+          loading={isLoading}
+          icon={{ base: <VenetianMaskIcon /> }}
+        />
         Kembali ke akun saya
       </SidebarMenuButton>
     </SidebarMenuItem>

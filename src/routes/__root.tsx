@@ -8,7 +8,6 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 type RouterContext = { session: AuthSession | null };
 
@@ -30,7 +29,7 @@ function RootLayout() {
       <HeadContent />
       <Outlet />
       <Scripts />
-      <TanStackRouterDevtools />
+      {/* <TanStackRouterDevtools /> */}
     </>
   );
 }
