@@ -7,7 +7,7 @@ import {
   FieldLabel,
   FieldProps,
 } from "./field";
-import { LabelProps } from "./label";
+import { Label } from "./label";
 
 /**
  * @note
@@ -43,7 +43,7 @@ export function FieldWrapper({
   // Other optional props
   otherProps?: {
     field?: Omit<FieldProps, "className" | "data-invalid">;
-    label?: Omit<LabelProps, "htmlFor">;
+    label?: Omit<React.ComponentProps<typeof Label>, "htmlFor">;
     fieldDesc?: React.ComponentProps<"p">;
     fieldError?: Omit<FieldErrorProps, "errors">;
   };

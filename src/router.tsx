@@ -49,7 +49,7 @@ function App() {
 
       <GridPattern
         className={cn(
-          "stroke-muted dark:stroke-muted/60 -z-10 min-h-dvh",
+          "stroke-muted/70 dark:stroke-muted/30 -z-10 min-h-dvh",
           isInitialLoading && "mask-radial-from-60% dark:mask-radial-from-50%",
         )}
       />

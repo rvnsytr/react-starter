@@ -1,12 +1,3 @@
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/core/components/ui/command";
 import { Menu } from "@/core/constants/menu";
 import { messages } from "@/core/constants/messages";
 import { routesMeta } from "@/core/route";
@@ -16,6 +7,15 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 import { useNavigate } from "@tanstack/react-router";
 import { DotIcon, SearchIcon } from "lucide-react";
 import { Fragment, useState, useTransition } from "react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "./command";
 import {
   Dialog,
   DialogContent,
@@ -85,7 +85,7 @@ export function CommandPalette({
         </InputGroup>
       </DialogTrigger>
 
-      <DialogContent className="p-1" showCloseButton={false}>
+      <DialogContent className="p-0" showCloseButton={false}>
         <DialogHeader className="sr-only">
           <DialogTitle>Command Pallete</DialogTitle>
           <DialogDescription>Command Menu Pallete</DialogDescription>

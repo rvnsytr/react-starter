@@ -94,7 +94,7 @@ export function DatePicker({
           <PopoverTrigger asChild>
             <InputGroupButton
               size="icon-xs"
-              variant={invalid ? "outline_destructive" : "outline"}
+              variant={invalid ? "outline-destructive" : "outline"}
               disabled={props.disabled === true}
               className={cn(
                 !selected && "text-muted-foreground",
@@ -141,7 +141,7 @@ export function DateMultiPicker({
       <RequiredBridge required={props.required} />
       <PopoverTrigger asChild>
         <Button
-          variant={invalid ? "outline_destructive" : "outline"}
+          variant={invalid ? "outline-destructive" : "outline"}
           disabled={props.disabled === true}
           className={cn(
             "justify-between",
@@ -178,7 +178,7 @@ export function DateRangePicker({
       <RequiredBridge required={props.required} />
       <PopoverTrigger asChild>
         <Button
-          variant={invalid ? "outline_destructive" : "outline"}
+          variant={invalid ? "outline-destructive" : "outline"}
           disabled={props.disabled === true}
           className={cn(
             "justify-between",

@@ -1,8 +1,9 @@
 import { useTheme } from "@/core/providers/theme";
 import { Toaster as Sonner, ToasterProps } from "sonner";
 
-export function Toaster({ ...props }: ToasterProps) {
-  const { theme } = useTheme();
+const Toaster = ({ ...props }: ToasterProps) => {
+  const { theme = "system" } = useTheme();
+
   return (
     <Sonner
       theme={theme}
@@ -19,4 +20,6 @@ export function Toaster({ ...props }: ToasterProps) {
       {...props}
     />
   );
-}
+};
+
+export { Toaster };

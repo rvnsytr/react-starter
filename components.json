@@ -6,19 +6,20 @@
   "tailwind": {
     "config": "",
     "css": "src/styles.css",
-    "baseColor": "zinc",
+    "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
   "iconLibrary": "lucide",
+  "rtl": false,
   "aliases": {
     "components": "@/core/components",
+    "utils": "@/core/utils",
     "ui": "@/core/components/ui",
     "lib": "@/core/utils",
-    "utils": "@/core/utils",
     "hooks": "@/core/hooks"
   },
-  "menuColor": "default",
+  "menuColor": "default-translucent",
   "menuAccent": "subtle",
   "registries": {}
 }

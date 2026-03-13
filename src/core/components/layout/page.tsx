@@ -60,7 +60,7 @@ export function PageTitle({
     <Comp
       data-slot="page-title"
       className={cn(
-        "text-base leading-normal font-medium *:[svg:not([class*='size-'])]:size-4",
+        "text-base leading-normal font-medium **:[svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

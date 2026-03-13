@@ -64,7 +64,7 @@ function TimelineContent({
     <div
       data-slot="timeline-content"
       className={cn(
-        "text-muted-foreground [&_span]:text-foreground text-sm [&_span]:font-medium",
+        "text-muted-foreground *:[a]:hover:text-foreground *:[span]:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-2 *:[span]:font-medium",
         className,
       )}
       {...props}

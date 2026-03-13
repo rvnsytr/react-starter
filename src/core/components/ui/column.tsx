@@ -9,7 +9,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { Button } from "./button";
-import { Checkbox, CheckboxProps } from "./checkbox";
+import { Checkbox } from "./checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,7 +94,7 @@ export function ColumnHeaderCheckbox<TData, TValue>({
   className,
   ...props
 }: Pick<HeaderContext<TData, TValue>, "table"> &
-  Omit<CheckboxProps, "checked" | "onCheckedChange">) {
+  Omit<React.ComponentProps<typeof Checkbox>, "checked" | "onCheckedChange">) {
   return (
     <Checkbox
       aria-label="Select all"
@@ -114,7 +114,7 @@ export function ColumnCellCheckbox<TData, TValue>({
   className,
   ...props
 }: Pick<CellContext<TData, TValue>, "row"> &
-  Omit<CheckboxProps, "checked" | "onCheckedChange">) {
+  Omit<React.ComponentProps<typeof Checkbox>, "checked" | "onCheckedChange">) {
   if (!row.getCanSelect()) return;
   return (
     <Checkbox

@@ -527,7 +527,7 @@ export function SignOutButton() {
   return (
     <SidebarMenuButton
       tooltip="Keluar"
-      variant="outline_destructive"
+      variant="destructive"
       disabled={isLoading}
       onClick={clickHandler}
     >
@@ -647,7 +647,7 @@ function ProfilePicture({
               <Button
                 type="button"
                 size="sm"
-                variant="outline_destructive"
+                variant="destructive"
                 disabled={!data.image || isChange || isRemoved}
               >
                 <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
@@ -1076,7 +1076,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
               </Button>
             </PopoverTrigger>
 
-            <PopoverContent className="grid gap-y-1 p-1 [&_button]:justify-start">
+            <PopoverContent className="grid gap-y-1 p-1 **:[button]:justify-start">
               <div className="flex justify-center py-1 text-sm">
                 Akun dipilih: <span className="font-medium">{data.length}</span>
               </div>
@@ -1089,7 +1089,7 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
               />
 
               {/* // TODO */}
-              <Button size="sm" variant="ghost_destructive" disabled>
+              <Button size="sm" variant="ghost-destructive" disabled>
                 <BanIcon /> Blokir
               </Button>
 
@@ -1167,7 +1167,7 @@ export function UserDetailModal({
               </PopoverTrigger>
 
               <PopoverContent
-                className="grid gap-y-1 p-1 [&_button]:justify-start"
+                className="grid gap-y-1 p-1 **:[button]:justify-start"
                 align="end"
               >
                 <ImpersonateUserDialog
@@ -1458,8 +1458,8 @@ export function CreateUserModal({
                           <RadioGroupItem
                             value={value}
                             id={value}
-                            classNames={{ circle: "fill-[var(--field-color)]" }}
                             aria-invalid={!!fieldState.error}
+                            className="data-checked:text-(--field-color)"
                           />
                         </Field>
                       </FieldLabel>
@@ -2544,7 +2544,7 @@ function BanUserModal({
   return (
     <Modal open={isOpen} onOpenChange={setIsOpen}>
       <ModalTrigger asChild>
-        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+        <Button size="sm" variant="ghost-destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <BanIcon /> }} />
           Blokir
         </Button>
@@ -2741,7 +2741,7 @@ function RemoveUserModal({
   return (
     <Modal open={isOpen} onOpenChange={setIsOpen}>
       <ModalTrigger asChild>
-        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+        <Button size="sm" variant="ghost-destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2Icon /> }} />
           {messages.actions.remove}
         </Button>
@@ -2867,7 +2867,7 @@ function ActionRemoveUsersDialog({
   return (
     <Modal open={isOpen} onOpenChange={setIsOpen}>
       <ModalTrigger asChild>
-        <Button size="sm" variant="ghost_destructive" disabled={isLoading}>
+        <Button size="sm" variant="ghost-destructive" disabled={isLoading}>
           <LoadingSpinner loading={isLoading} icon={{ base: <Trash2Icon /> }} />
           {messages.actions.remove}
         </Button>

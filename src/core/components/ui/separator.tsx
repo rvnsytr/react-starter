@@ -1,7 +1,7 @@
 import { cn } from "@/core/utils/helpers";
 import { Separator as SeparatorPrimitive } from "radix-ui";
 
-export function Separator({
+function Separator({
   className,
   orientation = "horizontal",
   decorative = true,
@@ -21,3 +21,5 @@ export function Separator({
     />
   );
 }
+
+export { Separator };

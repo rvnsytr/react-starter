@@ -37,6 +37,7 @@ function BreadcrumbLink({
   asChild?: boolean;
 }) {
   const Comp = asChild ? Slot.Root : "a";
+
   return (
     <Comp
       data-slot="breadcrumb-link"
@@ -69,7 +70,7 @@ function BreadcrumbSeparator({
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn("[&>svg]:size-3.5", className)}
+      className={cn("*:[svg]:size-3.5", className)}
       {...props}
     >
       {children ?? <ChevronRightIcon />}
@@ -86,7 +87,7 @@ function BreadcrumbEllipsis({
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       aria-hidden="true"
-      className={cn("flex size-9 items-center justify-center", className)}
+      className={cn("flex size-5 items-center justify-center", className)}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

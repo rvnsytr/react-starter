@@ -178,7 +178,7 @@ export function FileUpload({
 
           <Button
             type="button"
-            variant="outline_destructive"
+            variant="outline-destructive"
             onClick={resetFiles}
           >
             <XIcon /> {messages.actions.clear}

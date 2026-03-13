@@ -156,7 +156,7 @@ export function ActiveFiltersContainer({
 export function ClearFilters<TData>({
   table,
   size = "sm",
-  variant = "outline_destructive",
+  variant = "outline-destructive",
   ...props
 }: Omit<ButtonProps, "onClick"> & { table: Table<TData> }) {
   return (

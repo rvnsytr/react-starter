@@ -95,7 +95,7 @@ export function DataTable<TData>({
                   "flex flex-col gap-2 lg:flex-row lg:items-center",
                 )}
               >
-                <ButtonGroup className="w-full lg:w-fit [&_button]:grow">
+                <ButtonGroup className="w-full lg:w-fit **:[button]:grow">
                   <FilterSelector table={table} disabled={isLoading} />
 
                   <DataControllerVisibility

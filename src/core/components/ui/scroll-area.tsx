@@ -1,7 +1,7 @@
 import { cn } from "@/core/utils/helpers";
 import { ScrollArea as ScrollAreaPrimitive } from "radix-ui";
 
-export function ScrollArea({
+function ScrollArea({
   className,
   children,
   ...props
@@ -24,7 +24,7 @@ export function ScrollArea({
   );
 }
 
-export function ScrollBar({
+function ScrollBar({
   className,
   orientation = "vertical",
   ...props
@@ -47,3 +47,5 @@ export function ScrollBar({
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   );
 }
+
+export { ScrollArea, ScrollBar };
