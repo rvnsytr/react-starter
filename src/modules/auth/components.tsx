@@ -651,7 +651,7 @@ function ProfilePicture({
               <Button
                 type="button"
                 size="sm"
-                variant="destructive"
+                variant="outline-destructive"
                 disabled={!data.image || isChange || isRemoved}
               >
                 <LoadingSpinner loading={isRemoved} /> {messages.actions.remove}
@@ -1456,7 +1456,7 @@ export function CreateUserModal({
                             value={value}
                             id={value}
                             aria-invalid={!!fieldState.error}
-                            className="data-checked:text-(--field-color)"
+                            className="data-checked:border-(--field-color) data-checked:bg-(--field-color) data-checked:text-(--field-color)"
                           />
                         </Field>
                       </FieldLabel>

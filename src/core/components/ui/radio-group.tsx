@@ -1,12 +1,10 @@
 import { cn } from "@/core/utils/helpers";
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
 
-type RadioGroupProps = React.ComponentProps<typeof RadioGroupPrimitive.Root>;
-type RadioGroupItemProps = React.ComponentProps<
-  typeof RadioGroupPrimitive.Item
-> & { classNames?: { indicator?: string; circle?: string } };
-
-function RadioGroup({ className, ...props }: RadioGroupProps) {
+function RadioGroup({
+  className,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
   return (
     <RadioGroupPrimitive.Root
       data-slot="radio-group"
@@ -18,9 +16,8 @@ function RadioGroup({ className, ...props }: RadioGroupProps) {
 
 function RadioGroupItem({
   className,
-  classNames,
   ...props
-}: RadioGroupItemProps) {
+}: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
   return (
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
