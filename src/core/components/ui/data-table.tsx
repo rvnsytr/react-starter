@@ -76,8 +76,11 @@ export function DataTable<TData>({
         const selectedRowsCount =
           Object.keys(state.rowSelection).length ??
           table.getFilteredSelectedRowModel().rows.length;
-        const rowsCount =
-          data?.count?.total ?? table.getFilteredRowModel().rows.length;
+
+        const rowsLength = table.getFilteredRowModel().rows.length;
+        const rowsCount = data?.success
+          ? (data?.count?.total ?? rowsLength)
+          : rowsLength;
 
         const selectedRows = table.getFilteredSelectedRowModel().rows;
         const isSelected = selectedRows.length > 0;

@@ -1,21 +1,30 @@
 import z from "zod";
 import { apiConfig } from "./constants/app";
 
-export const apiResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  count: z
-    .intersection(
-      z.object({ total: z.number() }),
-      z.record(z.string(), z.number()),
-    )
-    .optional(),
-});
+export const getApiResponseSchema = <T>(schema: z.ZodType<T>) =>
+  z.intersection(
+    z.object({
+      code: z.number(),
+      message: z.string(),
+    }),
+    z.discriminatedUnion("success", [
+      z.object({
+        success: z.literal(true),
+        count: z
+          .intersection(
+            z.object({ total: z.number() }),
+            z.record(z.string(), z.number()),
+          )
+          .optional(),
+        data: schema,
+      }),
+      z.object({ success: z.literal(false), error: z.unknown() }),
+    ]),
+  );
 
-export type ApiResponse<T> = z.infer<typeof apiResponseSchema> & {
-  data: T;
-  error?: unknown;
-};
+export type ApiResponse<T> = z.infer<
+  ReturnType<typeof getApiResponseSchema<T>>
+>;
 
 export type FetcherConfig<T> = RequestInit & {
   schema?: z.ZodType<T>;
@@ -43,12 +52,14 @@ const fetcher = async <T>(
 fetcher.api = async <T>(
   path: string,
   config?: ApiFetcherConfig<T>,
-): Promise<ApiResponse<T>> =>
-  await fetcher(`${apiConfig.baseUrl}${path}`, {
+): Promise<ApiResponse<T>> => {
+  const schema = config?.schema ?? z.any();
+  return await fetcher(`${apiConfig.baseUrl}${path}`, {
     ...config,
     credentials: "include",
-    schema: apiResponseSchema.extend({ data: config?.schema ?? z.any() }),
+    schema: getApiResponseSchema(schema),
   });
+};
 
 fetcher.postJson = async <T>(
   path: string,

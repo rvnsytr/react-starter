@@ -136,7 +136,7 @@ export function EventLogTimeline({
 
               {isLoading ? (
                 <LoadingFallback />
-              ) : res?.data.length ? (
+              ) : res?.success && res.data.length ? (
                 <Timeline orientation="vertical">
                   {res.data.map((item, index) => {
                     const {

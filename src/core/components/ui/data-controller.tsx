@@ -415,7 +415,7 @@ export function DataController<TData>({
 
     // * Pagination
     manualPagination: isManual,
-    rowCount: result.data?.count?.total ?? 0,
+    rowCount: result.data?.success ? (result.data.count?.total ?? 0) : 0,
     onPaginationChange: setPagination,
     getPaginationRowModel: !isManual ? getPaginationRowModel() : undefined,
   });

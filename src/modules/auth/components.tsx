@@ -1041,8 +1041,10 @@ export function UserDataTable({ ...props }: DataQueryStateProps) {
       mode="manual"
       query={{
         key,
-        fetcher: async (state) =>
-          await fetcher.postJson(key, { schema, body: JSON.stringify(state) }),
+        fetcher: async (state) => {
+          const body = JSON.stringify(state);
+          return await fetcher.postJson(key, { schema, body });
+        },
       }}
       columns={(result) => getUserColumns(user.id, result)}
       getRowId={(row) => row.id}
