@@ -527,7 +527,8 @@ export function SignOutButton() {
   return (
     <SidebarMenuButton
       tooltip="Keluar"
-      variant="destructive"
+      variant="ghost-destructive"
+      className="cursor-pointer"
       disabled={isLoading}
       onClick={clickHandler}
     >
@@ -1310,9 +1311,11 @@ export function CreateUserModal({
         </Button>
       </ModalTrigger>
 
-      <ModalContent>
+      <ModalContent className="">
         <ModalHeader>
-          <ModalTitle>Tambah Pengguna</ModalTitle>
+          <ModalTitle className="flex items-center gap-x-2">
+            <UserRoundPlusIcon /> Tambah Pengguna
+          </ModalTitle>
           <ModalDescription>
             Pastikan semua informasi sudah benar sebelum mengkonfirmasi.
           </ModalDescription>
