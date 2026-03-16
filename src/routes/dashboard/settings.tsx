@@ -63,9 +63,10 @@ function RouteComponent() {
             <FrameIcon /> Layout
           </CardTitle>
           <CardDescription>
-            Atur tata letak antarmuka{" "}
+            Sesuaikan tata letak antarmuka{" "}
             <span className="text-foreground font-medium">{appMeta.name}</span>{" "}
-            sesuai keinginan Anda.
+            sesuai preferensi Anda. Perubahan ini berlaku pada layar dengan
+            lebar lebih dari 1024px.
           </CardDescription>
           <CardAction>
             <Kbd>{formatForDisplay(LAYOUT_TOGGLE_HOTKEY)}</Kbd>
@@ -83,7 +84,7 @@ function RouteComponent() {
             <ShieldIcon /> Sesi Aktif
           </CardTitle>
           <CardDescription>
-            Tinjau dan kelola sesi yang saat ini sedang masuk ke akun Anda.
+            Lihat dan kelola sesi yang saat ini sedang aktif pada akun Anda.
           </CardDescription>
         </CardHeader>
 
@@ -99,7 +100,7 @@ function RouteComponent() {
       <PageCard id="ubah-kata-sandi" className="w-full lg:max-w-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
-            <LockKeyholeIcon /> Ubah Kata Sandi
+            <LockKeyholeIcon /> Ganti Kata Sandi
           </CardTitle>
           <CardDescription>
             Gunakan kata sandi yang kuat untuk menjaga keamanan akun Anda.

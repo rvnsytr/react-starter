@@ -41,7 +41,7 @@ export function LayoutToggle({
         onClick?.(e);
         toggleLayout();
       }}
-      className={cn("hidden md:inline-flex", className)}
+      className={cn("hidden 2xl:inline-flex", className)}
       disabled={disabled ?? layout === "unset"}
       {...props}
     >

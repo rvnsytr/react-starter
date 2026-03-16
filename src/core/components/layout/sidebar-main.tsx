@@ -6,13 +6,13 @@ import {
   ImpersonateUserBadge,
   SignOutButton,
   StopImpersonateUserMenuItem,
-  UserAvatar,
   UserVerifiedBadge,
 } from "@/modules/auth/components";
 import { useAuth } from "@/modules/auth/provider.auth";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
+import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   Collapsible,
   CollapsibleContent,
@@ -66,7 +66,11 @@ export function SidebarMain() {
               asChild
             >
               <Link to="/dashboard/profile">
-                <UserAvatar data={user} className="rounded-md" />
+                <Avatar className="rounded-md *:rounded-md after:rounded-md">
+                  <AvatarImage src={user.image ?? undefined} />
+                  <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
+                  <AvatarBadge className="bg-success" />
+                </Avatar>
 
                 <div className="grid break-all">
                   <div className="flex gap-x-2 truncate">
@@ -245,7 +249,11 @@ export function SidebarMainSiteHeader() {
           <Separator orientation="vertical" className="mr-2 h-4" />
 
           <Link to="/dashboard/profile">
-            <UserAvatar data={user} />
+            <Avatar className="rounded-md *:rounded-md after:rounded-md">
+              <AvatarImage src={user.image ?? undefined} />
+              <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
+              <AvatarBadge className="bg-success" />
+            </Avatar>
           </Link>
         </div>
       </div>

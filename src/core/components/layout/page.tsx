@@ -24,7 +24,7 @@ export function Page({
         data-slot="page"
         className={cn(
           "relative z-10 flex flex-1 flex-col gap-4 py-4",
-          "px-4 group-data-[layout-mode=centered]/layout-mode:container",
+          "px-4 md:group-data-[layout-mode=centered]/layout-mode:container",
           withLayoutLoader &&
             "group-data-[layout-mode=unset]/layout-mode:hidden",
           className,

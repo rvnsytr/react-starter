@@ -147,7 +147,7 @@ import {
   UserRoundPlusIcon,
   VenetianMaskIcon,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UAParser, UAParserProps } from "ua-parser-js";
@@ -615,7 +615,10 @@ function ProfilePicture({
 
   return (
     <div className="flex items-center gap-x-4">
-      <UserAvatar data={data} className="size-24" />
+      <Avatar className="size-20 rounded-lg *:rounded-lg after:rounded-lg">
+        <AvatarImage src={data.image ?? undefined} />
+        <AvatarFallback>{data.name.slice(0, 2)}</AvatarFallback>
+      </Avatar>
 
       <input
         type="file"
@@ -897,28 +900,6 @@ export function UserVerifiedBadge({
   );
 }
 
-export function UserAvatar({
-  data,
-  className,
-  classNames,
-}: {
-  data: Pick<AuthSession["user"], "image" | "name">;
-  className?: string;
-  classNames?: { image?: string; fallback?: string };
-}) {
-  return (
-    <Avatar className={cn("rounded-lg", className)}>
-      <AvatarImage
-        src={data.image ?? undefined}
-        className={cn("rounded-lg", classNames?.image)}
-      />
-      <AvatarFallback className={cn("rounded-lg", classNames?.fallback)}>
-        {data.name.slice(0, 2)}
-      </AvatarFallback>
-    </Avatar>
-  );
-}
-
 const createUserColumn = createColumnHelper<AuthSession["user"]>();
 const getUserColumns = (
   currentUserId: string,
@@ -1115,6 +1096,11 @@ export function UserDetailModal({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const avatar = {
+    image: data.image ?? undefined,
+    fallback: data.name.slice(0, 2),
+  };
+
   const profile: DetailListData = [
     {
       label: "Terakhir diperbarui",
@@ -1138,7 +1124,11 @@ export function UserDetailModal({
   return (
     <Modal open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex items-center gap-x-3">
-        <UserAvatar data={data} className="rounded-full" />
+        <Avatar className="rounded-md *:rounded-md after:rounded-md">
+          <AvatarImage src={avatar.image} />
+          <AvatarFallback>{avatar.fallback}</AvatarFallback>
+        </Avatar>
+
         <ModalTrigger className="group flex w-fit gap-x-1 hover:cursor-pointer">
           <span className="link-group">{data.name}</span>
           <ArrowUpRightIcon className="group-hover:text-primary size-3.5" />
@@ -1148,7 +1138,11 @@ export function UserDetailModal({
       <ModalContent className="sm:max-w-2xl" showCloseButton={false}>
         <ModalHeader className="flex-row justify-between gap-x-4">
           <div className="flex items-center gap-x-3">
-            <UserAvatar data={data} className="size-12" />
+            <Avatar className="size-12 rounded-md *:rounded-md after:rounded-md">
+              <AvatarImage src={avatar.image} />
+              <AvatarFallback>{avatar.fallback}</AvatarFallback>
+            </Avatar>
+
             <div className="grid">
               <ModalTitle className="flex gap-x-2">
                 <span className="text-base">{data.name}</span>
