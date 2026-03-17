@@ -10,7 +10,7 @@
   },
 
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
-  "search.exclude": { "**/routeTree.gen.ts": true },
+  "search.exclude": { "**/routeTree.gen.ts": true, "**/dist/**": true },
 
   "js/ts.preferences.autoImportFileExcludePatterns": ["radix-ui"],
 

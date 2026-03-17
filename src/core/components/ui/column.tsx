@@ -58,9 +58,8 @@ export function ColumnHeader<TData, TValue>({
                 <ColumnPinIcon />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="min-w-fit flex-row">
+            <DropdownMenuContent className="flex min-w-fit flex-row *:size-5 *:items-center *:justify-center *:p-0">
               <DropdownMenuItem
-                className="size-6"
                 onClick={() => column.pin("left")}
                 disabled={columnPinned === "left"}
               >
@@ -68,14 +67,12 @@ export function ColumnHeader<TData, TValue>({
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
-                className="size-6"
                 onClick={() => column.pin(false)}
                 disabled={columnPinned === false}
               >
                 <XIcon />
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="size-6"
                 onClick={() => column.pin("right")}
                 disabled={columnPinned === "right"}
               >

@@ -1458,7 +1458,7 @@ export function CreateUserModal({
                             value={value}
                             id={value}
                             aria-invalid={!!fieldState.error}
-                            className="data-checked:border-(--field-color) data-checked:bg-(--field-color) data-checked:text-(--field-color)"
+                            className="data-checked:border-(--field-color) data-checked:bg-(--field-color) data-checked:text-(--field-color) dark:data-checked:bg-(--field-color)"
                           />
                         </Field>
                       </FieldLabel>
