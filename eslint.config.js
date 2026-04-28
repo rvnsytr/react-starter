@@ -20,7 +20,7 @@ export default defineConfig([
     ],
     languageOptions: {
       parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
+        project: ["./tsconfig.json"],
         tsconfigRootDir: import.meta.dirname,
       },
       ecmaVersion: 2020,
@@ -28,8 +28,8 @@ export default defineConfig([
     },
     rules: {
       "@typescript-eslint/consistent-type-definitions": "off",
-      "react-refresh/only-export-components": "off",
       "no-extra-boolean-cast": "off",
+      "react-refresh/only-export-components": "off",
     },
   },
 ]);

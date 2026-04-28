@@ -4,11 +4,6 @@
     "**/core/**": true
   },
 
-  "files.readonlyExclude": {
-    "**/core/constants/menu.ts": true,
-    "**/core/routes.ts": true
-  },
-
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
   "search.exclude": { "**/routeTree.gen.ts": true, "**/dist/**": true },
 
