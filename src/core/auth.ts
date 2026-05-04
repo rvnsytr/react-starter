@@ -5,10 +5,9 @@ import { createAuthClient } from "better-auth/react";
 import z from "zod";
 import { toast } from "./components/ui/toast";
 
-export type AuthSession = {
-  session: z.infer<typeof sessionSchema>;
-  user: z.infer<typeof userSchema>;
-};
+export type AuthSession = { session: Session; user: User };
+export type Session = z.infer<typeof sessionSchema>;
+export type User = z.infer<typeof userSchema>;
 
 export const authClient = createAuthClient({
   plugins: [adminClient({ ac, roles })],
