@@ -27,8 +27,10 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      "@typescript-eslint/consistent-type-definitions": "off",
       "no-extra-boolean-cast": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/non-nullable-type-assertion-style": "off",
       "react-refresh/only-export-components": "off",
     },
   },

@@ -1,4 +1,6 @@
-import { cn } from "@/core/utils/helpers";
+"use client";
+
+import { cn } from "@/core/utils";
 import { motion, useAnimation, useInView } from "motion/react";
 import { useEffect, useRef } from "react";
 

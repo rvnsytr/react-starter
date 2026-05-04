@@ -1,23 +1,20 @@
-import { Hotkey } from "@tanstack/react-hotkeys";
 import { LucideIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
-
-export const THEME_TOGGLE_HOTKEY: Hotkey = "Alt+T";
 
 export type Theme = (typeof allThemes)[number];
 export const allThemes = ["light", "system", "dark"] as const;
 
-export const themeMeta: Record<Theme, { icon: LucideIcon }> = {
+export const themeConfig: Record<Theme, { icon: LucideIcon }> = {
   light: { icon: SunIcon },
   system: { icon: MonitorIcon },
   dark: { icon: MoonIcon },
 };
 
-type ThemeProviderProps = {
-  children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
-};
+export function nextTheme(currentTheme?: Theme) {
+  if (currentTheme === "light") return "dark";
+  if (currentTheme === "dark") return "system";
+  return "light";
+}
 
 type ThemeProviderState = {
   theme: Theme;
@@ -28,6 +25,12 @@ const ThemeProviderContext = createContext<ThemeProviderState>({
   theme: "system",
   setTheme: () => null,
 });
+
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+};
 
 export function ThemeProvider({
   children,
@@ -76,9 +79,3 @@ export const useTheme = () => {
   if (!ctx) throw new Error("useTheme must be used within a ThemeProvider");
   return ctx;
 };
-
-export function nextTheme(currentTheme?: Theme) {
-  if (currentTheme === "light") return "dark";
-  if (currentTheme === "dark") return "system";
-  return "light";
-}

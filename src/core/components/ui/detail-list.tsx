@@ -1,11 +1,12 @@
-import { cn } from "@/core/utils/helpers";
+import { cn } from "@/core/utils";
 import { Label } from "./label";
 
 export type DetailListData = {
   label: string;
   content?:
-    | React.ReactNode
-    | { subLabel: string; subContent?: React.ReactNode }[];
+    | string
+    | React.ReactElement
+    | { label: string; content?: React.ReactNode }[];
   className?: string;
   classNames?: { label?: string; content?: string };
 }[];
@@ -38,12 +39,10 @@ export function DetailList({
       >
         {Array.isArray(item.content) ? (
           <ul className="list-inside list-disc">
-            {item.content.map(({ subLabel, subContent }) => (
-              <li key={subLabel}>
-                <span className="capitalize">{subLabel}</span>:{" "}
-                <span className="text-foreground font-medium">
-                  {subContent ?? "-"}
-                </span>
+            {item.content.map((item) => (
+              <li key={item.label} className="font-normal">
+                {`${item.label}: `}
+                <span className="text-foreground">{item.content ?? "-"}</span>
               </li>
             ))}
           </ul>

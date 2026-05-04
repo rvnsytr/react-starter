@@ -1,9 +1,14 @@
-import { cn } from "@/core/utils/helpers";
+"use client";
+
+import { cn } from "@/core/utils";
 import { motion } from "motion/react";
 
 type Variant =
   | "default"
   | "secondary"
+  | "success"
+  | "warning"
+  | "info"
   | "destructive"
   | "red"
   | "blue"
@@ -24,17 +29,21 @@ type Variant =
   | "fuchsia";
 
 type ShimmerTextProps = {
-  children: React.ReactNode;
-  className?: string;
-  variant?: Variant;
-  duration?: number;
-  delay?: number;
   spread?: number;
+  delay?: number;
+  duration?: number;
+  variant?: Variant;
+  className?: string;
+  children: React.ReactNode;
+  containerClassName?: string;
 };
 
 const variantMap: Record<Variant, string> = {
   default: "",
   secondary: "text-secondary-foreground",
+  success: "text-success dark:text-success-foreground",
+  warning: "text-warning dark:text-warning-foreground",
+  info: "text-info dark:text-info-foreground",
   destructive: "text-destructive dark:text-destructive-foreground",
   red: "text-red-600 dark:text-red-400",
   blue: "text-blue-600 dark:text-blue-400",
@@ -56,14 +65,15 @@ const variantMap: Record<Variant, string> = {
 };
 
 export function ShimmerText({
-  children,
-  className,
-  variant = "default",
-  duration = 1.5,
   delay = 1.5,
+  duration = 1.5,
+  variant = "default",
+  className,
+  children,
+  containerClassName,
 }: ShimmerTextProps) {
   return (
-    <div className="group overflow-hidden">
+    <div className={cn("group overflow-hidden", containerClassName)}>
       <motion.div
         className={cn(
           "inline-block [--shimmer-contrast:rgba(255,255,255,0.6)] dark:[--shimmer-contrast:rgba(0,0,0,0.5)]",
@@ -84,8 +94,8 @@ export function ShimmerText({
         initial={{ backgroundPositionX: "250%" }}
         animate={{ backgroundPositionX: ["-100%", "250%"] }}
         transition={{
-          duration: duration,
           delay: delay,
+          duration: duration,
           repeat: Infinity,
           repeatDelay: 1.5,
           ease: "linear",

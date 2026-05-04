@@ -1,4 +1,6 @@
-import { cn } from "@/core/utils/helpers";
+"use client";
+
+import { cn } from "@/core/utils";
 import { motion } from "motion/react";
 
 export function R({

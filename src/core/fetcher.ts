@@ -1,5 +1,5 @@
+import { apiConfig } from "@/shared/config";
 import z from "zod";
-import { apiConfig } from "./constants/app";
 
 export const getApiResponseSchema = <T>(schema: z.ZodType<T>) =>
   z.intersection(
@@ -62,10 +62,10 @@ fetcher.api = async <T>(
 };
 
 fetcher.postJson = async <T>(
-  path: string,
+  url: string,
   config?: Omit<ApiFetcherConfig<T>, "method">,
 ) =>
-  await fetcher.api(path, {
+  await fetcher(url, {
     ...config,
     method: "POST",
     headers: { ...config?.headers, "Content-Type": "application/json" },

@@ -9,11 +9,15 @@ import {
   AppLoadingFallback,
 } from "./core/components/ui/fallback";
 import { GridPattern } from "./core/components/ui/grid-pattern";
-import { Toaster } from "./core/components/ui/sonner";
+import {
+  AnchoredToastProvider,
+  ToastProvider,
+} from "./core/components/ui/toast";
+import { DynamicBreadcrumbProvider } from "./core/providers/dynamic-breadcrumb";
 import { GlobalShortcuts } from "./core/providers/global-shortcuts";
 import { ThemeProvider } from "./core/providers/theme";
-import { cn } from "./core/utils/helpers";
-import { useSession } from "./modules/auth/hooks";
+import { cn } from "./core/utils";
+import { useSessionQuery } from "./modules/auth/hooks/use-session";
 import { routeTree } from "./routeTree.gen";
 
 z.config(id());
@@ -32,31 +36,38 @@ declare module "@tanstack/react-router" {
 }
 
 function App() {
-  const { data: session, isLoading, error } = useSession();
+  const { data: session, isLoading, error } = useSessionQuery();
 
   if (error) return <AppErrorFallback error={error} />;
   const isInitialLoading = session === undefined && isLoading;
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="theme">
-      <AnimatePresence>
-        {isInitialLoading && <AppLoadingFallback />}
-      </AnimatePresence>
+      <DynamicBreadcrumbProvider>
+        <ToastProvider>
+          <AnchoredToastProvider>
+            <main className="relative isolate flex min-h-svh flex-col">
+              <AnimatePresence>
+                {isInitialLoading && <AppLoadingFallback />}
+              </AnimatePresence>
 
-      {!isInitialLoading && (
-        <RouterProvider router={router} context={{ session }} />
-      )}
+              {!isInitialLoading && (
+                <RouterProvider router={router} context={{ session }} />
+              )}
 
-      <GridPattern
-        className={cn(
-          "stroke-muted/70 dark:stroke-muted/30 -z-10 min-h-dvh",
-          isInitialLoading && "mask-radial-from-60% dark:mask-radial-from-50%",
-        )}
-      />
+              <GridPattern
+                className={cn(
+                  "stroke-muted/60 dark:stroke-muted/20 -z-10 min-h-dvh",
+                  isInitialLoading &&
+                    "mask-radial-from-60% dark:mask-radial-from-50%",
+                )}
+              />
+            </main>
 
-      <Toaster position="top-center" closeButton richColors />
-
-      <GlobalShortcuts />
+            <GlobalShortcuts />
+          </AnchoredToastProvider>
+        </ToastProvider>
+      </DynamicBreadcrumbProvider>
     </ThemeProvider>
   );
 }

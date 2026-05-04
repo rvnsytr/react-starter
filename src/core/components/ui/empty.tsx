@@ -1,4 +1,4 @@
-import { cn } from "@/core/utils/helpers";
+import { cn } from "@/core/utils";
 import { cva, VariantProps } from "class-variance-authority";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
@@ -24,31 +24,59 @@ function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// ? based on: coss/ui
 const emptyMediaVariants = cva(
-  "mb-2 flex shrink-0 items-center justify-center **:[svg]:pointer-events-none **:[svg]:shrink-0",
+  "flex shrink-0 items-center justify-center **:[svg]:pointer-events-none **:[svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground **:[svg:not([class*='size-'])]:size-4",
+        icon: "relative flex size-8 shrink-0 items-center justify-center rounded-lg border bg-card not-dark:bg-clip-padding text-foreground shadow-sm/5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:before:shadow-[0_-1px_--theme(--color-white/6%)] **:[svg:not([class*='size-'])]:size-4",
       },
     },
     defaultVariants: { variant: "default" },
   },
 );
 
+// ? based on: coss/ui
 function EmptyMedia({
+  stacked = true,
   className,
   variant = "default",
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof emptyMediaVariants> & { stacked?: boolean }) {
   return (
     <div
-      data-slot="empty-icon"
+      data-slot="empty-media"
       data-variant={variant}
-      className={cn(emptyMediaVariants({ variant, className }))}
+      className={cn("relative mb-4", className)}
       {...props}
-    />
+    >
+      {variant === "icon" && stacked && (
+        <>
+          <div
+            aria-hidden="true"
+            className={cn(
+              emptyMediaVariants({ className, variant }),
+              "pointer-events-none absolute bottom-px origin-bottom-left -translate-x-0.5 scale-84 -rotate-15 shadow-none",
+            )}
+          />
+          <div
+            aria-hidden="true"
+            className={cn(
+              emptyMediaVariants({ className, variant }),
+              "pointer-events-none absolute bottom-px origin-bottom-right translate-x-0.5 scale-84 rotate-15 shadow-none",
+            )}
+          />
+        </>
+      )}
+
+      <div
+        className={cn(emptyMediaVariants({ className, variant }))}
+        {...props}
+      />
+    </div>
   );
 }
 
@@ -56,7 +84,7 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="empty-title"
-      className={cn("text-sm font-medium tracking-tight", className)}
+      className={cn("text-base font-semibold tracking-tight", className)}
       {...props}
     />
   );

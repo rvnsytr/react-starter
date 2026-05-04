@@ -1,28 +1,15 @@
-import { Role } from "@/modules/auth/constants";
 import { FileRouteTypes } from "@/routeTree.gen";
-import { appMeta } from "./constants/app";
-import { dashboardMenu, Menu } from "./constants/menu";
+import { appConfig } from "@/shared/config";
+import { Role } from "@/shared/permission";
+import { routesConfig } from "@/shared/route";
+import { Menu } from "./types";
 
 export type Route = FileRouteTypes["to"];
 export type RouteRole = "all" | Role[];
 
-export const routesMeta: Record<Route, { label: string; role?: RouteRole }> = {
-  "/": { label: "Beranda" },
-  "/about": { label: "Tentang" },
-  "/sign-in": { label: "Masuk" },
-
-  "/verify-user": { label: "Verifikasi Pengguna" },
-  "/reset-password": { label: "Atur Ulang Kata Sandi" },
-
-  "/dashboard": { label: "Dashboard", role: "all" },
-  "/dashboard/users": { label: "Pengguna", role: ["admin"] },
-  "/dashboard/profile": { label: "Profil Saya", role: "all" },
-  "/dashboard/settings": { label: "Pengaturan", role: "all" },
-};
-
 export function authorizedRoute(route: Route | null, role?: Role) {
   if (!route || !role) return false;
-  const meta = routesMeta[route];
+  const meta = routesConfig[route];
   if (!meta) return false;
   if (!meta.role) return true;
   return meta.role && (meta.role === "all" || meta.role.includes(role));
@@ -34,11 +21,11 @@ export function normalizeRoute(route?: string | null): Route {
 }
 
 export function setRouteTitle(title: string) {
-  return `${title} | ${appMeta.name}`;
+  return `${title} | ${appConfig.name}`;
 }
 
 export function getRouteTitle(route: Route) {
-  return setRouteTitle(routesMeta[route].label);
+  return setRouteTitle(routesConfig[route].label);
 }
 
 export function getRouteHierarchy(path: string): Route[] {
@@ -46,11 +33,9 @@ export function getRouteHierarchy(path: string): Route[] {
   return parts.map((_, i) => "/" + parts.slice(0, i + 1).join("/")) as Route[];
 }
 
-export function getActiveRoute(pathname: string) {
-  const allRoutes = Object.keys(routesMeta) as Route[];
-  const allMenuRoutes = dashboardMenu.flatMap((m) =>
-    m.content.map((c) => c.route),
-  );
+export function getActiveRoute(menu: Menu[], pathname: string) {
+  const allRoutes = Object.keys(routesConfig) as Route[];
+  const allMenuRoutes = menu.flatMap((m) => m.items.map((c) => c.route));
 
   const parts = pathname.split("/").filter(Boolean);
   const paths: string[] = [];
@@ -66,31 +51,30 @@ export function getActiveRoute(pathname: string) {
   }
 }
 
-export function getMenuByRole(
-  currentRole: Role,
-  menu: Menu[] = dashboardMenu,
-): Menu[] {
+export function getMenuByRole(menu: Menu[], currentRole: Role): Menu[] {
   const checkRole = (role?: RouteRole) => {
     if (!role) return true;
     return role === "all" || role?.includes(currentRole);
   };
 
-  const filteredMenu = menu.map(({ section, content }) => {
-    const filteredContent = content
+  const filteredMenu = menu.map(({ group, items }) => {
+    const filteredItems = items
       .filter(({ route }) => {
-        const meta = routesMeta[route];
+        const meta = routesConfig[route];
         if (!("role" in meta)) return true;
         return checkRole(meta.role);
       })
       .map((item) => {
-        if (!item.subMenu) return item;
-        const filteredSubMenu = item.subMenu.filter((sm) => checkRole(sm.role));
-        if (filteredSubMenu.length <= 0) return null;
-        else return { ...item, subMenu: filteredSubMenu };
+        if (!item.subItems) return item;
+        const filteredSubItems = item.subItems.filter((si) =>
+          checkRole(si.role),
+        );
+        if (filteredSubItems.length <= 0) return null;
+        else return { ...item, subItems: filteredSubItems };
       });
 
-    if (filteredContent.length <= 0) return null;
-    else return { section, content: filteredContent } as Menu;
+    if (filteredItems.length <= 0) return null;
+    else return { group, items: filteredItems } as Menu;
   });
 
   return filteredMenu.filter((item) => item !== null);

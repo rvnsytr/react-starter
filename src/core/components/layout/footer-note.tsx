@@ -1,4 +1,4 @@
-import { cn } from "@/core/utils/helpers";
+import { cn } from "@/core/utils";
 import { Link } from "@tanstack/react-router";
 
 export function FooterNote({ className }: { className?: string }) {
@@ -6,7 +6,7 @@ export function FooterNote({ className }: { className?: string }) {
     <small className={cn("text-muted-foreground", className)}>
       {"Built by "}
       <Link
-        to={"https://github.com/RvnSytR" as string}
+        to={"https://github.com/rvnsytr" as string}
         target="_blank"
         className="link-underline"
       >

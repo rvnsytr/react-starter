@@ -1,7 +1,7 @@
+import { AuthSession } from "@/core/auth";
 import { NotFound } from "@/core/components/layout/not-found";
-import { appMeta } from "@/core/constants/app";
 import { getRouteTitle } from "@/core/route";
-import { AuthSession } from "@/modules/auth/constants";
+import { appConfig } from "@/shared/config";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -14,8 +14,8 @@ type RouterContext = { session: AuthSession | null };
 export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
-      { name: "name", content: appMeta.name },
-      { name: "description", content: appMeta.description },
+      { name: "name", content: appConfig.name },
+      { name: "description", content: appConfig.description },
       { title: getRouteTitle("/") },
     ],
   }),

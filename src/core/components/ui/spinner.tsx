@@ -1,4 +1,6 @@
-import { cn } from "@/core/utils/helpers";
+"use client";
+
+import { cn } from "@/core/utils";
 import { useRouterState } from "@tanstack/react-router";
 import {
   FrameIcon,
@@ -23,7 +25,7 @@ export function Spinner({
   className,
   ...props
 }: SpinnerProps) {
-  const allIcon: Record<SpinnerVariant, LucideIcon> = {
+  const iconMap: Record<SpinnerVariant, LucideIcon> = {
     default: Loader2Icon,
     loader: LoaderIcon,
     refresh: RefreshCcwIcon,
@@ -32,7 +34,7 @@ export function Spinner({
   };
 
   const reverseArr: SpinnerVariant[] = ["orbit"];
-  const Icon = allIcon[variant];
+  const Icon = iconMap[variant];
 
   return (
     <Icon
@@ -58,9 +60,7 @@ export function LoadingSpinner({
     : (icon?.base ?? null);
 }
 
-export function LinkSpinner({
-  ...props
-}: Omit<LoadingSpinnerProps, "loading">) {
+export function LinkSpinner(props: Omit<LoadingSpinnerProps, "loading">) {
   const { isLoading } = useRouterState();
   return <LoadingSpinner loading={isLoading} {...props} />;
 }

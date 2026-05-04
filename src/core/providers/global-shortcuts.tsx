@@ -1,10 +1,23 @@
-import { useHotkey } from "@tanstack/react-hotkeys";
-import { nextTheme, THEME_TOGGLE_HOTKEY, useTheme } from "./theme";
+"use client";
+
+import { useHotkeys } from "@tanstack/react-hotkeys";
+import { THEME_TOGGLE_HOTKEY } from "../components/theme";
+import { useViewTransition } from "../hooks/use-view-transition";
+import { nextTheme, useTheme } from "./theme";
 
 export function GlobalShortcuts() {
   const { theme, setTheme } = useTheme();
+  const { isTransitioning, startTransition } = useViewTransition();
 
-  useHotkey(THEME_TOGGLE_HOTKEY, () => setTheme(nextTheme(theme)));
+  useHotkeys(
+    [
+      {
+        hotkey: THEME_TOGGLE_HOTKEY,
+        callback: () => startTransition(() => setTheme(nextTheme(theme))),
+      },
+    ],
+    { enabled: !isTransitioning },
+  );
 
   return null;
 }

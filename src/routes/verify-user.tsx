@@ -1,12 +1,11 @@
 import { authClient } from "@/core/auth";
 import { AppLoadingFallback } from "@/core/components/ui/fallback";
-import { messages } from "@/core/constants/messages";
+import { toast } from "@/core/components/ui/toast";
+import { messages } from "@/core/messages";
 import { getRouteTitle } from "@/core/route";
-import { mutateListUsers } from "@/modules/auth/hooks";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { useEffect, useEffectEvent, useState } from "react";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/verify-user")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -25,30 +24,35 @@ function RouteComponent() {
     if (token) {
       setIsverifying(true);
       toast.promise(
-        async () => {
-          const res = await authClient.verifyEmail({ query: { token } });
+        authClient.verifyEmail({ query: { token } }).then((res) => {
           if (res.error) throw res.error;
-          return res;
-        },
+          return res.data;
+        }),
         {
-          loading: messages.loading,
+          loading: { title: messages.loading },
           success: () => {
             setIsverifying(false);
             navigate({ to: "/sign-in" });
-            mutateListUsers();
-            return "Akun Anda berhasil diverifikasi. Silakan masuk untuk melanjutkan.";
+            return {
+              title: "Verifikasi Berhasil",
+              description: "Silakan masuk untuk melanjutkan.",
+            };
           },
           error: (e) => {
             setIsverifying(false);
             navigate({ to: "/sign-in" });
-            return e.message;
+            return { title: "Verifikasi Gagal", description: e.message };
           },
         },
       );
     } else {
       setIsverifying(false);
       navigate({ to: "/sign-in" });
-      toast.error("Verifikasi gagal, token tidak ditemukan");
+      toast.add({
+        type: "error",
+        title: "Token tidak ditemukan",
+        description: "Token verifikasi tidak ditemukan. Silakan coba lagi.",
+      });
     }
   });
 

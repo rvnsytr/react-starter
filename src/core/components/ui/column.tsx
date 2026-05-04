@@ -1,4 +1,4 @@
-import { cn } from "@/core/utils/helpers";
+import { cn } from "@/core/utils";
 import { CellContext, HeaderContext } from "@tanstack/react-table";
 import {
   ArrowLeftIcon,
@@ -8,27 +8,29 @@ import {
   PinOffIcon,
   XIcon,
 } from "lucide-react";
+import { SORT_ICONS } from "../data-controller";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
+import { Popover, PopoverPopup, PopoverTrigger } from "./popover";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "./tooltip";
 
 export function ColumnHeader<TData, TValue>({
   column,
+  isMulti = true,
   className,
   disabled = false,
   children,
 }: Pick<HeaderContext<TData, TValue>, "column"> & {
+  isMulti?: boolean;
   className?: string;
   disabled?: boolean;
   children: React.ReactNode;
 }) {
   const columnPinned = column.getIsPinned();
   const ColumnPinIcon = columnPinned ? PinOffIcon : PinIcon;
+
+  const sort = column.getIsSorted();
+  const SortIcon = sort ? SORT_ICONS[sort] : ArrowUpDownIcon;
 
   return (
     <div
@@ -41,45 +43,68 @@ export function ColumnHeader<TData, TValue>({
 
       <div className="flex gap-x-px">
         {column.getCanSort() && (
-          <Button
-            size="icon-xs"
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            disabled={disabled}
-          >
-            <ArrowUpDownIcon />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  size="icon-xs"
+                  variant="ghost"
+                  onClick={() => {
+                    if (sort === "asc") column.toggleSorting(true, isMulti);
+                    else if (sort === "desc") column.clearSorting();
+                    else column.toggleSorting(false, isMulti);
+                  }}
+                  disabled={disabled}
+                >
+                  <SortIcon />
+                </Button>
+              }
+            />
+            <TooltipPopup className="capitalize">
+              {typeof sort === "string" ? sort : "-"}
+            </TooltipPopup>
+          </Tooltip>
         )}
 
         {column.getCanPin() && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon-xs" variant="ghost" disabled={disabled}>
-                <ColumnPinIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="flex min-w-fit flex-row *:size-5 *:items-center *:justify-center *:p-0">
-              <DropdownMenuItem
+          <Popover>
+            <PopoverTrigger
+              openOnHover
+              delay={0}
+              render={
+                <Button size="icon-xs" variant="ghost" disabled={disabled}>
+                  <ColumnPinIcon />
+                </Button>
+              }
+            />
+
+            <PopoverPopup className="*:p-1">
+              <Button
+                size="xs"
+                variant="ghost"
                 onClick={() => column.pin("left")}
                 disabled={columnPinned === "left"}
               >
                 <ArrowLeftIcon />
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
+              </Button>
+              <Button
+                size="xs"
+                variant="destructive-ghost"
                 onClick={() => column.pin(false)}
                 disabled={columnPinned === false}
               >
                 <XIcon />
-              </DropdownMenuItem>
-              <DropdownMenuItem
+              </Button>
+              <Button
+                size="xs"
+                variant="ghost"
                 onClick={() => column.pin("right")}
                 disabled={columnPinned === "right"}
               >
                 <ArrowRightIcon />
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </Button>
+            </PopoverPopup>
+          </Popover>
         )}
       </div>
     </div>
@@ -95,11 +120,9 @@ export function ColumnHeaderCheckbox<TData, TValue>({
   return (
     <Checkbox
       aria-label="Select all"
+      indeterminate={table.getIsSomePageRowsSelected()}
+      checked={table.getIsAllPageRowsSelected()}
       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-      checked={
-        table.getIsAllPageRowsSelected() ||
-        (table.getIsSomePageRowsSelected() && "indeterminate")
-      }
       className={cn("mx-auto", className)}
       {...props}
     />

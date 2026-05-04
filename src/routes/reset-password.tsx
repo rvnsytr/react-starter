@@ -4,9 +4,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
-import { appMeta } from "@/core/constants/app";
 import { getRouteTitle } from "@/core/route";
-import { ResetPasswordForm } from "@/modules/auth/components";
+import { ResetPasswordForm } from "@/modules/auth/components/reset-password";
+import { appConfig } from "@/shared/config";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/reset-password")({
@@ -30,7 +30,7 @@ function RouteComponent() {
         <CardHeader className="border-b text-center">
           <CardTitle className="mx-auto">
             <Link to="/">
-              <h3>{appMeta.name}</h3>
+              <h3>{appConfig.name}</h3>
             </Link>
           </CardTitle>
           <CardDescription>
@@ -38,6 +38,7 @@ function RouteComponent() {
             bawah ini.
           </CardDescription>
         </CardHeader>
+
         <ResetPasswordForm token={token} />
       </Card>
     </main>

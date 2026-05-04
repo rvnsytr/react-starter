@@ -1,5 +1,5 @@
+import { ThemeToggle } from "@/core/components/theme";
 import { R } from "@/core/components/ui/r";
-import { ThemeToggle } from "@/core/components/ui/theme";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(home)")({
@@ -8,12 +8,14 @@ export const Route = createFileRoute("/(home)")({
 
 function HomeLayout() {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-y-4">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-y-4">
       <R />
 
       <p>React Starter</p>
 
-      <Link to="/sign-in">Sign In</Link>
+      <Link to="/dashboard" className="link">
+        Dashboard
+      </Link>
 
       <div className="flex items-center gap-x-2">
         <Link to="/" className="link [&.active]:font-semibold">
@@ -28,6 +30,6 @@ function HomeLayout() {
       <Outlet />
 
       <ThemeToggle />
-    </main>
+    </div>
   );
 }

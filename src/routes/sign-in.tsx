@@ -13,7 +13,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/core/components/ui/tabs";
-import { appMeta } from "@/core/constants/app";
+import { appConfig } from "@/core/constants/app";
 import { getRouteTitle } from "@/core/route";
 import { SignInForm, SignUpForm } from "@/modules/auth/components";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
@@ -33,11 +33,12 @@ function RouteComponent() {
         <CardHeader className="border-b text-center">
           <CardTitle className="mx-auto">
             <Link to="/">
-              <h3>{appMeta.name}</h3>
+              <h3>{appConfig.name}</h3>
             </Link>
           </CardTitle>
           <CardDescription>
-            Masuk ke Dashboard {appMeta.name} dengan aman menggunakan akun Anda.
+            Masuk ke Dashboard {appConfig.name} dengan aman menggunakan akun
+            Anda.
           </CardDescription>
         </CardHeader>
 

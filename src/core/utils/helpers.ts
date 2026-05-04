@@ -1,5 +1,6 @@
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { FileMetadata } from "../types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,9 +47,26 @@ export function getExcelColumnKey(columnNumber: number): string {
   return !!result ? result : "-";
 }
 
-export function getFileParts(originalFileName: string) {
+export function getFileInfo(file: File | FileMetadata) {
+  return {
+    name: file.name,
+    size: file.size,
+    type: file.type ?? "",
+    extension: `.${file.name.split(".").pop()}`,
+  };
+}
+
+export function getFileNameParts(originalFileName: string) {
   const parts = originalFileName.split(".");
   const fileName = parts.slice(0, -1).join(".");
   const extension = parts.at(-1) ?? "";
   return { fileName, extension };
+}
+
+export function getClientCookie(name: string) {
+  if (!document?.cookie) return undefined;
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${name}=`))
+    ?.split("=")[1];
 }

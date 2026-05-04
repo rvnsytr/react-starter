@@ -1,12 +1,10 @@
-import { getRouteTitle } from "@/core/route";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(home)/about")({
-  head: () => ({ meta: [{ title: getRouteTitle("/about") }] }),
-  component: AboutPage,
+  component: HomePage,
 });
 
-function AboutPage() {
+function HomePage() {
   return (
     <div>
       <code>/about</code>

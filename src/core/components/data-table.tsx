@@ -1,0 +1,320 @@
+"use client";
+
+import { formatNumber } from "@/core/utils/formaters";
+import { cn } from "@/core/utils/helpers";
+import { Hotkey } from "@tanstack/react-hotkeys";
+import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
+import {
+  DataControllerOptions,
+  DataControllerResponse,
+  useDataController,
+} from "../hooks/use-data-controller";
+import { useIsMobile } from "../hooks/use-media-query";
+import { messages } from "../messages";
+import {
+  DataControllerPageSize,
+  DataControllerPaginationNav,
+  DataControllerSearch,
+  DataControllerSorting,
+  DataControllerVisibility,
+} from "./data-controller";
+import {
+  ActiveFilters,
+  ActiveFiltersContainer,
+  ClearFilters,
+  FilterSelector,
+  ResetFilters,
+} from "./filters";
+import { ButtonGroup } from "./ui/button-group";
+import { ErrorFallback } from "./ui/fallback";
+import { Label } from "./ui/label";
+import { Separator } from "./ui/separator";
+import { Skeleton } from "./ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+
+export type DataTableProps<TData> = {
+  caption?: string;
+  placeholder?: {
+    table?: string;
+    search?: string;
+  };
+
+  className?: string;
+  classNames?: {
+    toolbox?: string;
+    filterContainer?: string;
+    tableContainer?: string;
+    table?: string;
+    footer?: string;
+  };
+  shortcuts?: {
+    filter?: Hotkey;
+    sort?: Hotkey;
+    view?: Hotkey;
+    reset?: Hotkey;
+    search?: Hotkey;
+  };
+
+  renderRowSelectionButton?: (props: {
+    rows: Row<TData>[];
+    table: TableType<TData>;
+  }) => React.ReactNode;
+};
+
+function BaseDataTable<TData>({
+  caption,
+  placeholder,
+  className,
+  classNames,
+  shortcuts,
+  renderRowSelectionButton,
+  controller: { result, table, columns },
+}: DataTableProps<TData> & { controller: DataControllerResponse<TData> }) {
+  const isMobile = useIsMobile();
+
+  if (result.error) return <ErrorFallback error={result.error} />;
+  if (!result.isLoading && !result.data?.success)
+    return <ErrorFallback error={result.data?.message} />;
+
+  const selectedRowsCount =
+    Object.keys(table.getState().rowSelection).length ??
+    table.getFilteredSelectedRowModel().rows.length;
+
+  const rowsLength = table.getFilteredRowModel().rows.length;
+  const rowsCount = result.data?.success
+    ? (result.data?.count?.total ?? rowsLength)
+    : rowsLength;
+
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
+  const isSelected = selectedRows.length > 0;
+
+  return (
+    <div className={cn("flex flex-col gap-y-4", className)}>
+      <div
+        className={cn(
+          "flex w-full flex-col gap-2 lg:flex-row lg:justify-between",
+          classNames?.toolbox,
+        )}
+      >
+        <div className={cn("flex flex-col gap-2 lg:flex-row lg:items-center")}>
+          <ButtonGroup className="w-full lg:w-fit **:[button]:grow">
+            <FilterSelector
+              table={table}
+              align="start"
+              disabled={result.isLoading}
+              shortcut={shortcuts?.filter}
+            />
+            <DataControllerSorting
+              table={table}
+              disabled={result.isLoading}
+              shortcut={shortcuts?.sort}
+            />
+            <DataControllerVisibility
+              table={table}
+              align={isMobile ? "end" : "center"}
+              disabled={result.isLoading}
+              shortcut={shortcuts?.view}
+            />
+          </ButtonGroup>
+
+          {isSelected && !isMobile && (
+            <Separator orientation="vertical" className="h-4" />
+          )}
+
+          {isSelected &&
+            renderRowSelectionButton?.({ table, rows: selectedRows })}
+        </div>
+
+        <div className="flex gap-x-2 *:grow">
+          <ResetFilters
+            table={table}
+            disabled={result.isLoading}
+            shortcut={shortcuts?.reset}
+          />
+          <DataControllerSearch
+            table={table}
+            placeholder={placeholder?.search}
+            disabled={result.isLoading}
+            shortcut={shortcuts?.search}
+          />
+        </div>
+      </div>
+
+      {table.getState().columnFilters.length > 0 && (
+        <ActiveFiltersContainer className={classNames?.filterContainer}>
+          <ClearFilters table={table} />
+          <Separator orientation="vertical" className="h-4" />
+          <ActiveFilters table={table} />
+        </ActiveFiltersContainer>
+      )}
+
+      <Table
+        className={classNames?.table}
+        containerClassName={cn("rounded-xl border", classNames?.tableContainer)}
+      >
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map(
+                ({ id, column, isPlaceholder, getContext }) => {
+                  const columnPinned = column.getIsPinned();
+                  return (
+                    <TableHead
+                      key={id}
+                      className={cn(
+                        "z-10 text-center",
+                        columnPinned && "bg-background/90 sticky z-20",
+                        columnPinned === "left" && "left-0",
+                        columnPinned === "right" && "right-0",
+                      )}
+                      // style={{
+                      //   left: column.getStart("left"),
+                      //   right: column.getAfter("right"),
+                      // }}
+                    >
+                      {!isPlaceholder &&
+                        flexRender(column.columnDef.header, getContext())}
+                    </TableHead>
+                  );
+                },
+              )}
+            </TableRow>
+          ))}
+        </TableHeader>
+
+        <TableBody>
+          {result.isLoading ? (
+            Array.from({ length: table.getState().pagination.pageSize }).map(
+              (_, i) => (
+                <TableRow key={i}>
+                  <TableCell colSpan={columns.length}>
+                    <Skeleton className="h-8 w-full" />
+                  </TableCell>
+                </TableRow>
+              ),
+            )
+          ) : table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map(({ id, column, getContext }) => {
+                  const columnPinned = column.getIsPinned();
+                  return (
+                    <TableCell
+                      key={id}
+                      className={cn(
+                        "z-10",
+                        columnPinned && "bg-background/90 sticky z-20",
+                        columnPinned === "left" && "left-0",
+                        columnPinned === "right" && "right-0",
+                      )}
+                      // style={{
+                      //   left: column.getStart("left"),
+                      //   right: column.getAfter("right"),
+                      // }}
+                    >
+                      {flexRender(column.columnDef.cell, getContext())}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="text-muted-foreground py-4 text-center whitespace-pre-line"
+              >
+                {placeholder?.table ?? messages.empty}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      <div
+        className={cn(
+          "flex w-full flex-col items-center gap-4 text-center lg:flex-row",
+          classNames?.footer,
+        )}
+      >
+        <div
+          data-slot="pagination"
+          className="order-4 flex items-center gap-x-2 lg:order-1"
+        >
+          <Label className="shrink-0">Baris per halaman</Label>
+          <DataControllerPageSize table={table} disabled={result.isLoading} />
+        </div>
+
+        <small
+          data-slot="selected-rows"
+          className="text-muted-foreground order-3 shrink-0 lg:order-2"
+        >
+          {formatNumber(selectedRowsCount)} dari{" "}
+          {result.isLoading ? "?" : formatNumber(rowsCount)} baris dipilih
+        </small>
+
+        <small
+          data-slot="caption"
+          className="text-muted-foreground order-1 mx-auto text-sm lg:order-3"
+        >
+          {caption}
+        </small>
+
+        <small
+          data-slot="page-info"
+          className="order-2 shrink-0 tabular-nums lg:order-4"
+        >
+          Halaman{" "}
+          {result.isLoading
+            ? "?"
+            : formatNumber(table.getState().pagination.pageIndex + 1)}{" "}
+          dari{" "}
+          {result.isLoading
+            ? "?"
+            : formatNumber(table.getPageCount() > 0 ? table.getPageCount() : 1)}
+        </small>
+
+        <DataControllerPaginationNav
+          data-slot="pagination-nav"
+          table={table}
+          size="icon"
+          className="order-3 shrink-0 lg:order-5"
+          disabled={result.isLoading}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function DataTable<TData>({
+  caption,
+  placeholder,
+  className,
+  classNames,
+  shortcuts,
+  renderRowSelectionButton,
+  ...options
+}: DataTableProps<TData> & DataControllerOptions<TData>) {
+  const controller = useDataController(options);
+  return (
+    <BaseDataTable
+      caption={caption}
+      placeholder={placeholder}
+      className={className}
+      classNames={classNames}
+      shortcuts={shortcuts}
+      renderRowSelectionButton={renderRowSelectionButton}
+      controller={controller}
+    />
+  );
+}
