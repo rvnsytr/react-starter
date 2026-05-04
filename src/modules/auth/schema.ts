@@ -1,10 +1,10 @@
 import { sharedSchemas } from "@/core/schema";
+import { allRoles } from "@/shared/permission";
 import {
   sessionSchema as betterAuthSessionSchema,
   userSchema as betterAuthUserSchema,
 } from "better-auth";
 import z from "zod";
-import { allRoles } from "./constants";
 
 export const passwordSchema = z.object({
   password: sharedSchemas.string({ label: "Kata sandi", min: 8 }),
@@ -24,7 +24,6 @@ export const passwordSchema = z.object({
 export const userSchema = betterAuthUserSchema.extend({
   email: sharedSchemas.email,
   name: sharedSchemas.string({ label: "Nama", min: 1, withRequired: true }),
-  image: z.string().optional().nullable(),
   role: z.enum(allRoles),
   banned: z.boolean().optional().nullable(),
   banReason: z.string().optional().nullable(),

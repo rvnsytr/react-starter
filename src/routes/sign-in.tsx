@@ -1,22 +1,19 @@
 import { FooterNote } from "@/core/components/layout/footer-note";
-import { PageCard } from "@/core/components/layout/page";
 import {
+  Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/core/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/core/components/ui/tabs";
-import { appConfig } from "@/core/constants/app";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/core/components/ui/tabs";
 import { getRouteTitle } from "@/core/route";
-import { SignInForm, SignUpForm } from "@/modules/auth/components";
+import { SignInForm } from "@/modules/auth/components/sign-in-form";
+import { SignUpForm } from "@/modules/auth/components/sign-up-form";
+import { appConfig } from "@/shared/config";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { LogInIcon, UserRoundPlusIcon } from "lucide-react";
 
 export const Route = createFileRoute("/sign-in")({
   beforeLoad: (c) => {
@@ -28,13 +25,11 @@ export const Route = createFileRoute("/sign-in")({
 
 function RouteComponent() {
   return (
-    <main className="flex min-h-dvh items-center justify-center md:container">
-      <PageCard className="w-full max-w-lg">
-        <CardHeader className="border-b text-center">
-          <CardTitle className="mx-auto">
-            <Link to="/">
-              <h3>{appConfig.name}</h3>
-            </Link>
+    <div className="flex min-h-dvh items-center justify-center">
+      <Card className="w-full max-w-lg" asPageCard>
+        <CardHeader className="flex flex-col items-center text-center">
+          <CardTitle className="text-lg font-semibold">
+            <Link to="/">{appConfig.name}</Link>
           </CardTitle>
           <CardDescription>
             Masuk ke Dashboard {appConfig.name} dengan aman menggunakan akun
@@ -42,26 +37,30 @@ function RouteComponent() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex flex-col gap-y-4">
           <Tabs defaultValue="masuk">
             <TabsList className="w-full">
-              <TabsTrigger value="masuk">Masuk</TabsTrigger>
-              <TabsTrigger value="daftar">Daftar</TabsTrigger>
+              <TabsTab value="masuk">
+                <LogInIcon /> Masuk
+              </TabsTab>
+              <TabsTab value="daftar">
+                <UserRoundPlusIcon /> Daftar
+              </TabsTab>
             </TabsList>
 
-            <TabsContent value="masuk">
+            <TabsPanel value="masuk">
               <SignInForm />
-            </TabsContent>
-            <TabsContent value="daftar">
+            </TabsPanel>
+            <TabsPanel value="daftar">
               <SignUpForm />
-            </TabsContent>
+            </TabsPanel>
           </Tabs>
         </CardContent>
 
-        <CardFooter className="justify-center border-t text-center">
+        <CardFooter className="justify-center text-center">
           <FooterNote />
         </CardFooter>
-      </PageCard>
-    </main>
+      </Card>
+    </div>
   );
 }

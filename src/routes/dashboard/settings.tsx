@@ -1,5 +1,11 @@
-import { Page, PageCard } from "@/core/components/layout/page";
 import {
+  LAYOUT_MODE_TOGGLE_HOTKEY,
+  LayoutModeSettings,
+} from "@/core/components/layout-mode";
+import { PageContainer } from "@/core/components/layout/page";
+import { THEME_TOGGLE_HOTKEY, ThemeSettings } from "@/core/components/theme";
+import {
+  Card,
   CardAction,
   CardContent,
   CardDescription,
@@ -8,17 +14,9 @@ import {
   CardTitle,
 } from "@/core/components/ui/card";
 import { Kbd } from "@/core/components/ui/kbd";
-import { LayoutSettings } from "@/core/components/ui/layout";
-import { ThemeSettings } from "@/core/components/ui/theme";
-import { appMeta } from "@/core/constants/app";
-import { LAYOUT_TOGGLE_HOTKEY } from "@/core/providers/layout";
-import { THEME_TOGGLE_HOTKEY } from "@/core/providers/theme";
 import { getRouteTitle } from "@/core/route";
-import {
-  ChangePasswordForm,
-  RevokeOtherSessionsButton,
-  SessionList,
-} from "@/modules/auth/components";
+import { SessionList } from "@/modules/auth/components/session-list";
+import { appConfig } from "@/shared/config";
 import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -35,19 +33,21 @@ export const Route = createFileRoute("/dashboard/settings")({
 
 function RouteComponent() {
   return (
-    <Page className="items-center px-0 md:px-4" withLayoutLoader={false}>
-      <PageCard id="tema" className="w-full lg:max-w-2xl">
+    <PageContainer className="items-center px-0 lg:px-4">
+      <Card id="tema" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <SunMoonIcon /> Tema
           </CardTitle>
           <CardDescription>
             Sesuaikan tampilan dan nuansa{" "}
-            <span className="text-foreground font-medium">{appMeta.name}</span>{" "}
+            <span className="text-foreground font-medium">
+              {appConfig.name}
+            </span>{" "}
             sesuai preferensi Anda.
           </CardDescription>
 
-          <CardAction>
+          <CardAction className="hidden lg:inline-flex">
             <Kbd>{formatForDisplay(THEME_TOGGLE_HOTKEY)}</Kbd>
           </CardAction>
         </CardHeader>
@@ -55,30 +55,33 @@ function RouteComponent() {
         <CardContent>
           <ThemeSettings />
         </CardContent>
-      </PageCard>
+      </Card>
 
-      <PageCard id="layout" className="w-full lg:max-w-2xl">
+      <Card id="layout" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <FrameIcon /> Layout
           </CardTitle>
           <CardDescription>
             Sesuaikan tata letak antarmuka{" "}
-            <span className="text-foreground font-medium">{appMeta.name}</span>{" "}
+            <span className="text-foreground font-medium">
+              {appConfig.name}
+            </span>{" "}
             sesuai preferensi Anda. Perubahan ini berlaku pada layar dengan
-            lebar lebih dari 1024px.
+            lebar lebih dari <code>1024px</code>.
           </CardDescription>
-          <CardAction>
-            <Kbd>{formatForDisplay(LAYOUT_TOGGLE_HOTKEY)}</Kbd>
+
+          <CardAction className="hidden lg:inline-flex">
+            <Kbd>{formatForDisplay(LAYOUT_MODE_TOGGLE_HOTKEY)}</Kbd>
           </CardAction>
         </CardHeader>
 
         <CardContent>
-          <LayoutSettings />
+          <LayoutModeSettings />
         </CardContent>
-      </PageCard>
+      </Card>
 
-      <PageCard id="sesi-aktif" className="w-full lg:max-w-2xl">
+      <Card id="sesi-aktif" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
             <ShieldIcon /> Sesi Aktif
@@ -93,22 +96,22 @@ function RouteComponent() {
         </CardContent>
 
         <CardFooter className="*:w-full *:lg:w-fit">
-          <RevokeOtherSessionsButton />
+          {/* <RevokeOtherSessionsButton /> */}
         </CardFooter>
-      </PageCard>
+      </Card>
 
-      <PageCard id="ubah-kata-sandi" className="w-full lg:max-w-2xl">
+      <Card id="ubah-kata-sandi" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
           <CardTitle className="flex items-center gap-x-2">
-            <LockKeyholeIcon /> Ganti Kata Sandi
+            <LockKeyholeIcon /> Ubah Kata Sandi
           </CardTitle>
           <CardDescription>
             Gunakan kata sandi yang kuat untuk menjaga keamanan akun Anda.
           </CardDescription>
         </CardHeader>
 
-        <ChangePasswordForm />
-      </PageCard>
-    </Page>
+        {/* <ChangePasswordForm /> */}
+      </Card>
+    </PageContainer>
   );
 }

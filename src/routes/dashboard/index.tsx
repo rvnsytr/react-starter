@@ -1,9 +1,9 @@
-import { Page } from "@/core/components/layout/page";
-import { FieldLegend } from "@/core/components/ui/field";
-import { R } from "@/core/components/ui/r";
-import { Separator } from "@/core/components/ui/separator";
-import { useAuth } from "@/modules/auth/provider.auth";
-import { EventLogTimeline } from "@/modules/event-log/components";
+import {
+  PageContainer,
+  PageDescription,
+  PageHeader,
+  PageTitle,
+} from "@/core/components/layout/page";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -11,21 +11,17 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function RouteComponent() {
-  const authSession = useAuth();
-
   return (
-    <Page>
-      <R className="mx-auto my-4" />
+    <PageContainer>
+      <PageHeader className="border-b">
+        <PageTitle>Dashboard</PageTitle>
+        <PageDescription>
+          Welcome to the dashboard! Here you can find an overview of your
+          account and access various features.
+        </PageDescription>
+      </PageHeader>
 
-      <Separator />
-
-      <FieldLegend>Event Log</FieldLegend>
-      <EventLogTimeline url="/event-log/me" />
-
-      <Separator />
-
-      <FieldLegend>Session Example</FieldLegend>
-      <pre className="container">{JSON.stringify(authSession, null, 2)}</pre>
-    </Page>
+      <p>Hello World</p>
+    </PageContainer>
   );
 }

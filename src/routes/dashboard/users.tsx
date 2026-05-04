@@ -1,23 +1,13 @@
 import {
-  Page,
-  PageAction,
+  PageContainer,
   PageDescription,
   PageHeader,
   PageTitle,
 } from "@/core/components/layout/page";
-import { Button } from "@/core/components/ui/button";
 import { CardAction } from "@/core/components/ui/card";
-import { dataQueryStateSchema } from "@/core/components/ui/data-controller";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/core/components/ui/popover";
 import { Separator } from "@/core/components/ui/separator";
 import { getRouteTitle } from "@/core/route";
-import { CreateUserModal, UserDataTable } from "@/modules/auth/components";
 import { createFileRoute } from "@tanstack/react-router";
-import { EllipsisIcon } from "lucide-react";
 
 // const t2Prefix = "t2-";
 
@@ -25,49 +15,29 @@ export const Route = createFileRoute("/dashboard/users")({
   // validateSearch: dataQueryStateSchema.extend(
   //   withSchemaPrefix(t2Prefix, dataQueryStateSchema).shape,
   // ),
-  validateSearch: dataQueryStateSchema,
+  // validateSearch: dataQueryStateSchema,
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/users") }] }),
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const searchParam = Route.useSearch();
-  const navigate = Route.useNavigate();
+  // const searchParam = Route.useSearch();
+  // const navigate = Route.useNavigate();
 
   return (
-    <Page>
+    <PageContainer>
       <PageHeader>
         <PageTitle>Manajemen Pengguna</PageTitle>
         <PageDescription>
           Kelola dan lihat detail semua pengguna yang telah terdaftar.
         </PageDescription>
 
-        <PageAction className="flex lg:hidden">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button size="icon-sm" variant="outline">
-                <EllipsisIcon />
-              </Button>
-            </PopoverTrigger>
-
-            <PopoverContent align="end" className="grid gap-y-1 p-1">
-              <CreateUserModal
-                size="sm"
-                variant="ghost"
-                className="justify-start"
-              />
-            </PopoverContent>
-          </Popover>
-        </PageAction>
-
-        <CardAction className="hidden lg:flex">
-          <CreateUserModal />
-        </CardAction>
+        <CardAction>{/* <CreateUserModal /> */}</CardAction>
       </PageHeader>
 
       <Separator />
 
-      <UserDataTable
+      {/* <UserDataTable
         defaultState={searchParam}
         onStateChange={(search) =>
           navigate({
@@ -75,7 +45,7 @@ function RouteComponent() {
             replace: true,
           })
         }
-      />
+      /> */}
 
       {/* <OtherDataTable
         defaultState={Object.fromEntries(
@@ -95,6 +65,6 @@ function RouteComponent() {
           })
         }
       /> */}
-    </Page>
+    </PageContainer>
   );
 }
