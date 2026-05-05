@@ -23,8 +23,8 @@ import { LinkSpinner } from "@/core/components/ui/spinner";
 import { getActiveRoute, getMenuByRole } from "@/core/route";
 import { toCase } from "@/core/utils";
 import { useSession } from "@/modules/auth/hooks/use-session";
+import { routeConfig } from "@/shared/config/route";
 import { menuConfig } from "@/shared/menu";
-import { routesConfig } from "@/shared/route";
 import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
@@ -58,7 +58,7 @@ export function SidebarAppContent() {
           <SidebarMenu>
             {items.map(
               ({ route, icon: Icon, disabled, shortcut, subItems }) => {
-                const { label } = routesConfig[route];
+                const { title } = routeConfig[route];
 
                 const isActive = route === activeRoute;
                 const iconElement = Icon && <Icon />;
@@ -68,7 +68,7 @@ export function SidebarAppContent() {
                     <SidebarMenuItem key={route}>
                       <SidebarMenuButton disabled>
                         {iconElement}
-                        <span className="line-clamp-1">{label}</span>
+                        <span className="line-clamp-1">{title}</span>
                         {shortcut && (
                           <Kbd className="ml-auto hidden lg:inline-flex">
                             {formatForDisplay(shortcut)}
@@ -88,11 +88,11 @@ export function SidebarAppContent() {
                     <SidebarMenuButton
                       onClick={() => isMobile && toggleSidebar()}
                       isActive={isActive}
-                      tooltip={label}
+                      tooltip={title}
                       render={<Link to={route} />}
                     >
                       <LinkSpinner icon={{ base: iconElement }} />
-                      <span className="line-clamp-1">{label}</span>
+                      <span className="line-clamp-1">{title}</span>
                       {shortcut && (
                         <Kbd className="ml-auto hidden lg:inline-flex">
                           {formatForDisplay(shortcut)}

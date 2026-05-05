@@ -1,6 +1,6 @@
 "use client";
 
-import { routesConfig } from "@/shared/route";
+import { routeConfig } from "@/shared/config/route";
 import { useLocation } from "@tanstack/react-router";
 import {
   createContext,
@@ -39,8 +39,8 @@ export function DynamicBreadcrumbProvider({
 
   const setByPathname = useCallback(() => {
     const crumbs = getRouteHierarchy(normalizeRoute(pathname)).flatMap((r) => {
-      const meta = routesConfig[r];
-      return meta ? [{ href: r, label: meta.label }] : [];
+      const config = routeConfig[r];
+      return config ? [{ href: r, label: config.title }] : [];
     });
     setBreadcrumbs(crumbs);
   }, [pathname]);

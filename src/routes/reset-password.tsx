@@ -6,7 +6,7 @@ import {
 } from "@/core/components/ui/card";
 import { getRouteTitle } from "@/core/route";
 import { ResetPasswordForm } from "@/modules/auth/components/reset-password";
-import { appConfig } from "@/shared/config";
+import { appConfig } from "@/shared/config/app";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/reset-password")({

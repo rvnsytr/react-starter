@@ -16,7 +16,7 @@ import {
 import { Kbd } from "@/core/components/ui/kbd";
 import { getRouteTitle } from "@/core/route";
 import { SessionList } from "@/modules/auth/components/session-list";
-import { appConfig } from "@/shared/config";
+import { appConfig } from "@/shared/config/app";
 import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import {
