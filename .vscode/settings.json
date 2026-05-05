@@ -2,7 +2,8 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true,
     "**/core/**": true,
-    "**/modules/auth/**": true
+    "**/modules/auth/**": true,
+    "**/modules/activity/**": true
   },
 
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
