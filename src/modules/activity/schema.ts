@@ -5,8 +5,8 @@ import { userSchema } from "../auth/schema";
 export type Activity = z.infer<typeof activityTableSchema>;
 export type ActivityWithEntity = z.infer<typeof activityTableWithEntitySchema>;
 
-export type ActivityType = (typeof allActivityType)[number];
-export const allActivityType = [
+export type ActivityType = (typeof allActivityTypes)[number];
+export const allActivityTypes = [
   // "user-registered",
   "user-created",
   // "user-imported",
@@ -36,7 +36,7 @@ export const activityTableSchema = z.object({
   id: z.uuidv4(),
   user_id: userSchema.shape.id,
 
-  type: z.enum(allActivityType, { error: messages.invalid("Event type") }),
+  type: z.enum(allActivityTypes, { error: messages.invalid("Event type") }),
   entity_id: z.uuidv4().nullable().default(null),
   data: z.string().nullable().default(null),
 
