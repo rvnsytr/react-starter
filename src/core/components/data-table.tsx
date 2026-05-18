@@ -2,6 +2,7 @@
 
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
+import { ErrorFallback } from "@/shared/components/fallback";
 import { Hotkey } from "@tanstack/react-hotkeys";
 import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
 import {
@@ -26,7 +27,6 @@ import {
   ResetFilters,
 } from "./filters";
 import { ButtonGroup } from "./ui/button-group";
-import { ErrorFallback } from "./ui/fallback";
 import { Label } from "./ui/label";
 import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
@@ -62,6 +62,7 @@ export type DataTableProps<TData> = {
     search?: Hotkey;
   };
 
+  onRowClick?: (row: Row<TData>) => void;
   renderRowSelectionButton?: (props: {
     rows: Row<TData>[];
     table: TableType<TData>;
@@ -74,26 +75,22 @@ function BaseDataTable<TData>({
   className,
   classNames,
   shortcuts,
+  onRowClick,
   renderRowSelectionButton,
   controller: { result, table, columns },
 }: DataTableProps<TData> & { controller: DataControllerResponse<TData> }) {
   const isMobile = useIsMobile();
 
   if (result.error) return <ErrorFallback error={result.error} />;
-  if (!result.isLoading && !result.data?.success)
-    return <ErrorFallback error={result.data?.message} />;
-
-  const selectedRowsCount =
-    Object.keys(table.getState().rowSelection).length ??
-    table.getFilteredSelectedRowModel().rows.length;
-
-  const rowsLength = table.getFilteredRowModel().rows.length;
-  const rowsCount = result.data?.success
-    ? (result.data?.count?.total ?? rowsLength)
-    : rowsLength;
 
   const selectedRows = table.getFilteredSelectedRowModel().rows;
   const isSelected = selectedRows.length > 0;
+
+  const rowsCount =
+    result.data?.count?.total ?? table.getFilteredRowModel().rows.length;
+  const selectedRowsCount =
+    Object.keys(table.getState().rowSelection).length ??
+    table.getFilteredSelectedRowModel().rows.length;
 
   return (
     <div className={cn("flex flex-col gap-y-4", className)}>
@@ -108,18 +105,12 @@ function BaseDataTable<TData>({
             <FilterSelector
               table={table}
               align="start"
-              disabled={result.isLoading}
               shortcut={shortcuts?.filter}
             />
-            <DataControllerSorting
-              table={table}
-              disabled={result.isLoading}
-              shortcut={shortcuts?.sort}
-            />
+            <DataControllerSorting table={table} shortcut={shortcuts?.sort} />
             <DataControllerVisibility
               table={table}
               align={isMobile ? "end" : "center"}
-              disabled={result.isLoading}
               shortcut={shortcuts?.view}
             />
           </ButtonGroup>
@@ -133,15 +124,10 @@ function BaseDataTable<TData>({
         </div>
 
         <div className="flex gap-x-2 *:grow">
-          <ResetFilters
-            table={table}
-            disabled={result.isLoading}
-            shortcut={shortcuts?.reset}
-          />
+          <ResetFilters table={table} shortcut={shortcuts?.reset} />
           <DataControllerSearch
             table={table}
             placeholder={placeholder?.search}
-            disabled={result.isLoading}
             shortcut={shortcuts?.search}
           />
         </div>
@@ -190,7 +176,7 @@ function BaseDataTable<TData>({
         </TableHeader>
 
         <TableBody>
-          {result.isLoading ? (
+          {!result.data && result.isLoading ? (
             Array.from({ length: table.getState().pagination.pageSize }).map(
               (_, i) => (
                 <TableRow key={i}>
@@ -200,11 +186,21 @@ function BaseDataTable<TData>({
                 </TableRow>
               ),
             )
-          ) : table.getRowModel().rows?.length ? (
+          ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className={cn(
+                  "group/row",
+                  !!onRowClick && "z-0 cursor-pointer select-none",
+                )}
+                onClick={(e) => {
+                  if (!onRowClick) return;
+                  const target = e.target as HTMLElement;
+                  if (target.closest("[data-no-row-click]")) return;
+                  onRowClick(row);
+                }}
               >
                 {row.getVisibleCells().map(({ id, column, getContext }) => {
                   const columnPinned = column.getIsPinned();
@@ -252,7 +248,7 @@ function BaseDataTable<TData>({
           className="order-4 flex items-center gap-x-2 lg:order-1"
         >
           <Label className="shrink-0">Baris per halaman</Label>
-          <DataControllerPageSize table={table} disabled={result.isLoading} />
+          <DataControllerPageSize table={table} />
         </div>
 
         <small
@@ -288,8 +284,7 @@ function BaseDataTable<TData>({
           data-slot="pagination-nav"
           table={table}
           size="icon"
-          className="order-3 shrink-0 lg:order-5"
-          disabled={result.isLoading}
+          className="order-3 lg:order-5"
         />
       </div>
     </div>
@@ -302,6 +297,7 @@ export function DataTable<TData>({
   className,
   classNames,
   shortcuts,
+  onRowClick,
   renderRowSelectionButton,
   ...options
 }: DataTableProps<TData> & DataControllerOptions<TData>) {
@@ -313,6 +309,7 @@ export function DataTable<TData>({
       className={className}
       classNames={classNames}
       shortcuts={shortcuts}
+      onRowClick={onRowClick}
       renderRowSelectionButton={renderRowSelectionButton}
       controller={controller}
     />

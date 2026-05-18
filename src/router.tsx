@@ -1,19 +1,18 @@
+import {
+  AppErrorFallback,
+  AppLoadingFallback,
+} from "@/shared/components/fallback";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import z from "zod";
 import { id } from "zod/locales";
-import {
-  AppErrorFallback,
-  AppLoadingFallback,
-} from "./core/components/ui/fallback";
 import { GridPattern } from "./core/components/ui/grid-pattern";
 import {
   AnchoredToastProvider,
   ToastProvider,
 } from "./core/components/ui/toast";
-import { DynamicBreadcrumbProvider } from "./core/providers/dynamic-breadcrumb";
 import { GlobalShortcuts } from "./core/providers/global-shortcuts";
 import { ThemeProvider } from "./core/providers/theme";
 import { cn } from "./core/utils";
@@ -43,31 +42,29 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="theme">
-      <DynamicBreadcrumbProvider>
-        <ToastProvider>
-          <AnchoredToastProvider>
-            <main className="relative isolate flex min-h-svh flex-col">
-              <AnimatePresence>
-                {isInitialLoading && <AppLoadingFallback />}
-              </AnimatePresence>
+      <ToastProvider>
+        <AnchoredToastProvider>
+          <main className="relative isolate flex min-h-svh flex-col">
+            <AnimatePresence>
+              {isInitialLoading && <AppLoadingFallback />}
+            </AnimatePresence>
 
-              {!isInitialLoading && (
-                <RouterProvider router={router} context={{ session }} />
+            {!isInitialLoading && (
+              <RouterProvider router={router} context={{ session }} />
+            )}
+
+            <GridPattern
+              className={cn(
+                "stroke-muted/60 dark:stroke-muted/20",
+                isInitialLoading &&
+                  "mask-radial-from-60% dark:mask-radial-from-50%",
               )}
+            />
+          </main>
 
-              <GridPattern
-                className={cn(
-                  "stroke-muted/60 dark:stroke-muted/20 -z-10 min-h-dvh",
-                  isInitialLoading &&
-                    "mask-radial-from-60% dark:mask-radial-from-50%",
-                )}
-              />
-            </main>
-
-            <GlobalShortcuts />
-          </AnchoredToastProvider>
-        </ToastProvider>
-      </DynamicBreadcrumbProvider>
+          <GlobalShortcuts />
+        </AnchoredToastProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

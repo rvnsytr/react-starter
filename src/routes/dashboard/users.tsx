@@ -7,6 +7,8 @@ import {
 import { CardAction } from "@/core/components/ui/card";
 import { Separator } from "@/core/components/ui/separator";
 import { getRouteTitle } from "@/core/route";
+import { CreateUserDialog } from "@/modules/auth/components/create-user-dialog";
+import { UserDataTable } from "@/modules/auth/components/user-data-table";
 import { createFileRoute } from "@tanstack/react-router";
 
 // const t2Prefix = "t2-";
@@ -32,10 +34,14 @@ function RouteComponent() {
           Kelola dan lihat detail semua pengguna yang telah terdaftar.
         </PageDescription>
 
-        <CardAction>{/* <CreateUserModal /> */}</CardAction>
+        <CardAction>
+          <CreateUserDialog />
+        </CardAction>
       </PageHeader>
 
       <Separator />
+
+      <UserDataTable />
 
       {/* <UserDataTable
         defaultState={searchParam}

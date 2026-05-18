@@ -28,9 +28,7 @@ export function SidebarAppSiteHeader() {
             to="/dashboard"
             className="mx-2 font-mono text-sm font-medium tracking-tight"
           >
-            <ShimmerText className="text-sm font-bold">
-              {appConfig.name}
-            </ShimmerText>
+            <ShimmerText>{appConfig.name}</ShimmerText>
           </Link>
 
           <DynamicBreadcrumb className="hidden md:flex" fallback />
@@ -38,10 +36,10 @@ export function SidebarAppSiteHeader() {
 
         <div className="flex items-center gap-x-2">
           <ImpersonateUserBadge />
-          <LayoutModeToggle />
+          <LayoutModeToggle withTooltip />
           <ThemeToggle align="end" />
 
-          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Separator orientation="vertical" className="h-4" />
 
           <Link to="/dashboard/profile">
             <Avatar radius="md">

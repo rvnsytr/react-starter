@@ -1,4 +1,4 @@
-export const ACTIVITY_KEYS = {
+export const activityKeys = {
   list: "/activities",
-  get: (userId: string) => `/activities/${userId}`,
-};
+  getByUser: (userId: string) => `/activities/${userId}`,
+} as const;

@@ -19,7 +19,7 @@ type ActivityConfigMetadata = {
 
 type ActivityConfigContext = Pick<ActivityWithEntity, "data" | "entity">;
 
-export const activityConfig: Record<
+export const activityTypeConfig: Record<
   ActivityType,
   | ActivityConfigMetadata
   | ((ctx?: ActivityConfigContext) => ActivityConfigMetadata)
@@ -128,10 +128,10 @@ export const activityConfig: Record<
   //   color: "var(--color-info)",
   // }),
   "admin-user-update-role": (c) => ({
-    label: "Admin Mengubah Peran",
+    label: "Admin Mengubah Role",
     description: (
       <span>
-        Admin mengubah peran akun <b>{c?.entity}</b>.
+        Admin mengubah role akun <b>{c?.entity}</b>.
       </span>
     ),
     icon: UserRoundCogIcon,
@@ -141,8 +141,7 @@ export const activityConfig: Record<
     label: "Admin Memblokir Akun",
     description: (
       <span>
-        Admin memblokir akun atas nama <b>{c?.entity}</b> dengan alasan{" "}
-        <b>{c?.data}</b>.
+        Admin memblokir akun atas nama <b>{c?.data}</b>.
       </span>
     ),
     icon: UserRoundXIcon,
@@ -152,7 +151,7 @@ export const activityConfig: Record<
     label: "Admin Membuka Blokir Akun",
     description: (
       <span>
-        Admin membuka blokir akun atas nama <b>{c?.entity}</b>.
+        Admin membuka blokir akun atas nama <b>{c?.data}</b>.
       </span>
     ),
     icon: UserRoundCheckIcon,
@@ -162,7 +161,7 @@ export const activityConfig: Record<
     label: "Admin Menghapus Akun",
     description: (
       <span>
-        Admin menghapus akun atas nama <b>{c?.entity}</b> dari sistem.
+        Admin menghapus akun atas nama <b>{c?.data}</b> dari sistem.
       </span>
     ),
     icon: UserRoundXIcon,
@@ -180,10 +179,10 @@ export const activityConfig: Record<
   }),
 };
 
-export function getActivityConfig(
+export function getActivityTypeConfig(
   type: ActivityType,
   ctx?: ActivityConfigContext,
 ) {
-  const config = activityConfig[type];
+  const config = activityTypeConfig[type];
   return typeof config === "function" ? config(ctx) : config;
 }

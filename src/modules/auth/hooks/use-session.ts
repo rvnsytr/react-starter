@@ -4,12 +4,12 @@ import { authClient, AuthSession } from "@/core/auth";
 import { useContext } from "react";
 import { mutate, SWRConfiguration } from "swr";
 import useSWRImmutable from "swr/immutable";
-import { AUTH_KEYS } from "../config/keys";
+import { authKeys } from "../config/keys";
 import { AuthContext } from "../provider";
 
 export function useSessionQuery(config?: SWRConfiguration) {
   return useSWRImmutable(
-    AUTH_KEYS.session,
+    authKeys.session,
     async () => {
       const { data, error } = await authClient.getSession();
       if (error) throw error;
@@ -19,7 +19,7 @@ export function useSessionQuery(config?: SWRConfiguration) {
   );
 }
 
-export const mutateSession = () => mutate(AUTH_KEYS.session);
+export const mutateSession = () => mutate(authKeys.session);
 
 export function useSession() {
   const ctx = useContext(AuthContext);

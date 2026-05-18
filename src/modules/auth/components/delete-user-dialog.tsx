@@ -26,6 +26,9 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { mutateUserDataTable } from "./user-data-table";
 
+const formId = "delete-user-form";
+const formActionId = "delete-user-action-form";
+
 export function DeleteUserDialog({
   data,
   open,
@@ -74,7 +77,7 @@ export function DeleteUserDialog({
             title: messages.success,
             description: (
               <span>
-                Akun <b>{data.name}</b> berhasil dihapus.
+                Akun atas nama <b>{data.name}</b> berhasil dihapus.
               </span>
             ),
           };
@@ -91,7 +94,7 @@ export function DeleteUserDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogPopup>
         <DialogHeader>
-          <DialogTitle className="text-destructive">
+          <DialogTitle className="text-destructive-foreground">
             <TriangleAlertIcon /> Hapus akun atas nama {data.name}
           </DialogTitle>
           <DialogDescription>
@@ -101,8 +104,8 @@ export function DeleteUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Form onSubmit={form.handleSubmit(formHandler)}>
-          <DialogPanel>
+        <DialogPanel>
+          <Form id={formId} onSubmit={form.handleSubmit(formHandler)}>
             <Controller
               name="input"
               control={form.control}
@@ -127,23 +130,22 @@ export function DeleteUserDialog({
                 </Field>
               )}
             />
-          </DialogPanel>
+          </Form>
+        </DialogPanel>
 
-          <DialogFooter>
-            <DialogClose
-              render={
-                <Button variant="ghost">{messages.actions.cancel}</Button>
-              }
-            />
-            <Button
-              type="submit"
-              variant="destructive"
-              disabled={input !== data.name}
-            >
-              {messages.actions.delete}
-            </Button>
-          </DialogFooter>
-        </Form>
+        <DialogFooter>
+          <DialogClose
+            render={<Button variant="ghost">{messages.actions.cancel}</Button>}
+          />
+          <Button
+            type="submit"
+            form={formId}
+            variant="destructive"
+            disabled={input !== data.name}
+          >
+            {messages.actions.delete}
+          </Button>
+        </DialogFooter>
       </DialogPopup>
     </Dialog>
   );
@@ -165,7 +167,6 @@ export function ActionDeleteUsersDialog({
   onSuccess: () => void;
 }) {
   const [input, setInput] = useState<string>("");
-
   const inputValue = `Hapus ${String(userIds.length)} Pengguna`;
 
   type FormSchema = z.infer<typeof formSchema>;
@@ -189,9 +190,7 @@ export function ActionDeleteUsersDialog({
 
     toast.promise(
       Promise.all(
-        userIds.map(
-          async (userId) => await authClient.admin.removeUser({ userId }),
-        ),
+        userIds.map((userId) => authClient.admin.removeUser({ userId })),
       ),
       {
         loading: { title: messages.loading },
@@ -218,7 +217,7 @@ export function ActionDeleteUsersDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogPopup>
         <DialogHeader>
-          <DialogTitle className="text-destructive flex items-center gap-x-2">
+          <DialogTitle className="text-destructive-foreground flex items-center gap-x-2">
             <TriangleAlertIcon /> Hapus {userIds.length} Akun
           </DialogTitle>
           <DialogDescription>
@@ -228,8 +227,8 @@ export function ActionDeleteUsersDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Form onSubmit={form.handleSubmit(formHandler)}>
-          <DialogPanel>
+        <DialogPanel>
+          <Form id={formActionId} onSubmit={form.handleSubmit(formHandler)}>
             <Controller
               name="input"
               control={form.control}
@@ -254,27 +253,23 @@ export function ActionDeleteUsersDialog({
                 </Field>
               )}
             />
-          </DialogPanel>
+          </Form>
+        </DialogPanel>
 
-          <DialogFooter>
-            <DialogClose
-              render={
-                <Button variant="ghost">{messages.actions.cancel}</Button>
-              }
-            />
-            <Button
-              type="submit"
-              variant="destructive"
-              disabled={input !== inputValue || loading}
-            >
-              <LoadingSpinner
-                icon={{ base: <Trash2Icon /> }}
-                loading={loading}
-              />
-              {messages.actions.delete}
-            </Button>
-          </DialogFooter>
-        </Form>
+        <DialogFooter>
+          <DialogClose
+            render={<Button variant="ghost">{messages.actions.cancel}</Button>}
+          />
+          <Button
+            type="submit"
+            form={formActionId}
+            variant="destructive"
+            disabled={input !== inputValue || loading}
+          >
+            <LoadingSpinner icon={{ base: <Trash2Icon /> }} loading={loading} />
+            {messages.actions.delete}
+          </Button>
+        </DialogFooter>
       </DialogPopup>
     </Dialog>
   );

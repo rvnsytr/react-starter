@@ -1,7 +1,7 @@
 "use client";
 
 import { useHotkeys } from "@tanstack/react-hotkeys";
-import { THEME_TOGGLE_HOTKEY } from "../components/theme";
+import { themeToggleConfig } from "../components/theme";
 import { useViewTransition } from "../hooks/use-view-transition";
 import { nextTheme, useTheme } from "./theme";
 
@@ -12,7 +12,7 @@ export function GlobalShortcuts() {
   useHotkeys(
     [
       {
-        hotkey: THEME_TOGGLE_HOTKEY,
+        hotkey: themeToggleConfig.hotkey,
         callback: () => startTransition(() => setTheme(nextTheme(theme))),
       },
     ],

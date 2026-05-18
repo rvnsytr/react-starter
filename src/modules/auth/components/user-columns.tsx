@@ -4,18 +4,17 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/core/components/ui/avatar";
-import { Button } from "@/core/components/ui/button";
 import {
   ColumnCellCheckbox,
   ColumnCellNumber,
   ColumnHeader,
   ColumnHeaderCheckbox,
 } from "@/core/components/ui/column";
+import { DataControllerResult } from "@/core/hooks/use-data-controller";
 import { filterFn, formatLocalizedDate } from "@/core/utils";
 import { allRoles } from "@/shared/permission";
 import { createColumnHelper } from "@tanstack/react-table";
 import {
-  ArrowUpRightIcon,
   CalendarCheck2Icon,
   CalendarSyncIcon,
   CircleDotIcon,
@@ -35,10 +34,7 @@ import { UserStatusBadge } from "./user-status-badge";
 import { UserVerifiedBadge } from "./user-verified-badge";
 
 const createColumn = createColumnHelper<User>();
-export const getUserColumns = (
-  setData: React.Dispatch<React.SetStateAction<User | null>>,
-  result?: { isLoading: boolean; count?: Record<string, number> },
-) => [
+export const getUserColumns = (result?: DataControllerResult<User>) => [
   createColumn.display({
     id: "select",
     header: (c) => <ColumnHeaderCheckbox table={c.table} />,
@@ -54,24 +50,17 @@ export const getUserColumns = (
   }),
   createColumn.accessor((ac) => ac.name, {
     id: "name",
-    header: (c) => (
-      <ColumnHeader column={c.column} disabled={result?.isLoading}>
-        Nama
-      </ColumnHeader>
-    ),
+    header: (c) => <ColumnHeader column={c.column}>Nama</ColumnHeader>,
     cell: (c) => (
-      <div className="flex items-center gap-1">
-        <Avatar radius="md">
+      <div className="flex items-center gap-2">
+        <Avatar
+          radius="md"
+          className="overflow-hidden *:transition-transform *:group-hover/row:scale-105"
+        >
           <AvatarImage src={c.row.original.image ?? undefined} />
           <AvatarFallback>{c.getValue().slice(0, 2)}</AvatarFallback>
         </Avatar>
-        <Button
-          size="sm"
-          variant="link"
-          onClick={() => setData(c.row.original)}
-        >
-          {c.getValue()} <ArrowUpRightIcon />
-        </Button>
+        <p>{c.getValue()}</p>
       </div>
     ),
     filterFn: filterFn("text"),
@@ -79,11 +68,7 @@ export const getUserColumns = (
   }),
   createColumn.accessor((ac) => ac.email, {
     id: "email",
-    header: (c) => (
-      <ColumnHeader column={c.column} disabled={result?.isLoading}>
-        Alamat Email
-      </ColumnHeader>
-    ),
+    header: (c) => <ColumnHeader column={c.column}>Alamat Email</ColumnHeader>,
     cell: (c) => (
       <div className="flex items-center gap-x-2">
         {c.cell.getValue()}
@@ -95,11 +80,7 @@ export const getUserColumns = (
   }),
   createColumn.accessor((ac) => getUserStatus(ac), {
     id: "status",
-    header: (c) => (
-      <ColumnHeader column={c.column} disabled={result?.isLoading}>
-        Status
-      </ColumnHeader>
-    ),
+    header: (c) => <ColumnHeader column={c.column}>Status</ColumnHeader>,
     cell: (c) => <UserStatusBadge value={c.cell.getValue()} />,
     filterFn: filterFn("option"),
     meta: {
@@ -108,18 +89,14 @@ export const getUserColumns = (
       icon: CircleDotIcon,
       options: allUserStatus.map((value) => {
         const { label, icon } = userStatusConfig[value];
-        const count = result?.count?.[value];
+        const count = result?.data?.count?.[value] ?? undefined;
         return { value, label, icon, count };
       }),
     },
   }),
   createColumn.accessor((ac) => ac.role, {
     id: "role",
-    header: (c) => (
-      <ColumnHeader column={c.column} disabled={result?.isLoading}>
-        Role
-      </ColumnHeader>
-    ),
+    header: (c) => <ColumnHeader column={c.column}>Role</ColumnHeader>,
     cell: (c) => (
       <div className="flex items-center gap-2">
         <UserRoleColumn data={c.row.original} />
@@ -133,7 +110,7 @@ export const getUserColumns = (
       icon: ShieldUserIcon,
       options: allRoles.map((value) => {
         const { label, icon } = roleConfig[value];
-        const count = result?.count?.[value];
+        const count = result?.data?.count?.[value] ?? undefined;
         return { value, label, icon, count };
       }),
     },
@@ -141,9 +118,7 @@ export const getUserColumns = (
   createColumn.accessor((ac) => ac.updatedAt, {
     id: "updatedAt",
     header: (c) => (
-      <ColumnHeader column={c.column} disabled={result?.isLoading}>
-        Terakhir Diperbarui
-      </ColumnHeader>
+      <ColumnHeader column={c.column}>Terakhir Diperbarui</ColumnHeader>
     ),
     cell: (c) => formatLocalizedDate(c.cell.getValue(), "PPPp"),
     filterFn: filterFn("date"),
@@ -155,17 +130,9 @@ export const getUserColumns = (
   }),
   createColumn.accessor((c) => c.createdAt, {
     id: "createdAt",
-    header: (c) => (
-      <ColumnHeader column={c.column} disabled={result?.isLoading}>
-        Waktu Dibuat
-      </ColumnHeader>
-    ),
+    header: (c) => <ColumnHeader column={c.column}>Waktu Dibuat</ColumnHeader>,
     cell: (c) => formatLocalizedDate(c.cell.getValue(), "PPPp"),
     filterFn: filterFn("date"),
-    meta: {
-      label: "Waktu Dibuat",
-      type: "date",
-      icon: CalendarCheck2Icon,
-    },
+    meta: { label: "Waktu Dibuat", type: "date", icon: CalendarCheck2Icon },
   }),
 ];

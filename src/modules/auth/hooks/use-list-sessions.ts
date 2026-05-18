@@ -1,10 +1,10 @@
 import { authClient } from "@/core/auth";
 import useSWR, { mutate, SWRConfiguration } from "swr";
-import { AUTH_KEYS } from "../config/keys";
+import { authKeys } from "../config/keys";
 
 export function useListSessions(config?: SWRConfiguration) {
   return useSWR(
-    AUTH_KEYS.sessions,
+    authKeys.sessions,
     async () => {
       const { data, error } = await authClient.listSessions();
       if (error) throw error;
@@ -14,4 +14,4 @@ export function useListSessions(config?: SWRConfiguration) {
   );
 }
 
-export const mutateListSessions = () => mutate(AUTH_KEYS.sessions);
+export const mutateListSessions = () => mutate(authKeys.sessions);

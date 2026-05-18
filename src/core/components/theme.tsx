@@ -11,15 +11,25 @@ import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 
-export const THEME_TOGGLE_LABEL = "Toggle Theme";
-export const THEME_TOGGLE_HOTKEY: Hotkey = "Alt+T";
+export const themeToggleConfig: {
+  label: string;
+  hotkey: Hotkey;
+  hotkeyDisplay: string;
+} = {
+  label: "Toggle Theme",
+  hotkey: "D",
+  get hotkeyDisplay() {
+    return formatForDisplay(this.hotkey);
+  },
+};
 
 export function ThemeToggle({
-  align,
   withTooltip = true,
+  align,
   size = "icon",
   variant = "ghost",
   onClick,
+  className,
   disabled = false,
   ...props
 }: Omit<ButtonProps, "children"> &
@@ -41,11 +51,12 @@ export function ThemeToggle({
         onClick?.(e);
         startTransition(() => setTheme(nextTheme(theme)));
       }}
+      className={className}
       disabled={disabled || isTransitioning}
       {...props}
     >
       <Icon />
-      <span className="sr-only">{THEME_TOGGLE_LABEL}</span>
+      <span className="sr-only">{themeToggleConfig.label}</span>
     </Button>
   );
 
@@ -56,8 +67,7 @@ export function ThemeToggle({
       <TooltipTrigger render={element} />
       <TooltipPopup align={align}>
         <div className="flex items-center gap-x-1">
-          {THEME_TOGGLE_LABEL}{" "}
-          <Kbd>{formatForDisplay(THEME_TOGGLE_HOTKEY)}</Kbd>
+          {themeToggleConfig.label} <Kbd>{themeToggleConfig.hotkeyDisplay}</Kbd>
         </div>
       </TooltipPopup>
     </Tooltip>

@@ -72,6 +72,7 @@ export function UserRoleColumn({
             size="icon-xs"
             variant="ghost"
             disabled={user.id === data.id || isLoading}
+            data-no-row-click
           >
             <LoadingSpinner
               loading={isLoading}
@@ -91,6 +92,7 @@ export function UserRoleColumn({
               className="text-(--item-color) data-highlighted:text-(--item-color)"
               onClick={() => clickHandler(item)}
               disabled={isLoading}
+              data-no-row-click
             >
               <Icon /> {label}
             </MenuItem>

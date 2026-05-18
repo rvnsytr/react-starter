@@ -24,7 +24,7 @@ import {
 } from "@/core/utils";
 import { formatNumber } from "@/core/utils/formaters";
 import { cn } from "@/core/utils/helpers";
-import { formatForDisplay, Hotkey, useHotkey } from "@tanstack/react-hotkeys";
+import { formatForDisplay, Hotkey, useHotkeys } from "@tanstack/react-hotkeys";
 import { Column, ColumnMeta, RowData, Table } from "@tanstack/react-table";
 import { endOfDay, isEqual } from "date-fns";
 import {
@@ -51,6 +51,7 @@ import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
 import { InputGroup, InputGroupAddon } from "./ui/input-group";
 import { Kbd } from "./ui/kbd";
+import { Label } from "./ui/label";
 import {
   Menu,
   MenuCheckboxItem,
@@ -184,7 +185,9 @@ export function ResetFilters<TData>({
     table.resetHeaderSizeInfo();
   };
 
-  useHotkey(shortcut ?? "R", () => clear(), { enabled: !!shortcut });
+  useHotkeys(shortcut ? [{ hotkey: shortcut, callback: clear }] : [], {
+    enabled: !!shortcut,
+  });
 
   return (
     <Button size={size} variant={variant} onClick={() => clear()} {...props}>
@@ -214,11 +217,16 @@ export function FilterSelector<TData>({
   const anchor = useRef<HTMLButtonElement>(null);
   const [property, setProperty] = useState<string | undefined>(undefined);
 
-  const [isOpen, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  useHotkey(shortcut ?? "F", () => setOpen((v) => !v), { enabled: !!shortcut });
+  useHotkeys(
+    shortcut
+      ? [{ hotkey: shortcut, callback: () => setIsOpen((v) => !v) }]
+      : [],
+    { enabled: !!shortcut },
+  );
 
   const properties = useMemo(
     () => table.getAllColumns().filter(isFilterableColumn),
@@ -242,7 +250,7 @@ export function FilterSelector<TData>({
 
   return (
     <>
-      <Menu open={isOpen} onOpenChange={setOpen}>
+      <Menu open={isOpen} onOpenChange={setIsOpen}>
         <MenuTrigger
           render={
             <Button ref={anchor} size={size} variant={variant} {...props}>
@@ -1152,7 +1160,8 @@ export function FilterValueNumberController<TData, TValue>({
           <TabsTab value="single">Single</TabsTab>
           <TabsTab value="range">Range</TabsTab>
         </TabsList>
-        <TabsPanel value="single" className="mt-4 flex flex-col gap-4">
+
+        <TabsPanel value="single" className="flex flex-col gap-4">
           <Slider
             step={1}
             value={[Number(inputValues[0])]}
@@ -1166,9 +1175,9 @@ export function FilterValueNumberController<TData, TValue>({
             aria-orientation="horizontal"
           />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium">Value</span>
+            <Label htmlFor="single-input">Value</Label>
             <Input
-              id="single"
+              id="single-input"
               type="number"
               value={inputValues[0]}
               onChange={(e) => handleInputChange(0, e.target.value)}
@@ -1176,10 +1185,12 @@ export function FilterValueNumberController<TData, TValue>({
             />
           </div>
         </TabsPanel>
-        <TabsPanel value="range" className="mt-4 flex flex-col gap-4">
+
+        <TabsPanel value="range" className="flex flex-col gap-4">
           <Slider
             step={1}
             value={slider.value}
+            defaultValue={slider.value}
             onValueChange={(v) => {
               const value: number = Array.isArray(v) ? v[0] : v;
               if (value >= cappedMax) handleInputChange(0, `${cappedMax}+`);
@@ -1191,8 +1202,9 @@ export function FilterValueNumberController<TData, TValue>({
           />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium">Min</span>
+              <Label htmlFor="range-min-input">Min</Label>
               <Input
+                id="range-min-input"
                 type="number"
                 value={inputValues[0]}
                 onChange={(e) => handleInputChange(0, e.target.value)}
@@ -1200,8 +1212,9 @@ export function FilterValueNumberController<TData, TValue>({
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium">Max</span>
+              <Label htmlFor="range-max-input">Max</Label>
               <Input
+                id="range-max-input"
                 type="text"
                 value={inputValues[1]}
                 placeholder={`${cappedMax}+`}
@@ -1311,7 +1324,7 @@ export function FilterValueOptionController<TData, TValue>({
   }
 
   const optionsCount: Record<DataFilterOption["value"], number> =
-    columnVals.reduce(
+    columnVals.reduce<Record<DataFilterOption["value"], number>>(
       (acc, curr) => {
         const { value } = columnMeta.transformOptionFn
           ? columnMeta.transformOptionFn(
@@ -1322,7 +1335,7 @@ export function FilterValueOptionController<TData, TValue>({
         acc[value] = (acc[value] ?? 0) + 1;
         return acc;
       },
-      {} as Record<DataFilterOption["value"], number>,
+      {},
     );
 
   const handleOptionSelect = (value: string, check: boolean) => {
@@ -1433,7 +1446,7 @@ export function FilterValueMultiOptionController<
   }
 
   const optionsCount: Record<DataFilterOption["value"], number> =
-    columnVals.reduce(
+    columnVals.reduce<Record<DataFilterOption["value"], number>>(
       (acc, curr) => {
         const value = columnMeta.options
           ? (curr as string)
@@ -1444,7 +1457,7 @@ export function FilterValueMultiOptionController<
         acc[value] = (acc[value] ?? 0) + 1;
         return acc;
       },
-      {} as Record<DataFilterOption["value"], number>,
+      {},
     );
 
   // Handles the selection/deselection of an option

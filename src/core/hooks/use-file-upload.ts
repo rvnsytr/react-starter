@@ -1,14 +1,9 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import z from "zod";
 import { messages } from "../messages";
-import { sharedSchemas } from "../schema";
-
-export type FileMetadata = z.infer<typeof sharedSchemas.fileMetadata>;
-export type FileWithPreview = z.infer<
-  ReturnType<typeof sharedSchemas.fileWithPreview>
->;
+import { FileMetadata, FileWithPreview } from "../types";
+import { getFileInfo } from "../utils";
 
 export type FileUploadOptions = {
   accept?: string;
@@ -67,13 +62,6 @@ export function useStatelessFileUpload(
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
-
-  const getFileInfo = (file: File | FileMetadata) => ({
-    name: file.name,
-    size: file.size,
-    type: file instanceof File ? file.type || "" : file.type,
-    extension: `.${file.name.split(".").pop()}`,
-  });
 
   const validateFile = useCallback(
     (file: File | FileMetadata) => {
@@ -207,66 +195,60 @@ export function useStatelessFileUpload(
 
   const removeFile = useCallback(
     (id: string) => {
-      setFiles((prev) => {
-        const fileToRemove = prev.find((file) => file.id === id);
+      const fileToRemove = files.find((file) => file.id === id);
 
-        if (
-          fileToRemove?.preview &&
-          fileToRemove.file instanceof File &&
-          fileToRemove.file.type.startsWith("image/")
-        ) {
-          URL.revokeObjectURL(fileToRemove.preview);
-        }
+      if (
+        fileToRemove?.preview &&
+        fileToRemove.file instanceof File &&
+        fileToRemove.file.type.startsWith("image/")
+      ) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
 
-        const newFiles = prev.filter((file) => file.id !== id);
+      const newFiles = files.filter((file) => file.id !== id);
 
-        onFilesChange?.(newFiles);
-        return newFiles;
-      });
+      onFilesChange?.(newFiles);
+      setFiles(newFiles);
       setErrors([]);
     },
-    [setFiles, onFilesChange],
+    [files, setFiles, onFilesChange],
   );
 
   const clearErrors = useCallback(() => setErrors([]), [setErrors]);
 
   const moveUp = useCallback(
     (id: string) => {
-      setFiles((prev) => {
-        const index = prev.findIndex((file) => file.id === id);
-        if (index === -1) return prev;
+      const index = files.findIndex((file) => file.id === id);
+      if (index === -1) return;
 
-        const newFiles = [...prev];
-        const targetIndex = index === 0 ? newFiles.length - 1 : index - 1;
-        [newFiles[targetIndex], newFiles[index]] = [
-          newFiles[index],
-          newFiles[targetIndex],
-        ];
+      const newFiles = [...files];
+      const targetIndex = index === 0 ? newFiles.length - 1 : index - 1;
+      [newFiles[targetIndex], newFiles[index]] = [
+        newFiles[index],
+        newFiles[targetIndex],
+      ];
 
-        onFilesChange?.(newFiles);
-        return newFiles;
-      });
+      onFilesChange?.(newFiles);
+      setFiles(newFiles);
     },
-    [setFiles, onFilesChange],
+    [files, setFiles, onFilesChange],
   );
 
   const moveDown = useCallback(
     (id: string) => {
-      setFiles((prev) => {
-        const index = prev.findIndex((file) => file.id === id);
-        if (index === -1) return prev;
+      const index = files.findIndex((file) => file.id === id);
+      if (index === -1) return;
 
-        const newFiles = [...prev];
-        const targetIndex = index === newFiles.length - 1 ? 0 : index + 1;
-        [newFiles[targetIndex], newFiles[index]] = [
-          newFiles[index],
-          newFiles[targetIndex],
-        ];
-        onFilesChange?.(newFiles);
-        return newFiles;
-      });
+      const newFiles = [...files];
+      const targetIndex = index === newFiles.length - 1 ? 0 : index + 1;
+      [newFiles[targetIndex], newFiles[index]] = [
+        newFiles[index],
+        newFiles[targetIndex],
+      ];
+      onFilesChange?.(newFiles);
+      setFiles(newFiles);
     },
-    [setFiles, onFilesChange],
+    [files, setFiles, onFilesChange],
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLElement>) => {

@@ -1,8 +1,7 @@
 "use client";
 
-import { useIsMobile } from "@/core/hooks/use-media-query";
+import { useMediaQuery } from "@/core/hooks/use-media-query";
 import { layoutModeConfig, useLayoutMode } from "@/core/providers/layout-mode";
-import { cn } from "@/core/utils";
 import { formatForDisplay, Hotkey, useHotkey } from "@tanstack/react-hotkeys";
 import { Button, ButtonProps } from "./ui/button";
 import { Kbd } from "./ui/kbd";
@@ -10,23 +9,32 @@ import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 
-export const LAYOUT_MODE_TOGGLE_LABEL = "Toggle Layout";
-export const LAYOUT_MODE_TOGGLE_HOTKEY: Hotkey = "Alt+L";
+export const layoutModeToggleConfig: {
+  label: string;
+  hotkey: Hotkey;
+  hotkeyDisplay: string;
+} = {
+  label: "Toggle Layout",
+  hotkey: "L",
+  get hotkeyDisplay() {
+    return formatForDisplay(this.hotkey);
+  },
+};
 
 export function LayoutModeToggle({
+  withTooltip = false,
   align,
-  withTooltip,
-  size = "icon-sm",
+  size = "icon",
   variant = "ghost",
   onClick,
-  disabled = false,
   className,
+  disabled = false,
   ...props
 }: Omit<ButtonProps, "children"> &
   Pick<React.ComponentProps<typeof TooltipPopup>, "align"> & {
     withTooltip?: boolean;
   }) {
-  const isMobile = useIsMobile();
+  const isLargeScreen = useMediaQuery("3xl");
   const { layout, setLayout } = useLayoutMode();
 
   const { icon: Icon } = layoutModeConfig[layout];
@@ -34,7 +42,9 @@ export function LayoutModeToggle({
   const toggleLayout = () =>
     setLayout((prev) => (prev === "fullwidth" ? "centered" : "fullwidth"));
 
-  useHotkey(LAYOUT_MODE_TOGGLE_HOTKEY, toggleLayout);
+  useHotkey(layoutModeToggleConfig.hotkey, toggleLayout);
+
+  if (!isLargeScreen) return null;
 
   const element = (
     <Button
@@ -44,24 +54,24 @@ export function LayoutModeToggle({
         onClick?.(e);
         toggleLayout();
       }}
-      className={cn("hidden 2xl:inline-flex", className)}
+      className={className}
       disabled={disabled}
       {...props}
     >
       <Icon />
-      <span className="sr-only">{LAYOUT_MODE_TOGGLE_LABEL}</span>
+      <span className="sr-only">{layoutModeToggleConfig.label}</span>
     </Button>
   );
 
-  if (isMobile || !withTooltip) return element;
+  if (!withTooltip) return element;
 
   return (
     <Tooltip>
       <TooltipTrigger render={element} />
       <TooltipPopup align={align}>
         <div className="flex items-center gap-x-1">
-          {LAYOUT_MODE_TOGGLE_LABEL}{" "}
-          <Kbd>{formatForDisplay(LAYOUT_MODE_TOGGLE_HOTKEY)}</Kbd>
+          {layoutModeToggleConfig.label}{" "}
+          <Kbd>{layoutModeToggleConfig.hotkeyDisplay}</Kbd>
         </div>
       </TooltipPopup>
     </Tooltip>

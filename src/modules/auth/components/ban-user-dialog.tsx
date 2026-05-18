@@ -39,6 +39,8 @@ const formSchema = z.object({
     .optional(),
 });
 
+const formId = "ban-user-form";
+
 export function BanUserDialog({
   data,
   open,
@@ -100,7 +102,7 @@ export function BanUserDialog({
             title: messages.success,
             description: (
               <span>
-                Akun <b>{data.name}</b> berhasil diblokir.
+                Akun atas nama <b>{data.name}</b> berhasil diblokir.
               </span>
             ),
           };
@@ -118,7 +120,7 @@ export function BanUserDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogPopup>
         <DialogHeader>
-          <DialogTitle className="text-destructive">
+          <DialogTitle className="text-destructive-foreground">
             <TriangleAlertIcon /> Blokir akun atas nama {data.name}
           </DialogTitle>
           <DialogDescription>
@@ -127,8 +129,8 @@ export function BanUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Form onSubmit={form.handleSubmit(formHandler)}>
-          <DialogPanel>
+        <DialogPanel>
+          <Form id={formId} onSubmit={form.handleSubmit(formHandler)}>
             <Controller
               name="banReason"
               control={form.control}
@@ -163,19 +165,17 @@ export function BanUserDialog({
                 </Field>
               )}
             />
-          </DialogPanel>
+          </Form>
+        </DialogPanel>
 
-          <DialogFooter>
-            <DialogClose
-              render={
-                <Button variant="ghost">{messages.actions.cancel}</Button>
-              }
-            />
-            <Button type="submit" variant="destructive" autoFocus>
-              {messages.actions.confirm}
-            </Button>
-          </DialogFooter>
-        </Form>
+        <DialogFooter>
+          <DialogClose
+            render={<Button variant="ghost">{messages.actions.cancel}</Button>}
+          />
+          <Button type="submit" form={formId} variant="destructive" autoFocus>
+            {messages.actions.confirm}
+          </Button>
+        </DialogFooter>
       </DialogPopup>
     </Dialog>
   );

@@ -1,9 +1,13 @@
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/core/components/ui/alert";
+import { Spinner, SpinnerProps } from "@/core/components/ui/spinner";
 import { cn } from "@/core/utils";
 import { appConfig } from "@/shared/config/app";
 import { TriangleAlertIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { Alert, AlertDescription, AlertTitle } from "./alert";
-import { Spinner, SpinnerProps } from "./spinner";
 
 export function LoadingFallback({
   containerClassName,
@@ -35,15 +39,17 @@ export function ErrorFallback({
     <Alert variant="destructive" className={className}>
       <TriangleAlertIcon />
       <AlertTitle>
-        {`${appConfig.name} / `}
+        {appConfig.name}
+        {/* {`${appConfig.name} / `}
         <code className="bg-destructive/10 text-xs tabular-nums">
           {error?.code ?? 500}
-        </code>
+        </code> */}
       </AlertTitle>
 
       {!hideDesc && (
         <AlertDescription>
           <pre className="whitespace-pre-wrap">{message}</pre>
+          <pre>{JSON.stringify(error, null, 2)}</pre>
         </AlertDescription>
       )}
     </Alert>

@@ -21,15 +21,15 @@ import {
 import { messages } from "@/core/messages";
 import { BanIcon, MonitorOff, Settings2Icon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
-import { AUTH_KEYS } from "../config/keys";
+import { authKeys } from "../config/keys";
 import { useSession } from "../hooks/use-session";
+import { userSchema } from "../schema";
 import { ActionDeleteUsersDialog } from "./delete-user-dialog";
 import { ActionRevokeUserSessionsDialog } from "./revoke-user-sessions-dialog";
 import { getUserColumns } from "./user-columns";
 import { UserDetailDialog } from "./user-detail-dialog";
-import { userSchema } from "../schema";
 
-export const mutateUserDataTable = () => mutateControlledData(AUTH_KEYS.users);
+export const mutateUserDataTable = () => mutateControlledData(authKeys.users);
 
 export function UserDataTable() {
   const { user } = useSession();
@@ -45,19 +45,15 @@ export function UserDataTable() {
   const queryFetcher = async (state: DataControllerState) => {
     const body = JSON.stringify(state);
     const schema = userSchema.array();
-    return fetcher.api(AUTH_KEYS.users, { schema, body });
+    return fetcher.api(authKeys.users, { schema, body });
   };
 
   return (
     <>
       <DataTable
         mode="auto"
-        columns={(result) => {
-          const isLoading = result?.isLoading ?? false;
-          const count = result?.data?.count;
-          return getUserColumns(setData, { isLoading, count });
-        }}
-        query={{ key: AUTH_KEYS.users, fetcher: queryFetcher, immutable: true }}
+        columns={getUserColumns}
+        query={{ key: authKeys.users, fetcher: queryFetcher, immutable: true }}
         getRowId={(row) => row.id}
         enableRowSelection={(row) => row.original.id !== user.id}
         placeholder={{ search: "Cari Pengguna..." }}
@@ -68,6 +64,7 @@ export function UserDataTable() {
           reset: "R",
           search: "/",
         }}
+        onRowClick={(row) => setData(row.original)}
         renderRowSelectionButton={({ table, rows }) => {
           const data = rows.map((row) => row.original);
           return (

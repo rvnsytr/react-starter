@@ -21,7 +21,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import useSWR, { mutate, SWRConfiguration, SWRResponse } from "swr";
-import { ActionResponse } from "../types";
+import { ActionResponse, ActionSuccess, Override } from "../types";
 import { useDebounce } from "./use-debounce";
 
 export type DataControllerState = {
@@ -34,13 +34,18 @@ export type DataControllerState = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ColumnDef<TData> = ColumnDefType<TData, any>[];
 
-type AllDataControllerState = DataControllerState & {
+export type AllDataControllerState = DataControllerState & {
   columnPinning: ColumnPinningState;
   columnVisibility: VisibilityState;
   rowSelection: RowSelectionState;
 };
 
-export type DataControllerResult<TData> = SWRResponse<ActionResponse<TData[]>>;
+export type DataControllerQueryConfig<TData> = Override<
+  SWRConfiguration,
+  { fallbackData?: ActionSuccess<TData[]> }
+>;
+
+export type DataControllerResult<TData> = SWRResponse<ActionSuccess<TData[]>>;
 
 export type DataControllerOptions<TData> = Pick<
   TableOptions<TData>,
@@ -53,8 +58,9 @@ export type DataControllerOptions<TData> = Pick<
   query: {
     key: string;
     fetcher: (state: DataControllerState) => Promise<ActionResponse<TData[]>>;
-    config?: SWRConfiguration;
-  } & ({ immutable: true } | { immutable?: false; revalidate?: boolean });
+    config?: DataControllerQueryConfig<TData>;
+    immutable?: boolean;
+  };
 
   defaultState?: Partial<AllDataControllerState>;
 };
@@ -110,18 +116,21 @@ export function useStatelessDataController<TData>({
     [debouncedSearch, pagination, sorting, columnFilters],
   );
 
-  const shouldRevalidate = !query.immutable && (query.revalidate ?? true);
-  const result = useSWR<ActionResponse<TData[]>>(
+  const result = useSWR<ActionSuccess<TData[]>>(
     mode === "manual" ? [query.key, state] : [query.key],
-    () => query.fetcher(state),
+    async () => {
+      const res = await query.fetcher(state);
+      if (!res.success) throw res;
+      return res;
+    },
     {
       ...query.config,
       revalidateIfStale:
-        shouldRevalidate && (query.config?.revalidateIfStale ?? true),
+        query.config?.revalidateIfStale ?? (query.immutable ? false : true),
       revalidateOnFocus:
-        shouldRevalidate && (query.config?.revalidateOnFocus ?? true),
+        query.config?.revalidateOnFocus ?? (query.immutable ? false : true),
       revalidateOnReconnect:
-        shouldRevalidate && (query.config?.revalidateOnReconnect ?? true),
+        query.config?.revalidateOnReconnect ?? (query.immutable ? false : true),
     },
   );
 
@@ -133,7 +142,7 @@ export function useStatelessDataController<TData>({
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     columns: resolvedColumns,
-    data: result.data?.success ? result.data.data : [],
+    data: result.data?.data ?? [],
 
     state: {
       globalFilter,

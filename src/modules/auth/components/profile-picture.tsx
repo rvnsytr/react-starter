@@ -87,6 +87,12 @@ export function ProfilePicture({
   });
 
   const deleteHandler = () => {
+    if (!data.image)
+      return toast.add({
+        type: "info",
+        title: messages.noChanges("foto profil"),
+      });
+
     setIsRemoved(true);
     toast.promise(
       authClient.updateUser({ image: null }).then((res) => {

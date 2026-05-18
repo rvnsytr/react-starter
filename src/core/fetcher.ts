@@ -49,23 +49,31 @@ const fetcher = async <T>(
   return config.schema.parse(json);
 };
 
-fetcher.api = async <T>(
-  path: string,
-  config?: ApiFetcherConfig<T>,
-): Promise<ApiResponse<T>> => {
-  const schema = config?.schema ?? z.any();
-  return await fetcher(`${apiConfig.baseUrl}${path}`, {
-    ...config,
-    credentials: "include",
-    schema: getApiResponseSchema(schema),
-  });
-};
-
 fetcher.postJson = async <T>(
   url: string,
   config?: Omit<ApiFetcherConfig<T>, "method">,
 ) =>
   await fetcher(url, {
+    ...config,
+    method: "POST",
+    headers: { ...config?.headers, "Content-Type": "application/json" },
+  });
+
+fetcher.api = async <T>(
+  path: string,
+  config?: ApiFetcherConfig<T>,
+): Promise<ApiResponse<T>> =>
+  await fetcher(`${apiConfig.baseUrl}${path}`, {
+    ...config,
+    credentials: "include",
+    schema: getApiResponseSchema(config?.schema ?? z.any()),
+  });
+
+fetcher.apiPostJson = async <T>(
+  path: string,
+  config?: ApiFetcherConfig<T>,
+): Promise<ApiResponse<T>> =>
+  await fetcher.api(path, {
     ...config,
     method: "POST",
     headers: { ...config?.headers, "Content-Type": "application/json" },

@@ -1,9 +1,9 @@
 import {
-  LAYOUT_MODE_TOGGLE_HOTKEY,
   LayoutModeSettings,
+  layoutModeToggleConfig,
 } from "@/core/components/layout-mode";
 import { PageContainer } from "@/core/components/layout/page";
-import { THEME_TOGGLE_HOTKEY, ThemeSettings } from "@/core/components/theme";
+import { ThemeSettings, themeToggleConfig } from "@/core/components/theme";
 import {
   Card,
   CardAction,
@@ -15,9 +15,10 @@ import {
 } from "@/core/components/ui/card";
 import { Kbd } from "@/core/components/ui/kbd";
 import { getRouteTitle } from "@/core/route";
+import { ChangePasswordForm } from "@/modules/auth/components/change-password-form";
+import { RevokeOtherSessionsButton } from "@/modules/auth/components/revoke-other-session-button";
 import { SessionList } from "@/modules/auth/components/session-list";
 import { appConfig } from "@/shared/config/app";
-import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   FrameIcon,
@@ -36,7 +37,7 @@ function RouteComponent() {
     <PageContainer className="items-center px-0 lg:px-4">
       <Card id="tema" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
-          <CardTitle className="flex items-center gap-x-2">
+          <CardTitle>
             <SunMoonIcon /> Tema
           </CardTitle>
           <CardDescription>
@@ -47,8 +48,10 @@ function RouteComponent() {
             sesuai preferensi Anda.
           </CardDescription>
 
-          <CardAction className="hidden lg:inline-flex">
-            <Kbd>{formatForDisplay(THEME_TOGGLE_HOTKEY)}</Kbd>
+          <CardAction>
+            <Kbd className="hidden lg:inline-flex">
+              {themeToggleConfig.hotkeyDisplay}
+            </Kbd>
           </CardAction>
         </CardHeader>
 
@@ -59,7 +62,7 @@ function RouteComponent() {
 
       <Card id="layout" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
-          <CardTitle className="flex items-center gap-x-2">
+          <CardTitle>
             <FrameIcon /> Layout
           </CardTitle>
           <CardDescription>
@@ -71,8 +74,10 @@ function RouteComponent() {
             lebar lebih dari <code>1024px</code>.
           </CardDescription>
 
-          <CardAction className="hidden lg:inline-flex">
-            <Kbd>{formatForDisplay(LAYOUT_MODE_TOGGLE_HOTKEY)}</Kbd>
+          <CardAction>
+            <Kbd className="hidden lg:inline-flex">
+              {layoutModeToggleConfig.hotkeyDisplay}
+            </Kbd>
           </CardAction>
         </CardHeader>
 
@@ -83,7 +88,7 @@ function RouteComponent() {
 
       <Card id="sesi-aktif" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
-          <CardTitle className="flex items-center gap-x-2">
+          <CardTitle>
             <ShieldIcon /> Sesi Aktif
           </CardTitle>
           <CardDescription>
@@ -96,13 +101,13 @@ function RouteComponent() {
         </CardContent>
 
         <CardFooter className="*:w-full *:lg:w-fit">
-          {/* <RevokeOtherSessionsButton /> */}
+          <RevokeOtherSessionsButton />
         </CardFooter>
       </Card>
 
       <Card id="ubah-kata-sandi" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
-          <CardTitle className="flex items-center gap-x-2">
+          <CardTitle>
             <LockKeyholeIcon /> Ubah Kata Sandi
           </CardTitle>
           <CardDescription>
@@ -110,7 +115,7 @@ function RouteComponent() {
           </CardDescription>
         </CardHeader>
 
-        {/* <ChangePasswordForm /> */}
+        <ChangePasswordForm />
       </Card>
     </PageContainer>
   );

@@ -1,8 +1,8 @@
 import { authClient } from "@/core/auth";
-import { AppLoadingFallback } from "@/core/components/ui/fallback";
 import { toast } from "@/core/components/ui/toast";
 import { messages } from "@/core/messages";
 import { getRouteTitle } from "@/core/route";
+import { AppLoadingFallback } from "@/shared/components/fallback";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { useEffect, useEffectEvent, useState } from "react";

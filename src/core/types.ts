@@ -13,9 +13,18 @@ export type OmitByType<T, V> = {
 export type Count = ({ total: number } & Record<string, number>) | undefined;
 
 export type ActionResponse<T = unknown> = {
-  count?: Count;
   message?: string;
-} & ({ success: true; data: T } | { success: false; error?: unknown });
+} & (
+  | { success: true; count?: Count; data: T }
+  | { success: false; error?: unknown }
+);
+
+export type ActionSuccess<T = unknown> = Extract<
+  ActionResponse<T>,
+  { success: true }
+>;
+
+export type ActionError = Extract<ActionResponse, { success: false }>;
 
 export type StringCase =
   | "kebab"
@@ -78,5 +87,10 @@ export type MenuItem = {
   shortcut?: Hotkey;
 
   // if href is not defined, the Link href prop will be `/${route}#${toCase(label, "kebab")}`
-  subItems?: { label: string; href?: Route | string; role?: RouteRole }[];
+  subItems?: {
+    label: string;
+    href?: Route | string;
+    role?: RouteRole;
+    disabled?: boolean;
+  }[];
 };

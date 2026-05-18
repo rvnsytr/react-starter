@@ -26,6 +26,7 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/core/components/ui/menu";
+import { ScrollArea } from "@/core/components/ui/scroll-area";
 import { Separator } from "@/core/components/ui/separator";
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@/core/components/ui/tabs";
@@ -83,12 +84,9 @@ function Content({ data, setData }: { data: User; setData: SetData }) {
     useState<boolean>(false);
   const [isImpersonateDialogOpen, setIsImpersonateDialogOpen] =
     useState<boolean>(false);
-  const [isBanUserDialogOpen, setIsBanUserDialogOpen] =
-    useState<boolean>(false);
-  const [isUnbanUserDialogOpen, setIsUnbanUserDialogOpen] =
-    useState<boolean>(false);
-  const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] =
-    useState<boolean>(false);
+  const [isBanDialogOpen, setIsBanDialogOpen] = useState<boolean>(false);
+  const [isUnbanDialogOpen, setIsUnbanDialogOpen] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const isCurrentUser = user.id === data.id;
 
@@ -156,13 +154,13 @@ function Content({ data, setData }: { data: User; setData: SetData }) {
               <MenuSeparator />
 
               {data.banned ? (
-                <MenuItem onClick={() => setIsUnbanUserDialogOpen(true)}>
+                <MenuItem onClick={() => setIsUnbanDialogOpen(true)}>
                   <LockKeyholeOpenIcon /> Buka Blokir
                 </MenuItem>
               ) : (
                 <MenuItem
                   variant="destructive"
-                  onClick={() => setIsBanUserDialogOpen(true)}
+                  onClick={() => setIsBanDialogOpen(true)}
                 >
                   <BanIcon /> Blokir
                 </MenuItem>
@@ -170,7 +168,7 @@ function Content({ data, setData }: { data: User; setData: SetData }) {
 
               <MenuItem
                 variant="destructive"
-                onClick={() => setIsDeleteUserDialogOpen(true)}
+                onClick={() => setIsDeleteDialogOpen(true)}
               >
                 <Trash2Icon /> Hapus
               </MenuItem>
@@ -180,7 +178,7 @@ function Content({ data, setData }: { data: User; setData: SetData }) {
       </DialogHeader>
 
       <DialogPanel className="flex flex-col gap-y-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {isCurrentUser && <Badge variant="outline">Pengguna saat ini</Badge>}
           <RoleBadge value={data.role} />
           <UserStatusBadge value={getUserStatus(data)} />
@@ -189,19 +187,21 @@ function Content({ data, setData }: { data: User; setData: SetData }) {
         <Separator />
 
         <Tabs defaultValue="profile">
-          <TabsList>
-            <TabsTab value="profile" className="h-6">
-              <UserRoundIcon /> Informasi Profil
-            </TabsTab>
+          <ScrollArea scrollFade withScrollbar={false}>
+            <TabsList>
+              <TabsTab value="profile">
+                <UserRoundIcon /> Informasi Profil
+              </TabsTab>
 
-            <TabsTab value="activity">
-              <HistoryIcon /> Aktivitas
-            </TabsTab>
+              <TabsTab value="activity">
+                <HistoryIcon /> Aktivitas
+              </TabsTab>
 
-            <TabsTab value="sessions" className="h-6">
-              <CookieIcon /> Sesi Terdaftar
-            </TabsTab>
-          </TabsList>
+              <TabsTab value="sessions">
+                <CookieIcon /> Sesi Terdaftar
+              </TabsTab>
+            </TabsList>
+          </ScrollArea>
 
           <TabsPanel value="profile" className="grid gap-x-2 gap-y-4">
             <DetailList data={profile} />
@@ -245,24 +245,24 @@ function Content({ data, setData }: { data: User; setData: SetData }) {
 
       <BanUserDialog
         data={data}
-        open={isBanUserDialogOpen}
-        setOpen={setIsBanUserDialogOpen}
+        open={isBanDialogOpen}
+        setOpen={setIsBanDialogOpen}
         setIsLoading={setIsLoading}
         setData={setData}
       />
 
       <UnbanUserDialog
         data={data}
-        open={isUnbanUserDialogOpen}
-        setOpen={setIsUnbanUserDialogOpen}
+        open={isUnbanDialogOpen}
+        setOpen={setIsUnbanDialogOpen}
         setIsLoading={setIsLoading}
         setData={setData}
       />
 
       <DeleteUserDialog
         data={data}
-        open={isDeleteUserDialogOpen}
-        setOpen={setIsDeleteUserDialogOpen}
+        open={isDeleteDialogOpen}
+        setOpen={setIsDeleteDialogOpen}
         setIsLoading={setIsLoading}
         setData={setData}
       />

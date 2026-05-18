@@ -1,11 +1,15 @@
 import {
+  DataControllerPageSize,
+  DataControllerPaginationNav,
+} from "@/core/components/data-controller";
+import {
   ActiveFilters,
   ActiveFiltersContainer,
   ClearFilters,
   FilterSelector,
   ResetFilters,
 } from "@/core/components/filters";
-import { LoadingFallback } from "@/core/components/ui/fallback";
+import { Label } from "@/core/components/ui/label";
 import { Separator } from "@/core/components/ui/separator";
 import {
   Timeline,
@@ -22,13 +26,15 @@ import {
   DataControllerOptions,
   DataControllerResponse,
   DataControllerState,
+  mutateControlledData,
   useDataController,
 } from "@/core/hooks/use-data-controller";
 import { messages } from "@/core/messages";
-import { formatLocalizedDate } from "@/core/utils";
+import { formatLocalizedDate, formatNumber } from "@/core/utils";
 import { cn } from "@/core/utils/helpers";
-import { getActivityConfig } from "../config";
-import { ACTIVITY_KEYS } from "../config/keys";
+import { ErrorFallback, LoadingFallback } from "@/shared/components/fallback";
+import { getActivityTypeConfig } from "../config";
+import { activityKeys } from "../config/keys";
 import { activityTableWithEntitySchema, ActivityWithEntity } from "../schema";
 import { getActivityColumns } from "./activity-column";
 
@@ -42,11 +48,13 @@ function BaseActivityTimeline({
 }: ActivityTimelineProps & {
   controller: DataControllerResponse<ActivityWithEntity>;
 }) {
+  if (result.error) return <ErrorFallback error={result.error} />;
+
   return (
     <div className={cn("flex flex-col gap-y-4", className)}>
       <div className="flex gap-x-2">
-        <FilterSelector table={table} size="sm" disabled={result.isLoading} />
-        <ResetFilters table={table} size="sm" disabled={result.isLoading} />
+        <FilterSelector table={table} size="sm" />
+        <ResetFilters table={table} size="sm" />
       </div>
 
       {table.getState().columnFilters.length > 0 && (
@@ -58,16 +66,16 @@ function BaseActivityTimeline({
       )}
 
       {result.isLoading ? (
-        <LoadingFallback />
-      ) : result.data?.success && result.data.data.length ? (
+        <LoadingFallback variant="frame" />
+      ) : table.getRowModel().rows.length ? (
         <Timeline orientation="vertical" className="px-2">
-          {result.data.data.map((item, index) => {
+          {table.getRowModel().rows.map((row, index) => {
             const {
               label,
               description,
               icon: Icon,
               color,
-            } = getActivityConfig(item.type, item);
+            } = getActivityTypeConfig(row.original.type, row.original);
 
             return (
               <TimelineItem
@@ -84,7 +92,7 @@ function BaseActivityTimeline({
                   </TimelineIndicator>
 
                   <TimelineDate>
-                    {formatLocalizedDate(item.created_at, "PPPp")}
+                    {formatLocalizedDate(row.original.created_at, "PPPp")}
                   </TimelineDate>
 
                   <TimelineTitle className="text-(--timeline-color)">
@@ -101,6 +109,37 @@ function BaseActivityTimeline({
           <small>{messages.empty}</small>
         </div>
       )}
+
+      <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
+        <div
+          data-slot="pagination"
+          className="order-3 flex items-center gap-x-2 lg:order-1"
+        >
+          <Label className="hidden shrink-0 lg:inline-flex">Per halaman</Label>
+          <DataControllerPageSize table={table} size="sm" />
+        </div>
+
+        <small
+          data-slot="page-info"
+          className="order-1 shrink-0 tabular-nums lg:order-2"
+        >
+          Halaman{" "}
+          {result.isLoading
+            ? "?"
+            : formatNumber(table.getState().pagination.pageIndex + 1)}{" "}
+          dari{" "}
+          {result.isLoading
+            ? "?"
+            : formatNumber(table.getPageCount() > 0 ? table.getPageCount() : 1)}
+        </small>
+
+        <DataControllerPaginationNav
+          data-slot="pagination-nav"
+          table={table}
+          size="icon-sm"
+          className="order-2 lg:order-3"
+        />
+      </div>
     </div>
   );
 }
@@ -110,20 +149,19 @@ const controllerOptions: Omit<
   "query"
 > = {
   mode: "auto",
-  columns: (ctx) => {
-    const isLoading = ctx?.isLoading ?? false;
-    const count = ctx?.data?.count;
-    return getActivityColumns({ isLoading, count });
-  },
+  columns: getActivityColumns,
   getRowId: (row) => row.id,
   defaultState: { pagination: { pageIndex: 0, pageSize: 5 } },
 };
+
+export const mutateUserActivityTimeline = (userId: string) =>
+  mutateControlledData(activityKeys.getByUser(userId));
 
 export function UserActivityTimeline({
   userId,
   ...props
 }: ActivityTimelineProps & { userId: string }) {
-  const key = ACTIVITY_KEYS.get(userId);
+  const key = activityKeys.getByUser(userId);
   const schema = activityTableWithEntitySchema.array();
 
   const queryFetcher = async (state: DataControllerState) => {
@@ -138,3 +176,5 @@ export function UserActivityTimeline({
 
   return <BaseActivityTimeline controller={controller} {...props} />;
 }
+
+// TODO: function ProfileActivityTimeline() {}

@@ -19,7 +19,6 @@ import {
   CollapsibleTrigger,
 } from "@/core/components/ui/collapsible";
 import { DetailList, DetailListData } from "@/core/components/ui/detail-list";
-import { ErrorFallback, LoadingFallback } from "@/core/components/ui/fallback";
 import {
   Item,
   ItemActions,
@@ -33,6 +32,7 @@ import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { toast } from "@/core/components/ui/toast";
 import { messages } from "@/core/messages";
 import { cn } from "@/core/utils";
+import { ErrorFallback, LoadingFallback } from "@/shared/components/fallback";
 import {
   ChevronsUpDownIcon,
   Gamepad2Icon,
@@ -50,14 +50,17 @@ import {
   mutateListSessions,
   useListSessions,
 } from "../hooks/use-list-sessions";
-import { useListUserSessions } from "../hooks/use-list-user-sessions";
+import {
+  mutateListUserSessions,
+  useListUserSessions,
+} from "../hooks/use-list-user-sessions";
 import { useSession } from "../hooks/use-session";
 import { ImpersonateUserBadge } from "./impersonate-user-badge";
 
 export function SessionList() {
   const { data, error, isLoading } = useListSessions();
   if (error) return <ErrorFallback error={error} />;
-  if (!data && isLoading) return <LoadingFallback />;
+  if (!data && isLoading) return <LoadingFallback variant="frame" />;
   return <SessionListCollapsible data={data ?? []} />;
 }
 
@@ -68,16 +71,16 @@ export function UserDetailSessionList({
 }) {
   const { data, error, isLoading } = useListUserSessions(user.id);
   if (error) return <ErrorFallback error={error} />;
-  if (!data && isLoading) return <LoadingFallback />;
-  return <SessionListCollapsible name={user.name} data={data ?? []} />;
+  if (!data && isLoading) return <LoadingFallback variant="frame" />;
+  return <SessionListCollapsible data={data ?? []} user={user} />;
 }
 
 export function SessionListCollapsible({
-  name,
   data,
+  user,
 }: {
-  name?: string;
   data: Session[];
+  user?: Pick<User, "id" | "name">;
 }) {
   const { session } = useSession();
   const [revokingSession, setRevokingSession] = useState<string | null>();
@@ -123,6 +126,7 @@ export function SessionListCollapsible({
         success: () => {
           setRevokingSession(null);
           mutateListSessions();
+          if (user?.id) mutateListUserSessions(user.id);
           return { title: "Sesi berhasil diakhiri." };
         },
         error: (e) => {
@@ -213,12 +217,12 @@ export function SessionListCollapsible({
                         <AlertDialogPopup>
                           <AlertDialogHeader>
                             <AlertDialogTitle className="flex items-center gap-x-2">
-                              <MonitorOffIcon /> Akhiri Sesi {name}
+                              <MonitorOffIcon /> Akhiri Sesi {user?.name}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Sesi pada perangkat <span>{name}</span> akan
-                              diakhiri dan pengguna harus login kembali. Yakin
-                              ingin melanjutkan?
+                              Sesi pada perangkat <b>{user?.name ?? "Anda"}</b>{" "}
+                              akan diakhiri dan harus login kembali untuk
+                              mengakses sistem. Yakin ingin melanjutkan?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

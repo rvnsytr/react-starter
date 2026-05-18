@@ -47,6 +47,7 @@ export type FileUploadProps = Pick<
       files?: string;
       file?: string;
     };
+    onClear?: () => void;
   };
 
 export function FileUpload({
@@ -63,6 +64,8 @@ export function FileUpload({
   files: filesProp,
   sortable = false,
   classNames,
+
+  onClear,
   ...options
 }: FileUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -98,7 +101,8 @@ export function FileUpload({
       data-slot="file-upload"
       className={cn(
         "group/file-upload relative flex w-full flex-col gap-y-4",
-        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        disabled &&
+          "pointer-events-none cursor-not-allowed has-disabled:opacity-64",
         classNames?.container,
       )}
     >
@@ -194,7 +198,10 @@ export function FileUpload({
             <ResetButton
               size="sm"
               variant="destructive-outline"
-              onClick={clearFiles}
+              onClick={() => {
+                clearFiles();
+                onClear?.();
+              }}
             />
           )}
         </div>
@@ -216,7 +223,7 @@ export function FileUpload({
                 tabIndex={0}
                 data-slot="file"
                 className={cn(
-                  "group/file relative aspect-3/4 overflow-hidden rounded-xl border",
+                  "group/file relative aspect-square overflow-hidden rounded-xl border",
                   "focus-visible:border-ring focus-visible:ring-ring/50 outline-0 focus-visible:ring-[3px]",
 
                   isImage ? "bg-black text-white" : "bg-card text-foreground",
@@ -229,7 +236,10 @@ export function FileUpload({
                 }}
               >
                 {isImage && (
-                  <div className="absolute z-10 size-full bg-black/60 mask-t-from-0 mask-t-to-40%" />
+                  <>
+                    <div className="absolute z-10 size-full bg-black/32 mask-t-from-0 mask-t-to-30%" />
+                    <div className="absolute z-10 size-full bg-black/32 mask-b-from-0 mask-b-to-30%" />
+                  </>
                 )}
 
                 {isImage && !!file.preview && (
@@ -238,8 +248,8 @@ export function FileUpload({
                       data-slot="file-media"
                       src={file.preview}
                       alt={file.file.name}
-                      width={64}
-                      height={64}
+                      width={1280}
+                      height={720}
                       className={cn(
                         "object-cover object-center",
                         "z-0 size-full opacity-100 transition duration-200",
@@ -292,7 +302,7 @@ export function FileUpload({
                   className={cn(
                     "absolute bottom-0 z-10",
                     "grid gap-y-1 p-3 break-all",
-                    "*:line-clamp-1 *:w-fit *:cursor-text",
+                    "*:line-clamp-1 *:w-fit",
                   )}
                 >
                   <p className="text-sm font-medium">{file.file.name}</p>
@@ -317,8 +327,8 @@ export function FileUpload({
                   data-slot="remove-file"
                   type="button"
                   size="icon-sm"
-                  variant={isImage ? "destructive" : "destructive-outline"}
-                  className="absolute top-2 left-2 z-10"
+                  variant="destructive-outline"
+                  className="dark:border-input border-input/32 absolute top-2 left-2 z-10 bg-transparent"
                   onClick={() => removeFile(file.id)}
                 >
                   <TrashIcon />
@@ -330,22 +340,24 @@ export function FileUpload({
                       data-slot="file-move-up"
                       type="button"
                       size="icon-sm"
-                      variant={isImage ? "default" : "outline"}
+                      variant="outline"
                       onClick={() => moveUp(file.id)}
+                      className="dark:border-input border-input/32 bg-transparent"
                       disabled={files.length === 1}
                     >
-                      <ChevronLeftIcon />
+                      <ChevronLeftIcon className="text-white" />
                     </Button>
                     {/* <ButtonGroupSeparator /> */}
                     <Button
                       data-slot="file-move-down"
                       type="button"
                       size="icon-sm"
-                      variant={isImage ? "default" : "outline"}
+                      variant="outline"
                       onClick={() => moveDown(file.id)}
+                      className="dark:border-input border-input/32 bg-transparent"
                       disabled={files.length === 1}
                     >
-                      <ChevronRightIcon />
+                      <ChevronRightIcon className="text-white" />
                     </Button>
                   </ButtonGroup>
                 )}
@@ -393,8 +405,8 @@ export function FileUpload({
             <img
               src={selectedImage}
               alt={`${displayName} Preview`}
-              width={1280}
-              height={720}
+              width={1920}
+              height={1080}
               className="rounded-lg"
             />
           )}

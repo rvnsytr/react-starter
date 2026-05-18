@@ -140,6 +140,7 @@ export const sharedSchemas = {
 
   fileMetadata: z.object({
     id: z.string(),
+    path: z.string(),
     name: z.string(),
     type: z.string(),
     size: z.number(),

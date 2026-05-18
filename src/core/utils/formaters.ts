@@ -2,7 +2,7 @@ import { appConfig } from "@/shared/config/app";
 import { Language, languageConfig } from "@/shared/config/language";
 import z from "zod";
 import {
-  ActionResponse,
+  ActionError,
   StringCase,
   TransformableStringCase,
   TransformKeys,
@@ -116,12 +116,12 @@ export function transformKeys<T, C extends TransformableStringCase>(
 
 export function formatNumber(
   number: number,
-  props?: { lang?: Language; options?: Intl.NumberFormatOptions },
+  options?: Intl.NumberFormatOptions & { lang?: Language },
 ) {
   const locale =
-    languageConfig[props?.lang ?? (appConfig.defaultLanguage as Language)]
+    languageConfig[options?.lang ?? (appConfig.defaultLanguage as Language)]
       .locale;
-  const value = new Intl.NumberFormat(locale, props?.options).format(number);
+  const value = new Intl.NumberFormat(locale, options).format(number);
   return value === "0" ? "0" : value;
 }
 
@@ -143,7 +143,7 @@ export function formatPhone(number: string | number, prefix?: "+62" | "0") {
 export function formatZodError<T>(
   zodError: z.ZodError<T>,
   options?: { withPath?: boolean },
-): Extract<ActionResponse, { success: false }> {
+): ActionError {
   const firstIssue = zodError.issues[0];
   let message = firstIssue?.message ?? "Validation error";
 
