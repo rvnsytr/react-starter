@@ -18,7 +18,7 @@ import { MailIcon, SaveIcon, UserRoundIcon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import { useSession } from "../hooks/use-session";
+import { mutateSession, useSession } from "../hooks/use-session";
 import { userSchema } from "../schema";
 import { ProfilePicture } from "./profile-picture";
 
@@ -53,6 +53,7 @@ export function ProfileForm() {
         loading: { title: messages.loading },
         success: () => {
           setIsLoading(false);
+          mutateSession();
           return { title: "Profil Anda berhasil diperbarui." };
         },
         error: (e) => {
