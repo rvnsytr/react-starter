@@ -1,8 +1,10 @@
 "use client";
 
+import { authClient } from "@/core/auth";
 import {
   QuickSearch,
   QuickSearchDataGroup,
+  QuickSearchItem,
 } from "@/core/components/quick-search";
 import {
   Avatar,
@@ -23,32 +25,39 @@ import { UserVerifiedBadge } from "@/modules/auth/components/user-verified-badge
 import { useSession } from "@/modules/auth/hooks/use-session";
 import { menuConfig } from "@/shared/menu";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOutIcon } from "lucide-react";
+import { Layers2Icon, LogOutIcon } from "lucide-react";
 import { useMemo } from "react";
 
 export function SidebarAppHeader() {
   const navigate = useNavigate();
-  const { user } = useSession();
+  const { user, session } = useSession();
 
   const data: QuickSearchDataGroup = useMemo(() => {
+    const actionItems: QuickSearchItem[] = [
+      {
+        type: "action",
+        label: "Keluar",
+        // TODO: variant: "destructive",
+        icon: <LogOutIcon />,
+        callback: () =>
+          signOutClient({ onSuccess: () => navigate({ to: "/sign-in" }) }),
+      },
+    ];
+
+    if (!!session.impersonatedBy)
+      actionItems.unshift({
+        type: "action",
+        label: "Kembali ke akun saya",
+        icon: <Layers2Icon />,
+        callback: authClient.admin.stopImpersonating,
+      });
+
     return [
       ...getMenuByRole(menuConfig.dashboard, user.role),
       { group: "Navigasi", items: menuConfig["dashboard-footer"] },
-      {
-        group: "Aksi",
-        items: [
-          {
-            type: "action",
-            label: "Keluar",
-            // TODO: variant: "destructive",
-            icon: <LogOutIcon />,
-            callback: () =>
-              signOutClient({ onSuccess: () => navigate({ to: "/sign-in" }) }),
-          },
-        ],
-      },
+      { group: "Aksi", items: actionItems },
     ];
-  }, [navigate, user.role]);
+  }, [user.role, session.impersonatedBy]);
 
   return (
     <SidebarHeader>

@@ -53,7 +53,7 @@ export function UserDataTable() {
       <DataTable
         mode="auto"
         columns={getUserColumns}
-        query={{ key: authKeys.users, fetcher: queryFetcher, immutable: true }}
+        query={{ key: authKeys.users, fetcher: queryFetcher }}
         getRowId={(row) => row.id}
         enableRowSelection={(row) => row.original.id !== user.id}
         placeholder={{ search: "Cari Pengguna..." }}
