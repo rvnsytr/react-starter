@@ -15,8 +15,8 @@ export default defineConfig([
       eslint.configs.recommended,
       tseslint.configs.recommended,
       tseslint.configs.stylisticTypeChecked,
-      reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
+      reactHooks.configs["recommended-latest"].recommended,
     ],
     languageOptions: {
       parserOptions: {
