@@ -16,6 +16,7 @@ import { messages } from "@/core/messages";
 import { useNavigate } from "@tanstack/react-router";
 import { Layers2Icon } from "lucide-react";
 import { roleConfig } from "../config/role";
+import { mutateSession } from "../hooks/use-session";
 
 export function ImpersonateUserDialog({
   data,
@@ -41,6 +42,7 @@ export function ImpersonateUserDialog({
         loading: { title: messages.loading },
         success: (res) => {
           setIsLoading(false);
+          mutateSession();
           const to =
             res.user.role === "admin" ? "/dashboard/users" : "/dashboard";
           navigate({ to });

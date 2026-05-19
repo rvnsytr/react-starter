@@ -19,7 +19,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/core/components/ui/sidebar";
-import { LinkSpinner } from "@/core/components/ui/spinner";
 import { getActiveRoute, getMenuByRole } from "@/core/route";
 import { toCase } from "@/core/utils";
 import { useSession } from "@/modules/auth/hooks/use-session";
@@ -91,8 +90,8 @@ export function SidebarAppContent() {
                       tooltip={title}
                       render={<Link to={route} />}
                     >
-                      <LinkSpinner icon={{ base: iconElement }} />
-                      <span className="line-clamp-1">{title}</span>
+                      {iconElement}
+                      <span>{title}</span>
                       {shortcut && (
                         <Kbd className="ml-auto hidden lg:inline-flex">
                           {formatForDisplay(shortcut)}
@@ -133,11 +132,9 @@ export function SidebarAppContent() {
                                           itm.href ??
                                           `${route}#${toCase(itm.label, "kebab")}`
                                         }
+                                        className="line-clamp-1"
                                       >
-                                        <span className="line-clamp-1">
-                                          {itm.label}
-                                        </span>
-                                        <LinkSpinner />
+                                        {itm.label}
                                       </Link>
                                     }
                                   />

@@ -39,15 +39,16 @@ export function SignInForm() {
   const formHandler = (formData: FormSchema) => {
     setIsLoading(true);
     toast.promise(
-      authClient.signIn
-        .email({ ...formData, callbackURL: "/dashboard" })
-        .then((res) => {
-          if (res.error) throw res.error;
-          return res.data;
-        }),
+      authClient.signIn.email(formData).then((res) => {
+        if (res.error) throw res.error;
+        return res.data;
+      }),
       {
         loading: { title: messages.loading },
         success: (res) => {
+          const url = `${import.meta.env.BASE_URL}sign-in`;
+          setTimeout(() => (location.href = url), 1000);
+
           const title = "Berhasil masuk!";
           const name = "user" in res ? res.user.name : null;
           if (!name) return { title };

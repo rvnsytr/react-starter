@@ -12,7 +12,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Layers2Icon } from "lucide-react";
 import { useState } from "react";
 import { roleConfig } from "../config/role";
-import { useSession } from "../hooks/use-session";
+import { mutateSession, useSession } from "../hooks/use-session";
 
 export function StopImpersonateUserMenuItem() {
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ export function StopImpersonateUserMenuItem() {
         loading: { title: messages.loading },
         success: () => {
           setIsLoading(false);
+          mutateSession();
           navigate({ to: "/dashboard/users" });
           return {
             title: messages.success,

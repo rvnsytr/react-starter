@@ -25,7 +25,6 @@ import { fetcher } from "@/core/fetcher";
 import {
   DataControllerOptions,
   DataControllerResponse,
-  DataControllerState,
   mutateControlledData,
   useDataController,
 } from "@/core/hooks/use-data-controller";
@@ -154,6 +153,8 @@ const controllerOptions: Omit<
   defaultState: { pagination: { pageIndex: 0, pageSize: 5 } },
 };
 
+const fetcherSchema = activityTableWithEntitySchema.array();
+
 export const mutateUserActivityTimeline = (userId: string) =>
   mutateControlledData(activityKeys.getByUser(userId));
 
@@ -162,16 +163,18 @@ export function UserActivityTimeline({
   ...props
 }: ActivityTimelineProps & { userId: string }) {
   const key = activityKeys.getByUser(userId);
-  const schema = activityTableWithEntitySchema.array();
-
-  const queryFetcher = async (state: DataControllerState) => {
-    const body = JSON.stringify(state);
-    return await fetcher.api(key, { schema, body });
-  };
 
   const controller = useDataController({
     ...controllerOptions,
-    query: { key, fetcher: queryFetcher },
+    query: {
+      key,
+      fetcher: async (state) =>
+        await fetcher.api(key, {
+          method: "POST",
+          body: JSON.stringify(state),
+          schema: fetcherSchema,
+        }),
+    },
   });
 
   return <BaseActivityTimeline controller={controller} {...props} />;

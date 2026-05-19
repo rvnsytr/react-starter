@@ -7,7 +7,7 @@ export type ActivityWithEntity = z.infer<typeof activityTableWithEntitySchema>;
 
 export type ActivityType = (typeof allActivityTypes)[number];
 export const allActivityTypes = [
-  // "user-registered",
+  "user-registered",
   "user-created",
   // "user-imported",
   // "user-activated",
@@ -40,7 +40,7 @@ export const activityTableSchema = z.object({
   entity_id: z.uuidv4().nullable().default(null),
   data: z.string().nullable().default(null),
 
-  created_at: z.date(),
+  created_at: z.coerce.date(),
 });
 
 export const activityTableWithEntitySchema = activityTableSchema.extend({

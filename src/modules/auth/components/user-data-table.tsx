@@ -45,7 +45,7 @@ export function UserDataTable() {
   const queryFetcher = async (state: DataControllerState) => {
     const body = JSON.stringify(state);
     const schema = userSchema.array();
-    return fetcher.api(authKeys.users, { schema, body });
+    return fetcher.api(authKeys.users, { method: "POST", body, schema });
   };
 
   return (
