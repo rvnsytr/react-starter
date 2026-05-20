@@ -3,8 +3,8 @@
     "target": "esnext",
     "jsx": "react-jsx",
     "module": "esnext",
-    "paths": { "@/*": ["./src/*"] },
     "lib": ["esnext", "dom", "dom.iterable"],
+    "paths": { "@/*": ["./src/*"] },
     "types": ["vite/client"],
 
     /* Bundler mode */

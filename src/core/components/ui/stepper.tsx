@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 "use client";
 
 import { cn } from "@/core/utils";
@@ -245,13 +243,11 @@ export function StepperTrigger({
   const btnRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (btnRef.current) registerTrigger(btnRef.current);
-    // eslint-disable-next-line react-hooks/refs
   }, [btnRef.current]);
 
   // Find our index among triggers for navigation
   const myIdx = useMemo(
     () =>
-      // eslint-disable-next-line react-hooks/refs
       triggerNodes.findIndex((n: HTMLButtonElement) => n === btnRef.current),
     [triggerNodes, btnRef.current],
   );

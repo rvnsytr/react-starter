@@ -1,37 +1,28 @@
-import eslint from "@eslint/js";
-import pluginRouter from "@tanstack/eslint-plugin-router";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
+import { tanstackConfig } from "@tanstack/eslint-config";
 import { defineConfig, globalIgnores } from "eslint/config";
-import globals from "globals";
-import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  ...pluginRouter.configs["flat/recommended"],
-  globalIgnores(["node_modules", "dist"]),
+  ...tanstackConfig,
   {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylisticTypeChecked,
-      reactRefresh.configs.vite,
-      reactHooks.configs["recommended-latest"].recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
+    files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
+      // Enabled rules
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
+
+      // Disabled rules
+      "import/order": "off",
+      "sort-imports": "off",
+
       "no-extra-boolean-cast": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/non-nullable-type-assertion-style": "off",
-      "react-refresh/only-export-components": "off",
+      "@stylistic/spaced-comment": "off",
+
+      "@typescript-eslint/array-type": "off",
+      "@typescript-eslint/naming-convention": "off",
+      "@typescript-eslint/consistent-type-imports": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
     },
   },
+  globalIgnores(["node_modules/**", "out/**", "build/**", "eslint.config.js"]),
 ]);

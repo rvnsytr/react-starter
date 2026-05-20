@@ -44,7 +44,7 @@ export function ProfilePicture({
     handleDrop,
   } = useFileUpload({
     ...fileTypeConfig.image,
-    onFilesChange: async (files) => {
+    onFilesChange: (files) => {
       if (!files.length) return;
       const file = files[0].file;
 
