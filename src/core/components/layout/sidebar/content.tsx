@@ -18,7 +18,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/core/components/ui/sidebar";
-import { LinkSpinner } from "@/core/components/ui/spinner";
 import { getActiveRoute, getMenuByRole } from "@/core/route";
 import { MenuItem, Route } from "@/core/types";
 import { toCase } from "@/core/utils";
@@ -109,8 +108,7 @@ function SidebarAppContentCollapsible({
         tooltip={title}
         render={<Link to={data.route} />}
       >
-        <LinkSpinner icon={{ base: iconElement }} />
-
+        {iconElement}
         <span className="line-clamp-1">{title}</span>
       </SidebarMenuButton>
 
@@ -128,16 +126,13 @@ function SidebarAppContentCollapsible({
             <SidebarMenuSub>
               {data.subItems.map((itm, idx) => {
                 const subHref = `${data.route}#${toCase(itm.label, "kebab")}`;
-
                 return (
                   <SidebarMenuSubItem key={idx}>
                     <SidebarMenuSubButton
                       className="flex justify-between"
                       render={
-                        <Link to={itm.href ?? subHref}>
-                          <span className="line-clamp-1">{itm.label}</span>
-
-                          <LinkSpinner />
+                        <Link to={itm.href ?? subHref} className="line-clamp-1">
+                          {itm.label}
                         </Link>
                       }
                     />

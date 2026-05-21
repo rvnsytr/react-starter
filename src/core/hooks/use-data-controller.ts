@@ -61,7 +61,6 @@ export type DataControllerOptions<TData> = Pick<
     config?: DataControllerQueryConfig<TData>;
     immutable?: boolean;
   };
-
   defaultState?: Partial<AllDataControllerState>;
 };
 
