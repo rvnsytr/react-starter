@@ -1,4 +1,4 @@
-import { Route } from "@/core/route";
+import { Route } from "@/core/types";
 import { cn } from "@/core/utils";
 import { Link } from "@tanstack/react-router";
 import { Button, ButtonProps } from "./button";

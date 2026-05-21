@@ -1,11 +1,7 @@
-import { FileRouteTypes } from "@/routeTree.gen";
 import { appConfig } from "@/shared/config/app";
 import { routeConfig } from "@/shared/config/route";
 import { Role } from "@/shared/permission";
-import { Menu } from "./types";
-
-export type Route = FileRouteTypes["to"];
-export type RouteRole = "all" | Role[];
+import { Menu, Route, RouteRole } from "./types";
 
 export function authorizedRoute(route: Route | null, role?: Role) {
   if (!route || !role) return false;

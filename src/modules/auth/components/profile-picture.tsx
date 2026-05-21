@@ -23,7 +23,7 @@ import { toast } from "@/core/components/ui/toast";
 import { prepareFiles, uploadFiles } from "@/core/files";
 import { useFileUpload } from "@/core/hooks/use-file-upload";
 import { messages } from "@/core/messages";
-import { fileTypeConfig } from "@/shared/file-type";
+import { fileTypeConfig } from "@/shared/config/file-type";
 import { TriangleAlertIcon, UploadIcon } from "lucide-react";
 import { useState } from "react";
 import { mutateSession } from "../hooks/use-session";

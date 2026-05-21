@@ -1,4 +1,4 @@
-import { Route, RouteRole } from "@/core/route";
+import { Route, RouteRole } from "@/core/types";
 
 export const routeConfig: Record<Route, { title: string; role?: RouteRole }> = {
   "/": { title: "Beranda" },

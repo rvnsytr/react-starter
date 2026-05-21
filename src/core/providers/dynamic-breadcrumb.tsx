@@ -11,7 +11,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getRouteHierarchy, normalizeRoute, Route } from "../route";
+import { getRouteHierarchy, normalizeRoute } from "../route";
+import { Route } from "../types";
 
 type DynamicBreadcrumbContent = { href: Route; label: string };
 

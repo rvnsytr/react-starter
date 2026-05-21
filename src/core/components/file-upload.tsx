@@ -1,6 +1,6 @@
 "use client";
 
-import { fileTypeConfig, FileTypeConfig } from "@/shared/file-type";
+import { fileTypeConfig, FileTypeConfig } from "@/shared/config/file-type";
 import { Link } from "@tanstack/react-router";
 import {
   BrushCleaningIcon,

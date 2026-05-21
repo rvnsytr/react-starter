@@ -6,7 +6,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/core/components/ui/empty";
-import { Route } from "@/core/route";
+import { Route } from "@/core/types";
 import { Link } from "@tanstack/react-router";
 import { GlobeXIcon } from "lucide-react";
 

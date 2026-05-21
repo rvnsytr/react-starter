@@ -1,8 +1,12 @@
+import { FileRouteTypes } from "@/routeTree.gen";
+import { Role } from "@/shared/permission";
 import { Hotkey } from "@tanstack/react-hotkeys";
 import { LucideIcon } from "lucide-react";
 import z from "zod";
-import { Route, RouteRole } from "./route";
 import { sharedSchemas } from "./schema";
+
+export type Route = FileRouteTypes["to"];
+export type RouteRole = "all" | Role[];
 
 export type Override<T, U> = Omit<T, keyof U> & U;
 

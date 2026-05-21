@@ -1,4 +1,4 @@
-import { FileType } from "@/shared/file-type";
+import { FileType } from "@/shared/config/file-type";
 import z from "zod";
 import { fetcher } from "./fetcher";
 import { sharedSchemas } from "./schema";
