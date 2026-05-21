@@ -11,7 +11,7 @@ import { ProfileForm } from "@/modules/auth/components/profile-form";
 import { RoleBadge } from "@/modules/auth/components/role-badge";
 import { UserVerifiedBadge } from "@/modules/auth/components/user-verified-badge";
 import { useSession } from "@/modules/auth/hooks/use-session";
-import { appConfig } from "@/shared/config/app";
+import { appConfig } from "@/shared/config";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserRoundIcon } from "lucide-react";
 

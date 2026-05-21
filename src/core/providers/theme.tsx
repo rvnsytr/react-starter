@@ -1,20 +1,5 @@
-import { LucideIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
+import { Theme } from "@/shared/config";
 import { createContext, useContext, useEffect, useState } from "react";
-
-export type Theme = (typeof allThemes)[number];
-export const allThemes = ["light", "system", "dark"] as const;
-
-export const themeConfig: Record<Theme, { icon: LucideIcon }> = {
-  light: { icon: SunIcon },
-  system: { icon: MonitorIcon },
-  dark: { icon: MoonIcon },
-};
-
-export function nextTheme(currentTheme?: Theme) {
-  if (currentTheme === "light") return "dark";
-  if (currentTheme === "dark") return "system";
-  return "light";
-}
 
 type ThemeProviderState = {
   theme: Theme;

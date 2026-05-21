@@ -1,5 +1,4 @@
-import { appConfig } from "@/shared/config/app";
-import { routeConfig } from "@/shared/config/route";
+import { appConfig, routeConfig } from "@/shared/config";
 import { Role } from "@/shared/permission";
 import { Menu, Route, RouteRole } from "./types";
 

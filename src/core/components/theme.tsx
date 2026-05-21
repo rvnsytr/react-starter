@@ -1,10 +1,11 @@
 "use client";
 
+import { nextTheme, themeConfig } from "@/shared/config";
 import { formatForDisplay, Hotkey } from "@tanstack/react-hotkeys";
 import { ComponentProps } from "react";
 import { useIsMobile } from "../hooks/use-media-query";
 import { useViewTransition } from "../hooks/use-view-transition";
-import { nextTheme, themeConfig, useTheme } from "../providers/theme";
+import { useTheme } from "../providers/theme";
 import { Button, ButtonProps } from "./ui/button";
 import { Kbd } from "./ui/kbd";
 import { Label } from "./ui/label";

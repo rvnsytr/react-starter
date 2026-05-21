@@ -1,7 +1,7 @@
 import { AuthSession } from "@/core/auth";
 import { NotFound } from "@/core/components/layout/not-found";
 import { getRouteTitle } from "@/core/route";
-import { appConfig } from "@/shared/config/app";
+import { appConfig } from "@/shared/config";
 import {
   createRootRouteWithContext,
   HeadContent,

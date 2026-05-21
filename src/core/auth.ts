@@ -1,5 +1,5 @@
 import { sessionSchema, userSchema } from "@/modules/auth/schema";
-import { apiConfig } from "@/shared/config/api";
+import { apiConfig } from "@/shared/config";
 import { ac, roles } from "@/shared/permission";
 import { adminClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";

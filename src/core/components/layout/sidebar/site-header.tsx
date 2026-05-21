@@ -12,7 +12,7 @@ import { ShimmerText } from "@/core/components/ui/shimmer-text";
 import { SidebarToggle } from "@/core/components/ui/sidebar";
 import { ImpersonateUserBadge } from "@/modules/auth/components/impersonate-user-badge";
 import { useSession } from "@/modules/auth/hooks/use-session";
-import { appConfig } from "@/shared/config/app";
+import { appConfig } from "@/shared/config";
 import { Link } from "@tanstack/react-router";
 
 export function SidebarAppSiteHeader() {

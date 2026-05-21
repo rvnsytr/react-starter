@@ -22,7 +22,7 @@ import {
 import { getActiveRoute, getMenuByRole } from "@/core/route";
 import { toCase } from "@/core/utils";
 import { useSession } from "@/modules/auth/hooks/use-session";
-import { routeConfig } from "@/shared/config/route";
+import { routeConfig } from "@/shared/config";
 import { menuConfig } from "@/shared/menu";
 import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { Link, useLocation } from "@tanstack/react-router";
