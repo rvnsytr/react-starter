@@ -3,62 +3,46 @@ import { toast } from "@/core/components/ui/toast";
 import { messages } from "@/core/messages";
 import { getRouteTitle } from "@/core/route";
 import { AppLoadingFallback } from "@/shared/components/fallback";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AnimatePresence } from "motion/react";
-import { useEffect, useEffectEvent, useState } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/verify-user")({
   validateSearch: (search: Record<string, unknown>) => ({
     token: (search?.token ?? null) as string | null,
   }),
   head: () => ({ meta: [{ title: getRouteTitle("/verify-user") }] }),
-  component: RouteComponent,
-});
+  loader: async ({ location }) => {
+    const token = new URLSearchParams(location.search).get("token");
 
-function RouteComponent() {
-  const { token } = Route.useSearch();
-  const navigate = useNavigate();
-  const [isverifying, setIsverifying] = useState<boolean>(false);
-
-  const onMount = useEffectEvent(() => {
-    if (token) {
-      setIsverifying(true);
-      toast.promise(
-        authClient.verifyEmail({ query: { token } }).then((res) => {
-          if (res.error) throw res.error;
-          return res.data;
-        }),
-        {
-          loading: { title: messages.loading },
-          success: () => {
-            setIsverifying(false);
-            navigate({ to: "/sign-in" });
-            return {
-              title: "Verifikasi Berhasil",
-              description: "Silakan masuk untuk melanjutkan.",
-            };
-          },
-          error: (e) => {
-            setIsverifying(false);
-            navigate({ to: "/sign-in" });
-            return { title: "Verifikasi Gagal", description: e.message };
-          },
-        },
-      );
-    } else {
-      setIsverifying(false);
-      navigate({ to: "/sign-in" });
+    if (!token) {
       toast.add({
         type: "error",
         title: "Token tidak ditemukan",
         description: "Token verifikasi tidak ditemukan. Silakan coba lagi.",
       });
+
+      throw redirect({ to: "/sign-in" });
     }
-  });
 
-  useEffect(() => onMount(), []);
+    await toast.promise(
+      authClient.verifyEmail({ query: { token } }).then((res) => {
+        if (res.error) throw res.error;
+        return res.data;
+      }),
+      {
+        loading: { title: messages.loading },
+        success: () => ({
+          title: "Verifikasi Berhasil",
+          description: "Silakan masuk untuk melanjutkan.",
+        }),
+        error: (e) => ({
+          title: "Verifikasi Gagal",
+          description: e.message,
+        }),
+      },
+    );
 
-  return (
-    <AnimatePresence>{isverifying && <AppLoadingFallback />};</AnimatePresence>
-  );
-}
+    throw redirect({ to: "/sign-in" });
+  },
+
+  component: () => <AppLoadingFallback />,
+});

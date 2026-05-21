@@ -1,7 +1,6 @@
 "use client";
 
-import { nextTheme, themeConfig } from "@/shared/config";
-import { formatForDisplay, Hotkey } from "@tanstack/react-hotkeys";
+import { nextTheme, themeConfig, themeToggleConfig } from "@/shared/config";
 import { ComponentProps } from "react";
 import { useIsMobile } from "../hooks/use-media-query";
 import { useViewTransition } from "../hooks/use-view-transition";
@@ -11,18 +10,6 @@ import { Kbd } from "./ui/kbd";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
-
-export const themeToggleConfig: {
-  label: string;
-  hotkey: Hotkey;
-  hotkeyDisplay: string;
-} = {
-  label: "Toggle Theme",
-  hotkey: "D",
-  get hotkeyDisplay() {
-    return formatForDisplay(this.hotkey);
-  },
-};
 
 export function ThemeToggle({
   withTooltip = true,

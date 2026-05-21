@@ -57,7 +57,7 @@ export function SidebarAppHeader() {
       { group: "Navigasi", items: menuConfig["dashboard-footer"] },
       { group: "Aksi", items: actionItems },
     ];
-  }, [user.role, session.impersonatedBy]);
+  }, [navigate, user.role, session.impersonatedBy]);
 
   return (
     <SidebarHeader>

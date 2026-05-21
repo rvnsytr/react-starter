@@ -6,14 +6,12 @@ import {
 } from "@/core/components/layout/sidebar";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
 import { DynamicBreadcrumbProvider } from "@/core/providers/dynamic-breadcrumb";
-import {
-  allLayoutMode,
-  LayoutModeProvider,
-} from "@/core/providers/layout-mode";
+import { LayoutModeProvider } from "@/core/providers/layout-mode";
 import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/route";
 import { getClientCookie } from "@/core/utils";
 import { useSessionQuery } from "@/modules/auth/hooks/use-session";
 import { AuthProvider } from "@/modules/auth/provider";
+import { allLayoutMode } from "@/shared/config";
 import {
   createFileRoute,
   notFound,
