@@ -52,7 +52,7 @@ function DashboardLayout() {
     <AuthProvider session={session ?? loader.session}>
       <LayoutModeProvider
         layout={loader.layoutPreference}
-        className="[--header-height:calc(--spacing(14))]"
+        className="[--header-height:calc(--spacing(12))] lg:[--header-height:calc(--spacing(14))]"
       >
         <SidebarProvider className="flex flex-col">
           <DynamicBreadcrumbProvider>

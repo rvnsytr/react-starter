@@ -35,7 +35,7 @@ export const Route = createFileRoute("/dashboard/settings")({
 
 function RouteComponent() {
   return (
-    <PageContainer className="items-center px-0 lg:px-4">
+    <PageContainer className="items-center">
       <Card id="tema" className="w-full lg:max-w-xl" asPageCard>
         <CardHeader>
           <CardTitle>
