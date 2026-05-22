@@ -45,15 +45,15 @@ export function UserDataTable() {
   const queryFetcher = async (state: DataControllerState) => {
     const body = JSON.stringify(state);
     const schema = userSchema.array();
-    return fetcher.api(authKeys.users, { method: "POST", body, schema });
+    return await fetcher.apiPostJson(authKeys.users, { body, schema });
   };
 
   return (
     <>
       <DataTable
-        mode="auto"
+        mode="manual"
         columns={getUserColumns}
-        query={{ key: authKeys.users, fetcher: queryFetcher }}
+        query={{ key: authKeys.users, fetcher: queryFetcher, immutable: true }}
         getRowId={(row) => row.id}
         enableRowSelection={(row) => row.original.id !== user.id}
         placeholder={{ search: "Cari Pengguna..." }}
