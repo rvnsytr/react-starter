@@ -1,15 +1,15 @@
 {
-  "files.readonlyInclude": {
-    "**/routeTree.gen.ts": true,
-    "**/core/**": true,
-    "**/modules/auth/**": true,
-    "**/modules/activity/**": true
-  },
+  // "files.readonlyInclude": {
+  //   "**/routeTree.gen.ts": true,
+  //   "**/core/**": true,
+  //   "**/modules/auth/**": true,
+  //   "**/modules/activity/**": true
+  // },
 
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
   "search.exclude": { "**/routeTree.gen.ts": true, "**/dist/**": true },
 
-  "js/ts.preferences.autoImportFileExcludePatterns": ["radix-ui"],
+  "js/ts.preferences.autoImportFileExcludePatterns": ["@base-ui/react"],
 
   "js/ts.preferences.importModuleSpecifier": "shortest"
 }
