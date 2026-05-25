@@ -1,14 +1,12 @@
 import {
-  DataControllerPageSize,
-  DataControllerPaginationNav,
-} from "@/core/components/data-controller";
-import {
   ActiveFilters,
   ActiveFiltersContainer,
   ClearFilters,
   FilterSelector,
+  PageSize,
+  Pagination,
   ResetFilters,
-} from "@/core/components/filters";
+} from "@/core/components/controllers";
 import { Label } from "@/core/components/ui/label";
 import { Separator } from "@/core/components/ui/separator";
 import {
@@ -117,7 +115,7 @@ function BaseActivityTimeline({
           className="order-3 flex items-center gap-x-2 lg:order-1"
         >
           <Label className="hidden shrink-0 lg:inline-flex">Per halaman</Label>
-          <DataControllerPageSize table={table} size="sm" />
+          <PageSize table={table} size="sm" />
         </div>
 
         <small
@@ -134,7 +132,7 @@ function BaseActivityTimeline({
             : formatNumber(table.getPageCount() > 0 ? table.getPageCount() : 1)}
         </small>
 
-        <DataControllerPaginationNav
+        <Pagination
           data-slot="pagination-nav"
           table={table}
           size="icon-sm"
@@ -155,8 +153,6 @@ const controllerOptions: Omit<
   defaultState: { pagination: { pageIndex: 0, pageSize: 5 } },
 };
 
-const fetcherSchema = activityTableWithEntitySchema.array();
-
 export const mutateUserActivityTimeline = (userId: string) =>
   mutateControlledData(activityKeys.getByUser(userId));
 
@@ -174,7 +170,7 @@ export function UserActivityTimeline({
         await fetcher.api(key, {
           method: "POST",
           body: JSON.stringify(state),
-          schema: fetcherSchema,
+          schema: activityTableWithEntitySchema.array(),
         }),
     },
   });

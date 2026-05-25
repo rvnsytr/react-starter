@@ -45,13 +45,13 @@ import {
   useState,
 } from "react";
 import { DateRange, TZDate } from "react-day-picker";
-import { Button, ButtonProps } from "./ui/button";
-import { ButtonGroup } from "./ui/button-group";
-import { Calendar } from "./ui/calendar";
-import { Input } from "./ui/input";
-import { InputGroup, InputGroupAddon } from "./ui/input-group";
-import { Kbd } from "./ui/kbd";
-import { Label } from "./ui/label";
+import { Button, ButtonProps } from "../ui/button";
+import { ButtonGroup } from "../ui/button-group";
+import { Calendar } from "../ui/calendar";
+import { Input } from "../ui/input";
+import { InputGroup, InputGroupAddon } from "../ui/input-group";
+import { Kbd } from "../ui/kbd";
+import { Label } from "../ui/label";
 import {
   Menu,
   MenuCheckboxItem,
@@ -59,11 +59,75 @@ import {
   MenuPopup,
   MenuShortcut,
   MenuTrigger,
-} from "./ui/menu";
-import { Popover, PopoverPopup, PopoverTrigger } from "./ui/popover";
-import { ScrollArea } from "./ui/scroll-area";
-import { Slider } from "./ui/slider";
-import { Tabs, TabsList, TabsPanel, TabsTab } from "./ui/tabs";
+} from "../ui/menu";
+import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
+import { ScrollArea } from "../ui/scroll-area";
+import { Slider } from "../ui/slider";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "../ui/tabs";
+
+export function resetFilters<TData>(table: Table<TData>) {
+  table.reset();
+
+  // table.resetPagination();
+  // if (dc.defaultState?.page) table.setPageIndex(dc.defaultState.page);
+  // else table.resetPageIndex();
+  // if (dc.defaultState?.size) table.setPageSize(dc.defaultState.size);
+  // else table.resetPageSize();
+
+  table.resetColumnOrder();
+  table.resetColumnSizing();
+  table.resetColumnVisibility();
+  table.resetColumnPinning();
+  table.resetColumnFilters();
+
+  table.resetRowPinning();
+  table.resetRowSelection();
+
+  table.resetGlobalFilter();
+  table.setGlobalFilter("");
+
+  table.resetSorting();
+  table.resetGrouping();
+  table.resetExpanded();
+  table.resetHeaderSizeInfo();
+}
+
+export function ResetFilters<TData>({
+  table,
+  shortcut,
+  size = "default",
+  variant = "outline",
+  children,
+  ...props
+}: Omit<ButtonProps, "onClick"> & { table: Table<TData>; shortcut?: Hotkey }) {
+  const isIconSize = size?.startsWith("icon") ?? false;
+
+  useHotkeys(
+    shortcut ? [{ hotkey: shortcut, callback: () => resetFilters(table) }] : [],
+    { enabled: !!shortcut },
+  );
+
+  return (
+    <Button
+      size={size}
+      variant={variant}
+      onClick={() => resetFilters(table)}
+      {...props}
+    >
+      {children ?? (
+        <>
+          <RotateCcwSquareIcon />
+          {!isIconSize && messages.actions.reset}
+          {!isIconSize && shortcut && (
+            <Kbd className="hidden text-xs lg:inline-flex">
+              {formatForDisplay(shortcut)}
+            </Kbd>
+          )}
+        </>
+      )}
+    </Button>
+  );
+}
 
 export function ActiveFiltersContainer({
   className,
@@ -148,6 +212,7 @@ export function ClearFilters<TData>({
   variant = "destructive-outline",
   ...props
 }: Omit<ButtonProps, "onClick"> & { table: Table<TData> }) {
+  const isIconSize = size?.startsWith("icon") ?? false;
   return (
     <Button
       size={size}
@@ -159,58 +224,7 @@ export function ClearFilters<TData>({
       {...props}
     >
       <FilterXIcon />
-      {!size?.startsWith("icon") && messages.actions.clear}
-    </Button>
-  );
-}
-
-export function ResetFilters<TData>({
-  table,
-  shortcut,
-  size = "default",
-  variant = "outline",
-  ...props
-}: Omit<ButtonProps, "onClick"> & { table: Table<TData>; shortcut?: Hotkey }) {
-  const clear = () => {
-    table.reset();
-
-    // table.resetPagination();
-    // if (dc.defaultState?.page) table.setPageIndex(dc.defaultState.page);
-    // else table.resetPageIndex();
-    // if (dc.defaultState?.size) table.setPageSize(dc.defaultState.size);
-    // else table.resetPageSize();
-
-    table.resetColumnOrder();
-    table.resetColumnSizing();
-    table.resetColumnVisibility();
-    table.resetColumnPinning();
-    table.resetColumnFilters();
-
-    table.resetRowPinning();
-    table.resetRowSelection();
-
-    table.resetGlobalFilter();
-    table.setGlobalFilter("");
-
-    table.resetSorting();
-    table.resetGrouping();
-    table.resetExpanded();
-    table.resetHeaderSizeInfo();
-  };
-
-  useHotkeys(shortcut ? [{ hotkey: shortcut, callback: clear }] : [], {
-    enabled: !!shortcut,
-  });
-
-  return (
-    <Button size={size} variant={variant} onClick={() => clear()} {...props}>
-      <RotateCcwSquareIcon />
-      {!size?.startsWith("icon") && messages.actions.reset}
-      {shortcut && (
-        <Kbd className="hidden text-xs lg:inline-flex">
-          {formatForDisplay(shortcut)}
-        </Kbd>
-      )}
+      {!isIconSize && messages.actions.clear}
     </Button>
   );
 }
@@ -246,6 +260,8 @@ export function FilterSelector<TData>({
     [table],
   );
 
+  const isIconSize = size?.startsWith("icon") ?? false;
+
   const column = property ? getColumn(table, property) : undefined;
   const columnMeta = property ? getColumnMeta(table, property) : undefined;
 
@@ -268,8 +284,8 @@ export function FilterSelector<TData>({
           render={
             <Button ref={anchor} size={size} variant={variant} {...props}>
               <FilterIcon />
-              {!size?.startsWith("icon") && "Filter"}
-              {shortcut && (
+              {!isIconSize && "Filter"}
+              {!isIconSize && shortcut && (
                 <Kbd className="hidden text-xs lg:inline-flex">
                   {formatForDisplay(shortcut)}
                 </Kbd>
