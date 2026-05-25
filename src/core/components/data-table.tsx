@@ -8,7 +8,9 @@ import { flexRender, Row, Table as TableType } from "@tanstack/react-table";
 import {
   DataControllerOptions,
   DataControllerResponse,
+  QueryDataControllerOptions,
   useDataController,
+  useQueryDataController,
 } from "../hooks/use-data-controller";
 import { useIsDesktop } from "../hooks/use-media-query";
 import { messages } from "../messages";
@@ -357,6 +359,33 @@ export function DataTable<TData>({
   ...options
 }: DataTableProps<TData> & DataControllerOptions<TData>) {
   const controller = useDataController(options);
+  return (
+    <BaseDataTable
+      caption={caption}
+      placeholder={placeholder}
+      className={className}
+      classNames={classNames}
+      shortcuts={shortcuts}
+      fullWidthOnMobile={fullWidthOnMobile}
+      onRowClick={onRowClick}
+      renderRowSelectionButton={renderRowSelectionButton}
+      controller={controller}
+    />
+  );
+}
+
+export function QueryDataTable<TData>({
+  caption,
+  placeholder,
+  className,
+  classNames,
+  shortcuts,
+  fullWidthOnMobile,
+  onRowClick,
+  renderRowSelectionButton,
+  ...options
+}: DataTableProps<TData> & QueryDataControllerOptions<TData>) {
+  const controller = useQueryDataController(options);
   return (
     <BaseDataTable
       caption={caption}

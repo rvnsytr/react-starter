@@ -6,6 +6,7 @@ import {
 } from "@/core/components/layout/page";
 import { CardAction } from "@/core/components/ui/card";
 import { Separator } from "@/core/components/ui/separator";
+import { dataControllerQueryStateSchema } from "@/core/hooks/use-data-controller";
 import { getRouteTitle } from "@/core/route";
 import { CreateUserDialog } from "@/modules/auth/components/create-user-dialog";
 import { UserDataTable } from "@/modules/auth/components/user-data-table";
@@ -17,14 +18,14 @@ export const Route = createFileRoute("/dashboard/users")({
   // validateSearch: dataQueryStateSchema.extend(
   //   withSchemaPrefix(t2Prefix, dataQueryStateSchema).shape,
   // ),
-  // validateSearch: dataQueryStateSchema,
+  validateSearch: dataControllerQueryStateSchema,
   head: () => ({ meta: [{ title: getRouteTitle("/dashboard/users") }] }),
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  // const searchParam = Route.useSearch();
-  // const navigate = Route.useNavigate();
+  const searchParam = Route.useSearch();
+  const navigate = Route.useNavigate();
 
   return (
     <PageContainer>
@@ -41,17 +42,15 @@ function RouteComponent() {
 
       <Separator />
 
-      <UserDataTable />
-
-      {/* <UserDataTable
+      <UserDataTable
         defaultState={searchParam}
-        onStateChange={(search) =>
+        onStateChange={(state) => {
           navigate({
-            search: (prev) => ({ ...prev, ...search }),
+            search: (prev) => ({ ...prev, ...state }),
             replace: true,
-          })
-        }
-      /> */}
+          });
+        }}
+      />
 
       {/* <OtherDataTable
         defaultState={Object.fromEntries(

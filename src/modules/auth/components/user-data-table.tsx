@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@/core/auth";
-import { DataTable } from "@/core/components/data-table";
+import { QueryDataTable } from "@/core/components/data-table";
 import { Button } from "@/core/components/ui/button";
 import {
   Menu,
@@ -15,6 +15,7 @@ import {
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { fetcher } from "@/core/fetcher";
 import {
+  BaseQueryDataControllerOptions,
   DataControllerState,
   mutateControlledData,
 } from "@/core/hooks/use-data-controller";
@@ -31,7 +32,7 @@ import { UserDetailDialog } from "./user-detail-dialog";
 
 export const mutateUserDataTable = () => mutateControlledData(authKeys.users);
 
-export function UserDataTable() {
+export function UserDataTable(props: BaseQueryDataControllerOptions) {
   const { user } = useSession();
 
   const [data, setData] = useState<User | null>(null);
@@ -50,7 +51,7 @@ export function UserDataTable() {
 
   return (
     <>
-      <DataTable
+      <QueryDataTable
         mode="manual"
         columns={getUserColumns}
         query={{ key: authKeys.users, fetcher: queryFetcher, immutable: true }}
@@ -140,6 +141,7 @@ export function UserDataTable() {
             </>
           );
         }}
+        {...props}
       />
 
       <UserDetailDialog data={data} setData={setData} />
