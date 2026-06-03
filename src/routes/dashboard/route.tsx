@@ -23,7 +23,11 @@ import z from "zod";
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: (c) => {
     const { session, ...rest } = c.context;
-    if (!session) throw redirect({ to: "/sign-in" });
+
+    if (!session) {
+      const callbackURL = c.location.href;
+      throw redirect({ to: "/sign-in", search: { callbackURL } });
+    }
 
     const pathname = normalizeRoute(c.location.pathname);
     const isAuthorized = authorizedRoute(pathname, session.user.role);

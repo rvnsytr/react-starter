@@ -14,8 +14,10 @@ import { SignUpForm } from "@/modules/auth/components/sign-up-form";
 import { appConfig } from "@/shared/config";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { LogInIcon, UserRoundPlusIcon } from "lucide-react";
+import z from "zod";
 
 export const Route = createFileRoute("/sign-in")({
+  validateSearch: z.object({ callbackURL: z.string().optional() }),
   beforeLoad: (c) => {
     if (c.context.session) throw redirect({ to: "/dashboard" });
   },

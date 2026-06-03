@@ -14,7 +14,9 @@ import {
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { toast } from "@/core/components/ui/toast";
 import { messages } from "@/core/messages";
+import { normalizeRoute } from "@/core/route";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearch } from "@tanstack/react-router";
 import { LogInIcon, MailIcon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -29,6 +31,7 @@ const formSchema = userSchema.pick({ email: true }).extend({
 });
 
 export function SignInForm() {
+  const searchParams = useSearch({ from: "/sign-in" });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<FormSchema>({
@@ -46,8 +49,9 @@ export function SignInForm() {
       {
         loading: { title: messages.loading },
         success: (res) => {
-          const url = `${import.meta.env.BASE_URL}sign-in`;
-          setTimeout(() => (location.href = url), 1000);
+          const CU = `${import.meta.env.BASE_URL}${searchParams.callbackURL ?? "/dashboard"}`;
+          const callbackURL = normalizeRoute(CU, { withSearch: true });
+          setTimeout(() => (location.href = callbackURL), 1000);
 
           const title = "Berhasil masuk!";
           const name = "user" in res ? res.user.name : null;

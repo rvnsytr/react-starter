@@ -5,6 +5,7 @@ import { SidebarMenuButton } from "@/core/components/ui/sidebar";
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { toast } from "@/core/components/ui/toast";
 import { messages } from "@/core/messages";
+import { normalizeRoute } from "@/core/route";
 import { LogOutIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -24,8 +25,9 @@ export function signOutClient({
       loading: { title: messages.loading },
       success: () => {
         onSuccess?.();
-        const url = `${import.meta.env.BASE_URL}sign-in`;
-        setTimeout(() => (location.href = url), 1000);
+        const CU = `${import.meta.env.BASE_URL}sign-in`;
+        const callbackURL = normalizeRoute(CU);
+        setTimeout(() => (location.href = callbackURL), 1000);
         return { title: "Berhasil keluar - Sampai jumpa!" };
       },
       error: (e) => {
