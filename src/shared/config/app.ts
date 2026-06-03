@@ -2,11 +2,7 @@ export const appConfig = {
   name: "React Starter",
   description: "App description...",
 
-  defaultLanguage: "id",
-
-  baseUrl: import.meta.env.PROD
-    ? "https://yourdomain.com"
-    : "http://localhost:3000",
+  language: "id",
 
   logo: {
     default: `${import.meta.env.BASE_URL}logo.png`,
