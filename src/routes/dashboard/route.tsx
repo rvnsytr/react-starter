@@ -7,7 +7,13 @@ import {
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
 import { DynamicBreadcrumbProvider } from "@/core/providers/dynamic-breadcrumb";
 import { LayoutModeProvider } from "@/core/providers/layout-mode";
-import { authorizedRoute, getRouteTitle, normalizeRoute } from "@/core/route";
+import {
+  authorizedRoute,
+  createSignInURL,
+  getRouteTitle,
+  normalizeRoute,
+} from "@/core/route";
+import { Route as RouteType } from "@/core/types";
 import { getClientCookie } from "@/core/utils";
 import { useSessionQuery } from "@/modules/auth/hooks/use-session";
 import { AuthProvider } from "@/modules/auth/provider";
@@ -25,12 +31,16 @@ export const Route = createFileRoute("/dashboard")({
     const { session, ...rest } = c.context;
 
     if (!session) {
-      const callbackURL = c.location.href;
+      const url = createSignInURL({
+        ...c.location,
+        search: c.location.searchStr,
+      });
+      const callbackURL = url.searchParams.get("callbackURL") ?? undefined;
       throw redirect({ to: "/sign-in", search: { callbackURL } });
     }
 
-    const pathname = normalizeRoute(c.location.pathname);
-    const isAuthorized = authorizedRoute(pathname, session.user.role);
+    const route = normalizeRoute(c.location.pathname) as RouteType;
+    const isAuthorized = authorizedRoute(route, session.user.role);
 
     const layoutPreference = z
       .enum(allLayoutMode)

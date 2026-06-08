@@ -5,7 +5,7 @@ import { SidebarMenuButton } from "@/core/components/ui/sidebar";
 import { LoadingSpinner } from "@/core/components/ui/spinner";
 import { toast } from "@/core/components/ui/toast";
 import { messages } from "@/core/messages";
-import { normalizeRoute } from "@/core/route";
+import { createSignInURL, normalizeRoute } from "@/core/route";
 import { LogOutIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -13,7 +13,7 @@ export function signOutClient({
   onSuccess,
   onError,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (url: string) => void;
   onError?: (e: Error) => void;
 } = {}) {
   toast.promise(
@@ -24,10 +24,12 @@ export function signOutClient({
     {
       loading: { title: messages.loading },
       success: () => {
-        onSuccess?.();
-        const CU = `${import.meta.env.BASE_URL}sign-in`;
-        const callbackURL = normalizeRoute(CU);
-        setTimeout(() => (location.href = callbackURL), 1000);
+        const baseUrl = normalizeRoute(`${import.meta.env.BASE_URL}sign-in`);
+        const url = createSignInURL({ baseUrl, ...location });
+
+        onSuccess?.(url.toString());
+        setTimeout(() => (location.href = url.toString()), 1000);
+
         return { title: "Berhasil keluar - Sampai jumpa!" };
       },
       error: (e) => {

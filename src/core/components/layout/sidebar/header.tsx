@@ -24,12 +24,11 @@ import { signOutClient } from "@/modules/auth/components/sign-out-button";
 import { UserVerifiedBadge } from "@/modules/auth/components/user-verified-badge";
 import { useSession } from "@/modules/auth/hooks/use-session";
 import { menuConfig } from "@/shared/menu";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Layers2Icon, LogOutIcon } from "lucide-react";
 import { useMemo } from "react";
 
 export function SidebarAppHeader() {
-  const navigate = useNavigate();
   const { user, session } = useSession();
 
   const data: QuickSearchDataGroup = useMemo(() => {
@@ -39,8 +38,7 @@ export function SidebarAppHeader() {
         label: "Keluar",
         // TODO: variant: "destructive",
         icon: <LogOutIcon />,
-        callback: () =>
-          signOutClient({ onSuccess: () => navigate({ to: "/sign-in" }) }),
+        callback: () => signOutClient(),
       },
     ];
 
@@ -57,7 +55,7 @@ export function SidebarAppHeader() {
       { group: "Navigasi", items: menuConfig["dashboard-footer"] },
       { group: "Aksi", items: actionItems },
     ];
-  }, [navigate, user.role, session.impersonatedBy]);
+  }, [user.role, session.impersonatedBy]);
 
   return (
     <SidebarHeader>

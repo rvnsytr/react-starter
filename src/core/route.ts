@@ -60,6 +60,16 @@ type NormalizeRouteOptions = {
   ensureLeadingSlash?: boolean;
 };
 
+/**
+ * Normalize a route by applying various transformations.
+ *
+ * @example
+ * normalizeRoute("/dashboard///settings/")
+ * // "/dashboard/settings"
+ *
+ * normalizeRoute("/users?id=123#profile", { withSearch: true })
+ * // "/users?id=123#profile"
+ */
 export function normalizeRoute(
   route?: string | null,
   options?: NormalizeRouteOptions,
@@ -77,7 +87,80 @@ export function normalizeRoute(
   if (removeTrailingSlash) result = result.replace(/\/+$/, "");
   if (ensureLeadingSlash) result = "/" + result.replace(/^\/+/, "");
 
-  return (result || "/") as Route;
+  return result || "/";
+}
+
+/** Extract request URL components from headers set by the proxy. */
+export function getRequestUrl(headers?: Headers) {
+  const h = headers ?? new Headers();
+  return {
+    /**
+     * The base path, if the app is deployed under a subpath.
+     * @example "/app"
+     */
+    basePath: h.get("x-nextUrl-basePath"),
+
+    /**
+     * The full URL.
+     * @example "https://example.com/dashboard/settings?tab=profile#section1"
+     */
+    href: h.get("x-nextUrl-href"),
+
+    /**
+     * The origin.
+     * @example "https://example.com"
+     */
+    origin: h.get("x-nextUrl-origin"),
+
+    /**
+     * The hostname.
+     * @example "example.com"
+     */
+    hostname: h.get("x-nextUrl-hostname"),
+
+    /**
+     * The pathname.
+     * @example "/dashboard/settings"
+     */
+    pathname: h.get("x-nextUrl-pathname"),
+
+    /**
+     * The hash fragment.
+     * @example "#section1"
+     */
+    hash: h.get("x-nextUrl-hash"),
+
+    /**
+     * The query string.
+     * @example "?tab=profile"
+     */
+    search: h.get("x-nextUrl-search"),
+  };
+}
+
+export function createSignInURL({
+  baseUrl = "/sign-in",
+  origin = location.origin,
+  pathname,
+  hash,
+  search,
+}: {
+  baseUrl?: string;
+  origin?: string;
+  pathname: string | null;
+  hash: string | null;
+  search: string | null;
+}): URL {
+  const url = new URL(baseUrl, origin);
+  if (!pathname) return url;
+
+  const callbackURL = `${pathname}${search}${hash}`;
+
+  const defaultRoutes: Route[] = ["/", "/dashboard"];
+  if (!defaultRoutes.includes(pathname as Route))
+    url.searchParams.set("callbackURL", callbackURL);
+
+  return url;
 }
 
 export function authorizedRoute(route: Route | null, role?: Role) {
