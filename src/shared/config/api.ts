@@ -8,4 +8,4 @@ export const apiConfig = {
   get baseUrl() {
     return `${this.host}${this.basePath}`;
   },
-};
+} as const;

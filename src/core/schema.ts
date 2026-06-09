@@ -90,11 +90,7 @@ export const sharedSchemas = {
 
   file: (type: FileType, options?: FileSchemaOptions) => {
     const { mimeInvalid, tooLarge } = messages.files;
-    const {
-      displayName,
-      accept,
-      maxSize: defaultMaxSize,
-    } = fileTypeConfig[type];
+    const { label, accept, maxSize: defaultMaxSize } = fileTypeConfig[type];
 
     const mimeTypes =
       accept === "*" ? [] : accept.split(",").map((t) => t.trim());
@@ -106,10 +102,10 @@ export const sharedSchemas = {
     let schema = z
       .file()
       .min(1)
-      .max(maxSize, { error: tooLarge(displayName, maxSize) });
+      .max(maxSize, { error: tooLarge(label, maxSize) });
 
     if (mimeTypes.length) {
-      const error = mimeInvalid(displayName);
+      const error = mimeInvalid(label);
       schema = schema.mime(mimeTypes, { error });
     }
 
@@ -118,7 +114,7 @@ export const sharedSchemas = {
 
   files(type: FileType, options?: FilesSchemaOptions) {
     const { tooFew, tooMany } = messages.files;
-    const { displayName } = fileTypeConfig[type];
+    const { label } = fileTypeConfig[type];
 
     const minFiles = options?.minFiles ?? 0;
     const maxFiles = options?.maxFiles ?? 0;
@@ -126,12 +122,12 @@ export const sharedSchemas = {
     let schema = z.array(this.file(type, options));
 
     if (minFiles > 0) {
-      const message = tooFew(displayName, minFiles);
+      const message = tooFew(label, minFiles);
       schema = schema.min(minFiles, { error: message });
     }
 
     if (maxFiles > 0) {
-      const message = tooMany(displayName, maxFiles);
+      const message = tooMany(label, maxFiles);
       schema = schema.max(maxFiles, { error: message });
     }
 
@@ -158,7 +154,7 @@ export const sharedSchemas = {
 
   filesWithPreview(type: FileType, options?: FilesSchemaOptions) {
     const { tooFew, tooMany } = messages.files;
-    const { displayName } = fileTypeConfig[type];
+    const { label } = fileTypeConfig[type];
 
     const minFiles = options?.minFiles ?? 0;
     const maxFiles = options?.maxFiles ?? 0;
@@ -166,12 +162,12 @@ export const sharedSchemas = {
     let schema = z.array(this.fileWithPreview(type, options));
 
     if (minFiles > 0) {
-      const message = tooFew(displayName, minFiles);
+      const message = tooFew(label, minFiles);
       schema = schema.min(minFiles, { error: message });
     }
 
     if (maxFiles > 0) {
-      const message = tooMany(displayName, maxFiles);
+      const message = tooMany(label, maxFiles);
       schema = schema.max(maxFiles, { error: message });
     }
 

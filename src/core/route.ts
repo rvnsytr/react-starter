@@ -156,8 +156,7 @@ export function createSignInURL({
 
   const callbackURL = `${pathname}${search}${hash}`;
 
-  const defaultRoutes: Route[] = ["/", "/dashboard"];
-  if (!defaultRoutes.includes(pathname as Route))
+  if (!appConfig.default.callbackUrls.includes(pathname as Route))
     url.searchParams.set("callbackURL", callbackURL);
 
   return url;
