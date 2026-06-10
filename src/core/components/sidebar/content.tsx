@@ -1,10 +1,19 @@
 "use client";
 
+import { getActiveRoute, getMenuByRole } from "@/core/route";
+import { MenuItem, Route } from "@/core/types";
+import { toCase } from "@/core/utils";
+import { useSession } from "@/modules/auth/hooks/use-session";
+import { routeConfig } from "@/shared/config";
+import { menuConfig } from "@/shared/menu";
+import { Link, useLocation } from "@tanstack/react-router";
+import { ChevronRightIcon } from "lucide-react";
+import { ComponentProps, useEffect, useMemo, useState } from "react";
 import {
   Collapsible,
   CollapsiblePanel,
   CollapsibleTrigger,
-} from "@/core/components/ui/collapsible";
+} from "../ui/collapsible";
 import {
   SidebarContent,
   SidebarGroup,
@@ -17,16 +26,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/core/components/ui/sidebar";
-import { getActiveRoute, getMenuByRole } from "@/core/route";
-import { MenuItem, Route } from "@/core/types";
-import { toCase } from "@/core/utils";
-import { useSession } from "@/modules/auth/hooks/use-session";
-import { routeConfig } from "@/shared/config";
-import { menuConfig } from "@/shared/menu";
-import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronRightIcon } from "lucide-react";
-import { ComponentProps, useEffect, useMemo, useState } from "react";
+} from "../ui/sidebar";
 
 export function SidebarAppContent() {
   const { user } = useSession();

@@ -2,8 +2,8 @@
 
 import { nextTheme, themeToggleConfig } from "@/shared/config";
 import { useHotkeys } from "@tanstack/react-hotkeys";
-import { useViewTransition } from "../hooks/use-view-transition";
-import { useTheme } from "./theme";
+import { useViewTransition } from "../../core/hooks/use-view-transition";
+import { useTheme } from "../../core/providers/theme";
 
 export function GlobalShortcuts() {
   const { theme, setTheme } = useTheme();

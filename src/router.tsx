@@ -13,11 +13,11 @@ import {
   AnchoredToastProvider,
   ToastProvider,
 } from "./core/components/ui/toast";
-import { GlobalShortcuts } from "./core/providers/global-shortcuts";
 import { ThemeProvider } from "./core/providers/theme";
 import { cn } from "./core/utils";
 import { useSessionQuery } from "./modules/auth/hooks/use-session";
 import { routeTree } from "./routeTree.gen";
+import { GlobalShortcuts } from "./shared/providers/global-shortcuts";
 
 z.config(id());
 

@@ -1,5 +1,5 @@
 import { AuthSession } from "@/core/auth";
-import { NotFound } from "@/core/components/layout/not-found";
+import { NotFound } from "@/core/components/not-found";
 import { getRouteTitle } from "@/core/route";
 import { appConfig } from "@/shared/config";
 import {

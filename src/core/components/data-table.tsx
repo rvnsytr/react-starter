@@ -1,7 +1,6 @@
 "use client";
 
-import { formatNumber } from "@/core/utils/formaters";
-import { cn } from "@/core/utils/helpers";
+import { cn, formatNumber } from "@/core/utils";
 import { ErrorFallback } from "@/shared/components/fallback";
 import { Hotkey } from "@tanstack/react-hotkeys";
 import { flexRender, Row, Table as TableType } from "@tanstack/react-table";

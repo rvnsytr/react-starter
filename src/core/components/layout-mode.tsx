@@ -1,9 +1,9 @@
 "use client";
 
-import { useMediaQuery } from "@/core/hooks/use-media-query";
-import { useLayoutMode } from "@/core/providers/layout-mode";
 import { layoutModeConfig, layoutModeToggleConfig } from "@/shared/config";
 import { useHotkey } from "@tanstack/react-hotkeys";
+import { useMediaQuery } from "../hooks/use-media-query";
+import { useLayoutMode } from "../providers/layout-mode";
 import { Button, ButtonProps } from "./ui/button";
 import { Kbd } from "./ui/kbd";
 import { Label } from "./ui/label";
