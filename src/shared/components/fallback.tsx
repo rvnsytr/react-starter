@@ -9,10 +9,12 @@ import { appConfig } from "@/shared/config";
 import { TriangleAlertIcon } from "lucide-react";
 import { motion } from "motion/react";
 
+export type LoadingFallback = SpinnerProps & { containerClassName?: string };
+
 export function LoadingFallback({
   containerClassName,
   ...props
-}: SpinnerProps & { containerClassName?: string }) {
+}: LoadingFallback) {
   return (
     <div
       className={cn("flex items-center justify-center p-4", containerClassName)}
@@ -22,34 +24,46 @@ export function LoadingFallback({
   );
 }
 
-export function ErrorFallback({
-  error,
-  hideDesc = false,
-  className,
-}: {
+export type ErrorFallbackProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any;
-  hideDesc?: boolean;
+  hideDescription?: boolean;
+  hideError?: boolean;
   className?: string;
-}) {
-  const message =
+};
+
+export function ErrorFallback({
+  error,
+  hideDescription = false,
+  hideError = false,
+  className,
+}: ErrorFallbackProps) {
+  let errorData = error;
+  let errorMessage =
     error?.message ?? (typeof error === "string" ? error : "Tidak ada data");
+
+  if (error instanceof Error) {
+    const { name, message, stack, cause } = error;
+    errorData = { ...error, name, message, stack, cause };
+    errorMessage = `${name}: ${message}`;
+  }
 
   return (
     <Alert variant="destructive" className={className}>
       <TriangleAlertIcon />
       <AlertTitle>
-        {appConfig.name}
-        {/* {`${appConfig.name} / `}
+        {`${appConfig.name} / `}
         <code className="bg-destructive/10 text-xs tabular-nums">
-          {error?.code ?? 500}
-        </code> */}
+          {errorData?.code ?? 500}
+        </code>
       </AlertTitle>
 
-      {!hideDesc && (
+      {!(hideDescription && hideError) && (
         <AlertDescription>
-          <pre className="whitespace-pre-wrap">{message}</pre>
-          <pre>{JSON.stringify(error, null, 2)}</pre>
+          {!hideDescription && errorMessage}
+          {!hideError && (
+            <pre className="text-xs">{JSON.stringify(errorData, null, 2)}</pre>
+          )}
         </AlertDescription>
       )}
     </Alert>
@@ -69,11 +83,10 @@ export function AppLoadingFallback() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function AppErrorFallback({ error }: { error?: any }) {
+export function AppErrorFallback({ className, ...props }: ErrorFallbackProps) {
   return (
     <div className="container flex min-h-svh items-center justify-center">
-      <ErrorFallback error={error} className="size-fit" />
+      <ErrorFallback className={cn(className, "size-fit")} {...props} />
     </div>
   );
 }

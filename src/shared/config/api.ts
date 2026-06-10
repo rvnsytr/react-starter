@@ -1,6 +1,6 @@
 export const apiConfig = {
   host: import.meta.env.PROD
-    ? "https://api.yourdomain.com"
+    ? "https://api.example.com"
     : "http://localhost:8000",
 
   basePath: "/api",
