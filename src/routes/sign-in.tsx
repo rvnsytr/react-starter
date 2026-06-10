@@ -1,4 +1,3 @@
-import { FooterNote } from "@/core/components/layout/footer-note";
 import {
   Card,
   CardContent,
@@ -11,6 +10,7 @@ import { Tabs, TabsList, TabsPanel, TabsTab } from "@/core/components/ui/tabs";
 import { getRouteTitle } from "@/core/route";
 import { SignInForm } from "@/modules/auth/components/sign-in-form";
 import { SignUpForm } from "@/modules/auth/components/sign-up-form";
+import { FooterNote } from "@/shared/components/footer-note";
 import { appConfig } from "@/shared/config";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { LogInIcon, UserRoundPlusIcon } from "lucide-react";

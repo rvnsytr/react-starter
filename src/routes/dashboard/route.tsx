@@ -1,4 +1,3 @@
-import { FooterNote } from "@/core/components/layout/footer-note";
 import { NotFound } from "@/core/components/not-found";
 import { SidebarApp, SidebarAppSiteHeader } from "@/core/components/sidebar";
 import { SidebarInset, SidebarProvider } from "@/core/components/ui/sidebar";
@@ -14,6 +13,7 @@ import { Route as RouteType } from "@/core/types";
 import { getClientCookie } from "@/core/utils";
 import { useSessionQuery } from "@/modules/auth/hooks/use-session";
 import { AuthProvider } from "@/modules/auth/provider";
+import { FooterNote } from "@/shared/components/footer-note";
 import { allLayoutMode } from "@/shared/config";
 import {
   createFileRoute,

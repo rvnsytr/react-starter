@@ -3,7 +3,7 @@ import {
   PageDescription,
   PageHeader,
   PageTitle,
-} from "@/core/components/layout/page";
+} from "@/core/components/page";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/")({
