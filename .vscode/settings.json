@@ -1,9 +1,15 @@
 {
   "files.readonlyInclude": {
-    "**/routeTree.gen.ts": true,
-    "**/core/**": true,
-    "**/modules/auth/**": true,
-    "**/modules/activity/**": true
+    "**/src/core/**": true,
+
+    "**/src/router.tsx": true,
+    "**/src/routeTree.gen.ts": true,
+
+    "**/src/routes/__root.tsx": true,
+    "**/src/routes/dashboard/route.tsx": true,
+
+    "**/src/modules/auth/**": true,
+    "**/src/modules/activity/**": true
   },
 
   "files.watcherExclude": { "**/routeTree.gen.ts": true },
