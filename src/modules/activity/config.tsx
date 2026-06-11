@@ -8,8 +8,8 @@ import {
   UserRoundXIcon,
   UserSquare2Icon,
 } from "lucide-react";
-import { DeletedEntityIcon } from "../components/deleted-entity-icon";
-import { ActivityType, ActivityWithEntity } from "../schema";
+import { DeletedEntityIcon } from "./components/deleted-entity-icon";
+import { ActivityType, ActivityWithEntity } from "./schema";
 
 type ActivityConfigMetadata = {
   label: string;
